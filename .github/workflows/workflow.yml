@@ -37,17 +37,17 @@ jobs:
           parameterPairs: |
             /ci/ec2/host = EC2_HOST
             /ci/ec2/user = EC2_USER
-            /ci/ec2/private_key = EC2_PRIVATE_KEY
             /ci/ec2/ssh_port = EC2_SSH_PORT
 
           # The part before equals is the ssm parameterName, and after is the ENV Variable name for the workflow.
           # No limit on number of parameters. You can put new lines and spaces in as desired, they get trimmed out.
           withDecryption: "true" # defaults to true
 
-      - name: Export EC2_PRIVATE_KEY safely
+      - name: Get private key from SSM via AWS CLI
         run: |
+          EC2_PRIVATE_KEY=$(aws ssm get-parameter --name "/ci/ec2/private_key" --with-decryption --query "Parameter.Value" --output text)
           echo "EC2_PRIVATE_KEY<<EOF" >> $GITHUB_ENV
-          echo "${{ env.EC2_PRIVATE_KEY }}" >> $GITHUB_ENV
+          echo "$EC2_PRIVATE_KEY" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
       - name: ssh to EC2 and deploy
