@@ -43,10 +43,12 @@ jobs:
           # No limit on number of parameters. You can put new lines and spaces in as desired, they get trimmed out.
           withDecryption: "true" # defaults to true
 
-      - name: Debug EC2_SSH_PORT
+      - name: Export SSM params to GITHUB_ENV
         run: |
-          echo "EC2_SSH_PORT is: $EC2_SSH_PORT"
-      
+          echo "EC2_HOST=${EC2_HOST}" >> $GITHUB_ENV
+          echo "EC2_USER=${EC2_USER}" >> $GITHUB_ENV
+          echo "EC2_PRIVATE_KEY=${EC2_PRIVATE_KEY}" >> $GITHUB_ENV
+          echo "EC2_SSH_PORT=${EC2_SSH_PORT}" >> $GITHUB_ENV
 
       - name: ssh to EC2 and deploy
         uses: appleboy/ssh-action@v0.1.6 # ssh 접속하는 오픈소스
@@ -54,7 +56,7 @@ jobs:
           host: ${{ env.EC2_HOST }}
           username: ${{ env.EC2_USER }}
           key: ${{ env.EC2_PRIVATE_KEY }}
-          port: 22 # ${{ env.EC2_SSH_PORT }}
+          port: ${{ env.EC2_SSH_PORT }}
 
 
           script: |
