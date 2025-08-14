@@ -11,11 +11,11 @@ import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.*;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -31,7 +31,7 @@ import java.util.Date;
 public class AppleOAuthClient implements OAuthClient {
     
     private final AppleProperties appleProperties;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestClient restClient = RestClient.create();
     
     private static final String APPLE_AUTH_URL = "https://appleid.apple.com";
     private static final String TOKEN_ENDPOINT = "/auth/token";
@@ -42,9 +42,6 @@ public class AppleOAuthClient implements OAuthClient {
     public OAuthTokenResponse getToken(String authCode) {
         String clientSecret = generateClientSecret();
         
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("client_id", appleProperties.getClientId());
         params.add("client_secret", clientSecret);
@@ -52,34 +49,26 @@ public class AppleOAuthClient implements OAuthClient {
         params.add("grant_type", "authorization_code");
         params.add("redirect_uri", appleProperties.getRedirectUri());
         
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
-        
-        ResponseEntity<OAuthTokenResponse> response = restTemplate.postForEntity(
-            APPLE_AUTH_URL + TOKEN_ENDPOINT, 
-            request, 
-            OAuthTokenResponse.class
-        );
-        
-        return response.getBody();
+        return restClient.post()
+            .uri(APPLE_AUTH_URL + TOKEN_ENDPOINT)
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .body(params)
+            .retrieve()
+            .body(OAuthTokenResponse.class);
     }
     
     @Override
     @Cacheable(value = "oidcPublicKeys", key = "'apple'")
     public OIDCPublicKeyList getPublicKeys() {
-        ResponseEntity<OIDCPublicKeyList> response = restTemplate.getForEntity(
-            APPLE_AUTH_URL + KEYS_ENDPOINT, 
-            OIDCPublicKeyList.class
-        );
-        
-        return response.getBody();
+        return restClient.get()
+            .uri(APPLE_AUTH_URL + KEYS_ENDPOINT)
+            .retrieve()
+            .body(OIDCPublicKeyList.class);
     }
     
     @Override
     public void unlink(String identifier) {
         String clientSecret = generateClientSecret();
-        
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("client_id", appleProperties.getClientId());
@@ -87,9 +76,12 @@ public class AppleOAuthClient implements OAuthClient {
         params.add("token", identifier);
         params.add("token_type_hint", "refresh_token");
         
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
-        
-        restTemplate.postForEntity(APPLE_AUTH_URL + REVOKE_ENDPOINT, request, String.class);
+        restClient.post()
+            .uri(APPLE_AUTH_URL + REVOKE_ENDPOINT)
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .body(params)
+            .retrieve()
+            .toBodilessEntity();
     }
     
     private String generateClientSecret() {
