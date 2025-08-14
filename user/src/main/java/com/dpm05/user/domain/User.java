@@ -58,4 +58,11 @@ public class User {
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
+    public User(String nickname, String email, String profileImageUrl, OAuthProviderInfo oAuthProviderInfo) {
+        this.nickname = nickname;
+        this.email = email;
+        this.profileImageUrl = profileImageUrl;
+        this.oAuthProviderInfo = oAuthProviderInfo;
+    }
 }
