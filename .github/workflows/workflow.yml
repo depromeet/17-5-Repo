@@ -31,17 +31,28 @@ jobs:
           aws-secret-access-key: ${{ secrets.PROD_AWS_SECRET_KEY }}
           aws-region: ap-northeast-2
 
-      - uses: dkershner6/aws-ssm-getparameters-action@v2
-        id: ssm
-        with:
-          parameterPairs: |
-            /ci/ec2/host = EC2_HOST
-            /ci/ec2/user = EC2_USER
-            /ci/ec2/ssh_port = EC2_SSH_PORT
+      - name: Get parameters from SSM and trim whitespace
+        run: |
+          EC2_HOST=$(aws ssm get-parameter --name "/ci/ec2/host" --with-decryption --query "Parameter.Value" --output text | tr -d '\r\n' | xargs)
+          EC2_USER=$(aws ssm get-parameter --name "/ci/ec2/user" --with-decryption --query "Parameter.Value" --output text | tr -d '\r\n' | xargs)
+          EC2_SSH_PORT=$(aws ssm get-parameter --name "/ci/ec2/ssh_port" --with-decryption --query "Parameter.Value" --output text | tr -d '\r\n' | xargs)
 
-          # The part before equals is the ssm parameterName, and after is the ENV Variable name for the workflow.
-          # No limit on number of parameters. You can put new lines and spaces in as desired, they get trimmed out.
-          withDecryption: "true" # defaults to true
+          echo "EC2_HOST=$EC2_HOST" >> $GITHUB_ENV
+          echo "EC2_USER=$EC2_USER" >> $GITHUB_ENV
+          echo "EC2_SSH_PORT=$EC2_SSH_PORT" >> $GITHUB_ENV
+          
+
+#      - uses: dkershner6/aws-ssm-getparameters-action@v2
+#        id: ssm
+#        with:
+#          parameterPairs: |
+#            /ci/ec2/host = EC2_HOST,
+#            /ci/ec2/user = EC2_USER,
+#            /ci/ec2/ssh_port = EC2_SSH_PORT
+#
+#          # The part before equals is the ssm parameterName, and after is the ENV Variable name for the workflow.
+#          # No limit on number of parameters. You can put new lines and spaces in as desired, they get trimmed out.
+#          withDecryption: "true" # defaults to true
 
       - name: Get private key from SSM via AWS CLI
         run: |
