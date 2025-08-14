@@ -32,6 +32,7 @@ jobs:
           aws-region: us-east-1
 
       - uses: dkershner6/aws-ssm-getparameters-action@v2
+        id: ssm
         with:
           parameterPairs: |
             /ci/ec2/host = EC2_HOST
@@ -45,10 +46,10 @@ jobs:
 
       - name: Export SSM params to GITHUB_ENV
         run: |
-          echo "EC2_HOST=${EC2_HOST}" >> $GITHUB_ENV
-          echo "EC2_USER=${EC2_USER}" >> $GITHUB_ENV
-          echo "EC2_PRIVATE_KEY=${EC2_PRIVATE_KEY}" >> $GITHUB_ENV
-          echo "EC2_SSH_PORT=${EC2_SSH_PORT}" >> $GITHUB_ENV
+          echo "EC2_HOST=${{steps.ssm.outputs.EC2_HOST}}" >> $GITHUB_ENV
+          echo "EC2_USER=${{ steps.ssm.outputs.EC2_USER }}" >> $GITHUB_ENV
+          echo "EC2_PRIVATE_KEY=${{ steps.ssm.outputs.EC2_PRIVATE_KEY }}" >> $GITHUB_ENV
+          echo "EC2_SSH_PORT=${{ steps.ssm.outputs.EC2_SSH_PORT }}" >> $GITHUB_ENV
 
       - name: ssh to EC2 and deploy
         uses: appleboy/ssh-action@v0.1.6 # ssh 접속하는 오픈소스
