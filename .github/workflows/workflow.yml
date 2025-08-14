@@ -43,6 +43,10 @@ jobs:
           # No limit on number of parameters. You can put new lines and spaces in as desired, they get trimmed out.
           withDecryption: "true" # defaults to true
 
+      - name: Debug EC2_SSH_PORT
+        run: |
+          echo "EC2_SSH_PORT is: $EC2_SSH_PORT"
+      
 
       - name: ssh to EC2 and deploy
         uses: appleboy/ssh-action@v0.1.6 # ssh 접속하는 오픈소스
@@ -50,7 +54,9 @@ jobs:
           host: ${{ env.EC2_HOST }}
           username: ${{ env.EC2_USER }}
           key: ${{ env.EC2_PRIVATE_KEY }}
-          port: ${{ env.EC2_SSH_PORT }}
+          port: 22 # ${{ env.EC2_SSH_PORT }}
+
+
           script: |
             cd /home/ubuntu/depromeet &&
             git checkout develop &&
