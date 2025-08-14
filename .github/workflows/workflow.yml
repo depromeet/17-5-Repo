@@ -44,6 +44,12 @@ jobs:
           # No limit on number of parameters. You can put new lines and spaces in as desired, they get trimmed out.
           withDecryption: "true" # defaults to true
 
+      - name: Export EC2_PRIVATE_KEY safely
+        run: |
+          echo "EC2_PRIVATE_KEY<<EOF" >> $GITHUB_ENV
+          echo "${{ env.EC2_PRIVATE_KEY }}" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
       - name: ssh to EC2 and deploy
         uses: appleboy/ssh-action@v0.1.6 # ssh 접속하는 오픈소스
         with:
