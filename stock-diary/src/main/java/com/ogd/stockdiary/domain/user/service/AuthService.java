@@ -7,7 +7,6 @@ import com.ogd.stockdiary.domain.user.entity.User;
 import com.ogd.stockdiary.domain.user.port.out.oauth.OAuthTokenResponse;
 import com.ogd.stockdiary.domain.user.port.out.oauth.OIDCPayload;
 import com.ogd.stockdiary.domain.user.port.out.oauth.OIDCPublicKeyList;
-import com.ogd.stockdiary.domain.user.port.out.oauth.OIDCTokenVerification;
 import com.ogd.stockdiary.domain.user.port.out.oauth.client.OAuthClient;
 import com.ogd.stockdiary.domain.user.port.out.oauth.client.OAuthClientFactory;
 import com.ogd.stockdiary.application.user.repository.AppleAuthTokenRepository;

@@ -1,4 +1,4 @@
-package com.ogd.stockdiary.application.config;
+package com.ogd.stockdiary.application.user.port.out.oauth.client;
 
 import lombok.Getter;
 import lombok.Setter;

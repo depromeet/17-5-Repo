@@ -1,6 +1,5 @@
 package com.ogd.stockdiary.application.user.port.out.oauth.client;
 
-import com.ogd.stockdiary.application.config.AppleProperties;
 import com.ogd.stockdiary.domain.user.port.out.oauth.OAuthTokenResponse;
 import com.ogd.stockdiary.domain.user.port.out.oauth.OIDCPublicKeyList;
 import com.ogd.stockdiary.domain.user.port.out.oauth.client.OAuthClient;

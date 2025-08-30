@@ -1,6 +1,9 @@
-package com.ogd.stockdiary.domain.user.port.out.oauth;
+package com.ogd.stockdiary.domain.user.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ogd.stockdiary.domain.user.port.out.oauth.OIDCPayload;
+import com.ogd.stockdiary.domain.user.port.out.oauth.OIDCPublicKey;
+import com.ogd.stockdiary.domain.user.port.out.oauth.OIDCPublicKeyList;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
