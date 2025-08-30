@@ -1,4 +1,3 @@
 rootProject.name = 'depromeet05_be'
 
-include 'common'
-include 'user'
+include 'stock-diary'
