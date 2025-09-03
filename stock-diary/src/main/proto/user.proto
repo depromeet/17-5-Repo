@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package com.ogd.stockdiary.proto;
+
+option java_package = "com.ogd.stockdiary.proto";
+option java_outer_classname = "UserProto";
+
+message UserRequest {
+  string user_id = 1;
+  string name = 2;
+  string email = 3;
+}
+
+message UserResponse {
+  string user_id = 1;
+  string name = 2;
+  string email = 3;
+  int64 created_at = 4;
+  bool is_active = 5;
+}
+
+message UserListRequest {
+  int32 page = 1;
+  int32 size = 2;
+}
+
+message UserListResponse {
+  repeated UserResponse users = 1;
+  int32 total_count = 2;
+  int32 current_page = 3;
+}
