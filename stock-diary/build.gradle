@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.5'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'com.diffplug.spotless' version '6.25.0'
 }
 
 group = 'com.ogd'
@@ -53,6 +54,30 @@ dependencies {
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+spotless {
+    java {
+        importOrder(
+                'java|javax|jakarta',
+                'org.springframework',
+                'lombok',
+                '',
+                'org.junit|org.mockito',
+                '\\#',
+                '\\#org.junit'
+        )
+        
+        googleJavaFormat()
+        
+        formatAnnotations()
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+        
+        target '**/*.java'
+        targetExclude 'build/**'
+    }
 }
 
 tasks.named('test') {

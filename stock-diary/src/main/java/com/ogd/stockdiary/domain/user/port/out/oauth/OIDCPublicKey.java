@@ -9,21 +9,21 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OIDCPublicKey {
-    @JsonProperty("kty")
-    private String kty;
-    
-    @JsonProperty("kid")
-    private String kid;
-    
-    @JsonProperty("use")
-    private String use;
-    
-    @JsonProperty("alg")
-    private String alg;
-    
-    @JsonProperty("n")
-    private String n;
-    
-    @JsonProperty("e")
-    private String e;
+  @JsonProperty("kty")
+  private String kty;
+
+  @JsonProperty("kid")
+  private String kid;
+
+  @JsonProperty("use")
+  private String use;
+
+  @JsonProperty("alg")
+  private String alg;
+
+  @JsonProperty("n")
+  private String n;
+
+  @JsonProperty("e")
+  private String e;
 }

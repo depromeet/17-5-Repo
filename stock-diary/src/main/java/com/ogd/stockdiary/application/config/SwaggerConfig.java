@@ -17,20 +17,18 @@ import org.springframework.context.annotation.Configuration;
     type = SecuritySchemeType.HTTP,
     scheme = "bearer",
     bearerFormat = "JWT",
-    description = "Token Authentication"
-)
+    description = "Token Authentication")
 public class SwaggerConfig {
-    public static final String SECURITY_SCHEME_NAME = "BearerAuth";
-    
-    @Value("${server.url:http://localhost:8080}")
-    private String serverUrl;
-    
-    @Bean
-    public OpenAPI openAPI() {
-        Server server = new Server();
-        server.setUrl(serverUrl);
-        
-        return new OpenAPI()
-                .addServersItem(server);
-    }
+  public static final String SECURITY_SCHEME_NAME = "BearerAuth";
+
+  @Value("${server.url:http://localhost:8080}")
+  private String serverUrl;
+
+  @Bean
+  public OpenAPI openAPI() {
+    Server server = new Server();
+    server.setUrl(serverUrl);
+
+    return new OpenAPI().addServersItem(server);
+  }
 }

@@ -9,19 +9,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SocialLoginResponse {
-    private Long userId;
-    private String nickname;
-    private String email;
-    private String profileImageUrl;
-    private boolean isNewUser;
-    
-    public static SocialLoginResponse from(User user, boolean isNewUser) {
-        return new SocialLoginResponse(
-            user.getId(),
-            user.getNickname(),
-            user.getEmail(),
-            user.getProfileImageUrl(),
-            isNewUser
-        );
-    }
+  private Long userId;
+  private String nickname;
+  private String email;
+  private String profileImageUrl;
+  private boolean isNewUser;
+
+  public static SocialLoginResponse from(User user, boolean isNewUser) {
+    return new SocialLoginResponse(
+        user.getId(), user.getNickname(), user.getEmail(), user.getProfileImageUrl(), isNewUser);
+  }
 }
