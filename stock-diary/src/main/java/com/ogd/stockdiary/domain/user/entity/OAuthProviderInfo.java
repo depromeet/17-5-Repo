@@ -14,10 +14,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class OAuthProviderInfo {
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "oauth_provider", length = 20)
-    private OAuthProvider oauthProvider;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "oauth_provider", length = 20)
+  private OAuthProvider oauthProvider;
 
-    @Column(name = "subject", length = 255)
-    private String subject;
+  @Column(name = "subject", length = 255)
+  private String subject;
 }

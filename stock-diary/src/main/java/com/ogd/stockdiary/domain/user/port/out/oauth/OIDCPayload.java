@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OIDCPayload {
-    private String subject;
-    private String email;
-    private String picture;
-    private String name;
+  private String subject;
+  private String email;
+  private String picture;
+  private String name;
 }

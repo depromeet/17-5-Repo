@@ -16,11 +16,11 @@ import lombok.Setter;
 @AllArgsConstructor
 public class AppleAuthToken {
 
-    @Id
-    @Column(name = "user_id")
-    private Long userId;
+  @Id
+  @Column(name = "user_id")
+  private Long userId;
 
-    @Setter
-    @Column(name = "refresh_token", nullable = false, length = 1000)
-    private String refreshToken;
+  @Setter
+  @Column(name = "refresh_token", nullable = false, length = 1000)
+  private String refreshToken;
 }
