@@ -37,8 +37,16 @@ jobs:
           script: |
             echo "🚀 Starting deployment..."
 
-            # Navigate to project directory
+            # Create and navigate to project directory
+            mkdir -p /home/ubuntu/depromeet
             cd /home/ubuntu/depromeet
+
+            # Initialize git repository if not exists
+            if [ ! -d ".git" ]; then
+              echo "📋 Initializing git repository..."
+              git clone https://github.com/depromeet/17-5-Repo.git .
+              echo "✅ Repository cloned"
+            fi
 
             # (선택) 현재 JAR 백업
             if [ -f "stock-diary/build/libs/stock-diary-0.0.1-SNAPSHOT.jar" ]; then
