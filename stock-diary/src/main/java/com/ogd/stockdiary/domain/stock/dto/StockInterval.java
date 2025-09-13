@@ -1,9 +1,9 @@
 package com.ogd.stockdiary.domain.stock.dto;
 
 public enum StockInterval {
-    DAILY("2"),
-    WEEKLY("3"),
-    MONTHLY("4");
+    DAILY("0"),
+    WEEKLY("1"),
+    MONTHLY("2");
 
     private final String code;
 

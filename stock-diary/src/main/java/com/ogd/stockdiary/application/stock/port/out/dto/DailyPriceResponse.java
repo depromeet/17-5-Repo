@@ -60,7 +60,6 @@ public class DailyPriceResponse {
     private static String getCurrencyByMarket(String market) {
         switch (market.toUpperCase()) {
             case "NAS":
-            case "NASDAQ":
             case "NYSE":
             case "AMEX":
                 return "USD";

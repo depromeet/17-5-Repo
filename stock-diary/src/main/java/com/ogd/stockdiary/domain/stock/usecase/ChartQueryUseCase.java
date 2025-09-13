@@ -1,16 +1,17 @@
-package com.ogd.stockdiary.domain.stock.port.out;
+package com.ogd.stockdiary.domain.stock.usecase;
 
 import java.time.LocalDate;
 
 import com.ogd.stockdiary.domain.stock.dto.StockChartData;
 import com.ogd.stockdiary.domain.stock.dto.StockInterval;
 
-public interface StockPort {
-    String getToken();
+public interface ChartQueryUseCase {
 
-    StockChartData getChartData(
+    StockChartData getStockChart(
         String market,
         String symbol,
+        LocalDate startDate,
+        LocalDate endDate,
         StockInterval interval
     );
 }
