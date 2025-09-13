@@ -4,15 +4,21 @@ import com.ogd.stockdiary.domain.retrospection.entity.Currency;
 import com.ogd.stockdiary.domain.retrospection.entity.OrderType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-public record CreateRetrospectionCommand(
-    Long userId,
-    String symbol,
-    String market,
-    OrderType orderType,
-    BigDecimal price,
-    Currency currency,
-    Integer volume,
-    LocalDate orderDate,
-    Double returnRate
-) {}
+@Getter
+@AllArgsConstructor
+public class CreateRetrospectionCommand {
+
+    private final Long userId;
+    private final String symbol;
+    private final String market;
+    private final OrderType orderType;
+    private final BigDecimal price;
+    private final Currency currency;
+    private final Integer volume;
+    private final LocalDate orderDate;
+    private final Double returnRate;
+
+}
