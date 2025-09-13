@@ -64,10 +64,15 @@ jobs:
 
             # Stop existing application (if running)
             echo "⏹️  Stopping existing application (if any)..."
-            if pgrep -f "stock-diary-0.0.1-SNAPSHOT.jar" > /dev/null; then
-              echo "📋 Found running application, stopping..."
-              pkill -f "stock-diary-0.0.1-SNAPSHOT.jar"
+            PID=$(pgrep -f "stock-diary-0.0.1-SNAPSHOT.jar" | head -1)
+            if [ -n "$PID" ]; then
+              echo "📋 Found running application (PID: $PID), stopping..."
+              kill -15 $PID || true
               sleep 3
+              if kill -0 $PID 2>/dev/null; then
+                echo "⚠️  Process still running, force killing..."
+                kill -9 $PID || true
+              fi
               echo "✅ Application stopped"
             else
               echo "📋 No running application found"
