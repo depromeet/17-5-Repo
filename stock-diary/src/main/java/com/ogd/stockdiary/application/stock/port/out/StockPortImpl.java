@@ -1,6 +1,7 @@
 package com.ogd.stockdiary.application.stock.port.out;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import org.springframework.stereotype.Component;
 
@@ -32,9 +33,12 @@ public class StockPortImpl implements StockPort {
     }
 
     @Override
-    public StockChartData getChartData(String market, String symbol, StockInterval interval) {
+    public StockChartData getChartData(String market, String symbol, LocalDate endDate, StockInterval interval) {
         String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0b2tlbiIsImF1ZCI6IjJjZTM5ZjhmLWRmNzMtNDBhZS1iNjM4LWFhNWU0Y2VkODUyYiIsInByZHRfY2QiOiIiLCJpc3MiOiJ1bm9ndyIsImV4cCI6MTc1Nzg2MzEyMywiaWF0IjoxNzU3Nzc2NzIzLCJqdGkiOiJQU09BNWE4RVVFelFuc2JiMFN0aWVpZ2o5bjhqVVVCaXdKMEEifQ.Z7q1cA4AI74Hrjfmg62tukt6_tsm1upj8azmV4lEnOEGD3hIP62ZHf8HcUVyB1Qxgy0rz-kdalxU_Ih0SUIRXA";
         String authorization = "Bearer " + token;
+
+        // LocalDate를 yyyyMMdd 형식으로 변환
+        String formattedEndDate = endDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
         DailyPriceResponse response = hanStockFeignClient.getDailyPrice(
             authorization,
@@ -45,7 +49,7 @@ public class StockPortImpl implements StockPort {
             market,
             symbol,
             interval.getCode(),
-            "",
+            formattedEndDate,
             "1"
         );
 

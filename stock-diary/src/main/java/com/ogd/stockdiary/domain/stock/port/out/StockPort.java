@@ -11,6 +11,7 @@ public interface StockPort {
     StockChartData getChartData(
         String market,
         String symbol,
+        LocalDate endDate,
         StockInterval interval
     );
 }
