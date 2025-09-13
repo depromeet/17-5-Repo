@@ -32,12 +32,14 @@ jobs:
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.6
+        env:
+          GITHUB_BRANCH: ${{ github.ref_name }}
         with:
           host: ${{ env.EC2_HOST }}
           username: ${{ env.EC2_USER }}
           key: ${{ env.EC2_PRIVATE_KEY }}
           port: ${{ env.EC2_SSH_PORT }}
-          envs: DB_URL,DB_USERNAME,DB_PASSWORD
+          envs: DB_URL,DB_USERNAME,DB_PASSWORD,GITHUB_BRANCH
           script: |
             echo "🚀 Starting deployment..."
 
@@ -58,17 +60,15 @@ jobs:
               cp stock-diary/build/libs/stock-diary-0.0.1-SNAPSHOT.jar stock-diary-backup-$(date +%Y%m%d_%H%M%S).jar || true
             fi
 
-            # Update code from repository (현재 체크아웃된 브랜치 그대로)
-            echo "📥 Pulling latest code for current branch..."
-            CUR_BRANCH="$(git rev-parse --abbrev-ref HEAD)" || { echo "❌ Not a git repo"; exit 1; }
-            if [ "$CUR_BRANCH" = "HEAD" ]; then
-              echo "❌ Detached HEAD 상태입니다. 브랜치가 필요합니다."
-              exit 1
-            fi
-            echo "🔎 Current branch: $CUR_BRANCH"
+            # Update code from repository (GitHub Actions에서 실행된 브랜치 사용)
+            echo "📥 Switching to GitHub Actions branch: $GITHUB_BRANCH"
             git fetch --prune origin
+            git checkout "$GITHUB_BRANCH" || {
+              echo "❌ 브랜치 체크아웃 실패: $GITHUB_BRANCH"; exit 1;
+            }
+            echo "🔎 Current branch: $(git rev-parse --abbrev-ref HEAD)"
             # 로컬 변경을 덮어쓰지 않도록 fast-forward만 허용
-            git pull --ff-only origin "$CUR_BRANCH" || {
+            git pull --ff-only origin "$GITHUB_BRANCH" || {
               echo "❌ Fast-forward 불가(로컬 변경/이력 차이). 수동 조치 필요."; exit 1;
             }
 
