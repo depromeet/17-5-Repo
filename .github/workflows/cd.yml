@@ -24,7 +24,10 @@ jobs:
             /ci/ec2/host = EC2_HOST,
             /ci/ec2/user = EC2_USER,
             /ci/ec2/private_key = EC2_PRIVATE_KEY,
-            /ci/ec2/ssh_port = EC2_SSH_PORT
+            /ci/ec2/ssh_port = EC2_SSH_PORT,
+            spring.datasource.url = DB_URL,
+            spring.datasource.username = DB_USERNAME,
+            spring.datasource.password = DB_PASSWORD
           withDecryption: "true"
 
       - name: Deploy to EC2
@@ -34,6 +37,7 @@ jobs:
           username: ${{ env.EC2_USER }}
           key: ${{ env.EC2_PRIVATE_KEY }}
           port: ${{ env.EC2_SSH_PORT }}
+          envs: DB_URL,DB_USERNAME,DB_PASSWORD
           script: |
             echo "🚀 Starting deployment..."
 
@@ -93,6 +97,9 @@ jobs:
             # Start the application
             echo "🚀 Starting new application..."
             [ -f app.log ] && mv app.log "app_$(date +%Y%m%d_%H%M%S).log" || true
+            export DB_URL="$DB_URL"
+            export DB_USERNAME="$DB_USERNAME"
+            export DB_PASSWORD="$DB_PASSWORD"
             nohup java -jar "$JAR_PATH" > app.log 2>&1 &
 
             # Wait a moment and check if application started
