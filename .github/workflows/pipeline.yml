@@ -1,0 +1,14 @@
+name: 통합 CI/CD (manual) - Build & Deploy
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
+
+  cd:
+    needs: ci
+    uses: ./.github/workflows/cd.yml
+    secrets: inherit
