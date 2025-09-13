@@ -58,10 +58,11 @@ public class Retrospection {
     this.updatedAt = LocalDateTime.now();
   }
 
-  public Retrospection(User user, String symbol, String market, Order order) {
+  public Retrospection(User user, String symbol, String market, Order order, Double returnRate) {
     this.user = user;
     this.symbol = symbol;
     this.market = market;
     this.order = order;
+    this.returnRate = returnRate;
   }
 }
