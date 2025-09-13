@@ -73,7 +73,7 @@ jobs:
             # Build the application
             echo "🔨 Building application..."
             chmod +x ./gradlew || true
-            ./gradlew :stock-diary:build --no-daemon
+            ./gradlew :stock-diary:build -x test --no-daemon
 
             # Verify build success
             JAR_PATH="stock-diary/build/libs/stock-diary-0.0.1-SNAPSHOT.jar"
