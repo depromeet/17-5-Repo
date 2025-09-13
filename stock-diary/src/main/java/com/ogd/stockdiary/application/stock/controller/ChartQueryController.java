@@ -8,6 +8,8 @@ import com.ogd.stockdiary.domain.stock.usecase.ChartQueryUseCase;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +22,7 @@ public class ChartQueryController {
   public ChartQueryController(ChartQueryUseCase chartQueryUseCase) {
     this.chartQueryUseCase = chartQueryUseCase;
   }
-
+  @Tag(name = "Stock Chart", description = "주식 조회")
   @GetMapping("/stock/charts/{market}/{symbol}")
   public HttpApiResponse<ChartResponse.ChartData> getStockCharts(
       @PathVariable String market,
