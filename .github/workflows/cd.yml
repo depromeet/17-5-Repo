@@ -54,14 +54,17 @@ jobs:
               cp stock-diary/build/libs/stock-diary-0.0.1-SNAPSHOT.jar stock-diary-backup-$(date +%Y%m%d_%H%M%S).jar || true
             fi
 
-            # Update code from repository (workflow 실행 브랜치 사용)
-            DEPLOY_BRANCH="${{ github.ref_name }}"
-            echo "📥 Pulling latest code from branch: $DEPLOY_BRANCH"
+            # Update code from repository (현재 체크아웃된 브랜치 그대로)
+            echo "📥 Pulling latest code for current branch..."
+            CUR_BRANCH="$(git rev-parse --abbrev-ref HEAD)" || { echo "❌ Not a git repo"; exit 1; }
+            if [ "$CUR_BRANCH" = "HEAD" ]; then
+              echo "❌ Detached HEAD 상태입니다. 브랜치가 필요합니다."
+              exit 1
+            fi
+            echo "🔎 Current branch: $CUR_BRANCH"
             git fetch --prune origin
-            git checkout "$DEPLOY_BRANCH" || {
-              echo "❌ Branch $DEPLOY_BRANCH not found"; exit 1;
-            }
-            git pull --ff-only origin "$DEPLOY_BRANCH" || {
+            # 로컬 변경을 덮어쓰지 않도록 fast-forward만 허용
+            git pull --ff-only origin "$CUR_BRANCH" || {
               echo "❌ Fast-forward 불가(로컬 변경/이력 차이). 수동 조치 필요."; exit 1;
             }
 
