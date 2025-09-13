@@ -2,6 +2,7 @@ name: CI
 
 on:
   workflow_dispatch:
+  workflow_call:
 
 jobs:
   build:
@@ -42,7 +43,4 @@ jobs:
             exit 1
           fi
 
-  call-cd:
-    needs: build
-    uses: ./.github/workflows/cd.yml
 
