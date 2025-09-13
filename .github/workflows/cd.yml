@@ -34,8 +34,6 @@ jobs:
           username: ${{ env.EC2_USER }}
           key: ${{ env.EC2_PRIVATE_KEY }}
           port: ${{ env.EC2_SSH_PORT }}
-          command_timeout: 10m
-          timeout: 10m
           script: |
             echo "🚀 Starting deployment..."
 
