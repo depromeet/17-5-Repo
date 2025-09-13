@@ -4,5 +4,5 @@ import com.ogd.stockdiary.domain.retrospection.entity.Retrospection;
 
 public interface CreateRetrospectionUseCase {
 
-    Retrospection createRetrospection(CreateRetrospectionCommand command);
+  Retrospection createRetrospection(CreateRetrospectionCommand command);
 }

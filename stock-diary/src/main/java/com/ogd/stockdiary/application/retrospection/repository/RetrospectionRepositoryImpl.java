@@ -12,21 +12,22 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class RetrospectionRepositoryImpl implements RetrospectionRepository {
 
-    private final JpaRetrospectionRepository jpaRetrospectionRepository;
+  private final JpaRetrospectionRepository jpaRetrospectionRepository;
 
-    @Override
-    public Retrospection save(Retrospection retrospection) {
-        return jpaRetrospectionRepository.save(retrospection);
-    }
+  @Override
+  public Retrospection save(Retrospection retrospection) {
+    return jpaRetrospectionRepository.save(retrospection);
+  }
 
-    @Override
-    public Retrospection findById(Long id) {
-        return jpaRetrospectionRepository.findById(id)
-            .orElseThrow(() -> new ApplicationException(CodeEnum.FRS_003, "회고를 찾을 수 없습니다: " + id));
-    }
+  @Override
+  public Retrospection findById(Long id) {
+    return jpaRetrospectionRepository
+        .findById(id)
+        .orElseThrow(() -> new ApplicationException(CodeEnum.FRS_003, "회고를 찾을 수 없습니다: " + id));
+  }
 
-    @Override
-    public List<Retrospection> findByUserId(Long userId) {
-        return jpaRetrospectionRepository.findByUserId(userId);
-    }
+  @Override
+  public List<Retrospection> findByUserId(Long userId) {
+    return jpaRetrospectionRepository.findByUserId(userId);
+  }
 }

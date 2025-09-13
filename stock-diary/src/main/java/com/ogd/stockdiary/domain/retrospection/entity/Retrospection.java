@@ -37,8 +37,7 @@ public class Retrospection {
   @Column(nullable = false, length = 20)
   private String market;
 
-  @Embedded
-  private Order order;
+  @Embedded private Order order;
 
   private Double returnRate;
 

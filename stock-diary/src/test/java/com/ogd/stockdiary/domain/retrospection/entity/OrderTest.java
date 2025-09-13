@@ -3,9 +3,6 @@ package com.ogd.stockdiary.domain.retrospection.entity;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.ogd.stockdiary.domain.user.entity.OAuthProvider;
-import com.ogd.stockdiary.domain.user.entity.OAuthProviderInfo;
-import com.ogd.stockdiary.domain.user.entity.User;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
@@ -45,8 +42,7 @@ class OrderTest {
     LocalDate orderDate = LocalDate.of(2025, 9, 13);
 
     // when & then
-    assertThatThrownBy(
-            () -> new Order(orderType, invalidPrice, currency, volume, orderDate))
+    assertThatThrownBy(() -> new Order(orderType, invalidPrice, currency, volume, orderDate))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("가격은 0보다 큰 값이어야 합니다.");
   }
@@ -62,8 +58,7 @@ class OrderTest {
     LocalDate orderDate = LocalDate.of(2025, 9, 13);
 
     // when & then
-    assertThatThrownBy(
-            () -> new Order(orderType, price, currency, invalidVolume, orderDate))
+    assertThatThrownBy(() -> new Order(orderType, price, currency, invalidVolume, orderDate))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("거래량은 0보다 큰 값이어야 합니다.");
   }
@@ -79,8 +74,7 @@ class OrderTest {
     LocalDate orderDate = LocalDate.of(2025, 9, 13);
 
     // when & then
-    assertThatThrownBy(
-            () -> new Order(orderType, nullPrice, currency, volume, orderDate))
+    assertThatThrownBy(() -> new Order(orderType, nullPrice, currency, volume, orderDate))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("가격은 0보다 큰 값이어야 합니다.");
   }
@@ -96,8 +90,7 @@ class OrderTest {
     LocalDate orderDate = LocalDate.of(2025, 9, 13);
 
     // when & then
-    assertThatThrownBy(
-            () -> new Order(orderType, price, currency, nullVolume, orderDate))
+    assertThatThrownBy(() -> new Order(orderType, price, currency, nullVolume, orderDate))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("거래량은 0보다 큰 값이어야 합니다.");
   }

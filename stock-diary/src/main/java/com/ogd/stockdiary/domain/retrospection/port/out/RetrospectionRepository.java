@@ -5,9 +5,9 @@ import java.util.List;
 
 public interface RetrospectionRepository {
 
-    Retrospection save(Retrospection retrospection);
+  Retrospection save(Retrospection retrospection);
 
-    Retrospection findById(Long id);
+  Retrospection findById(Long id);
 
-    List<Retrospection> findByUserId(Long userId);
+  List<Retrospection> findByUserId(Long userId);
 }

@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface JpaRetrospectionRepository extends JpaRepository<Retrospection, Long> {
 
-    List<Retrospection> findByUserId(Long userId);
+  List<Retrospection> findByUserId(Long userId);
 }

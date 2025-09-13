@@ -25,22 +25,21 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Retrospection", description = "회고 관리 API")
 public class RetrospectionController {
 
-    private final CreateRetrospectionUseCase createRetrospectionUseCase;
+  private final CreateRetrospectionUseCase createRetrospectionUseCase;
 
-    @PostMapping
-    @Operation(summary = "회고 생성", description = "주식 거래 회고를 생성합니다.")
-    public ResponseEntity<HttpApiResponse<CreateRetrospectionResponse>> createRetrospection(
-        @RequestHeader("Authorization_code") String authorizationCode,
-        @Valid @RequestBody CreateRetrospectionRequest request) {
+  @PostMapping
+  @Operation(summary = "회고 생성", description = "주식 거래 회고를 생성합니다.")
+  public ResponseEntity<HttpApiResponse<CreateRetrospectionResponse>> createRetrospection(
+      @RequestHeader("Authorization_code") String authorizationCode,
+      @Valid @RequestBody CreateRetrospectionRequest request) {
 
-        // TODO: Spring Security에서 User 정보 가져오기
-        Long userId = 1L; // 임시로 하드코딩
+    // TODO: Spring Security에서 User 정보 가져오기
+    Long userId = 1L; // 임시로 하드코딩
 
-        CreateRetrospectionCommand command = RetrospectionMapper.toCommand(request, userId);
-        Retrospection retrospection = createRetrospectionUseCase.createRetrospection(command);
-        CreateRetrospectionResponse response = RetrospectionMapper.toResponse(retrospection);
+    CreateRetrospectionCommand command = RetrospectionMapper.toCommand(request, userId);
+    Retrospection retrospection = createRetrospectionUseCase.createRetrospection(command);
+    CreateRetrospectionResponse response = RetrospectionMapper.toResponse(retrospection);
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-            .body(HttpApiResponse.of(response));
-    }
+    return ResponseEntity.status(HttpStatus.CREATED).body(HttpApiResponse.of(response));
+  }
 }
