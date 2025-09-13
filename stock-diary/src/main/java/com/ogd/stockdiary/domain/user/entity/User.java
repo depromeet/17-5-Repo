@@ -20,49 +20,48 @@ import lombok.Setter;
 @NoArgsConstructor
 public class User {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Setter
-    @Column(nullable = false, length = 100)
-    private String nickname;
+  @Setter
+  @Column(nullable = false, length = 100)
+  private String nickname;
 
-    @Column(nullable = false, unique = true, length = 255)
-    private String email;
+  @Column(nullable = false, unique = true, length = 255)
+  private String email;
 
-    @Column(name = "profile_image_url", length = 500)
-    private String profileImageUrl;
+  @Column(name = "profile_image_url", length = 500)
+  private String profileImageUrl;
 
-    @Embedded
-    private OAuthProviderInfo oAuthProviderInfo;
+  @Embedded private OAuthProviderInfo oAuthProviderInfo;
 
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+  @Column(name = "created_at", updatable = false)
+  private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+  @Column(name = "updated_at")
+  private LocalDateTime updatedAt;
 
-    @Setter
-    @Column(name = "is_deleted", nullable = false)
-    private Boolean isDeleted = false;
+  @Setter
+  @Column(name = "is_deleted", nullable = false)
+  private Boolean isDeleted = false;
 
+  @PrePersist
+  protected void onCreate() {
+    this.createdAt = LocalDateTime.now();
+    this.updatedAt = LocalDateTime.now();
+  }
 
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
+  @PreUpdate
+  protected void onUpdate() {
+    this.updatedAt = LocalDateTime.now();
+  }
 
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    public User(String nickname, String email, String profileImageUrl, OAuthProviderInfo oAuthProviderInfo) {
-        this.nickname = nickname;
-        this.email = email;
-        this.profileImageUrl = profileImageUrl;
-        this.oAuthProviderInfo = oAuthProviderInfo;
-    }
+  public User(
+      String nickname, String email, String profileImageUrl, OAuthProviderInfo oAuthProviderInfo) {
+    this.nickname = nickname;
+    this.email = email;
+    this.profileImageUrl = profileImageUrl;
+    this.oAuthProviderInfo = oAuthProviderInfo;
+  }
 }

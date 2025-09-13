@@ -27,6 +27,15 @@ spring:
     console:
       enabled: true
 
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /api-docs
+
+server:
+  url: ${SERVER_URL:http://localhost:8080}
+
 logging:
   level:
     com.dpm05.user: DEBUG

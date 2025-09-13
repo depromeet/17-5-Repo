@@ -7,6 +7,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class AuthResult {
-    private final User user;
-    private final boolean isNewUser;
+  private final User user;
+  private final boolean isNewUser;
 }
