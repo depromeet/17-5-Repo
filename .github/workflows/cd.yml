@@ -43,6 +43,19 @@ jobs:
           script: |
             echo "🚀 Starting deployment..."
 
+            # Check disk space and clean up if needed
+            echo "📊 Checking disk space..."
+            df -h
+
+            # Clean up old backups and logs
+            echo "🧹 Cleaning up old files..."
+            find /home/ubuntu -name "stock-diary-backup-*.jar" -mtime +7 -delete 2>/dev/null || true
+            find /home/ubuntu -name "app_*.log" -mtime +7 -delete 2>/dev/null || true
+
+            # Clean up git lock files if they exist
+            rm -f /home/ubuntu/depromeet/.git/index.lock 2>/dev/null || true
+            rm -f /home/ubuntu/depromeet/.git/*.lock 2>/dev/null || true
+
             # Create and navigate to project directory
             mkdir -p /home/ubuntu/depromeet
             cd /home/ubuntu/depromeet
@@ -54,10 +67,15 @@ jobs:
               echo "✅ Repository cloned"
             fi
 
-            # (선택) 현재 JAR 백업
+            # (선택) 현재 JAR 백업 - 공간 부족시 생략
             if [ -f "stock-diary/build/libs/stock-diary-0.0.1-SNAPSHOT.jar" ]; then
-              echo "📦 Backing up current JAR..."
-              cp stock-diary/build/libs/stock-diary-0.0.1-SNAPSHOT.jar stock-diary-backup-$(date +%Y%m%d_%H%M%S).jar || true
+              echo "📦 Trying to backup current JAR..."
+              AVAILABLE_SPACE=$(df . | tail -1 | awk '{print $4}')
+              if [ "$AVAILABLE_SPACE" -gt 100000 ]; then
+                cp stock-diary/build/libs/stock-diary-0.0.1-SNAPSHOT.jar stock-diary-backup-$(date +%Y%m%d_%H%M%S).jar || echo "⚠️  Backup failed but continuing..."
+              else
+                echo "⚠️  Skipping backup due to low disk space"
+              fi
             fi
 
             # Update code from repository (GitHub Actions에서 실행된 브랜치 사용)
