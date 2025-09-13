@@ -20,7 +20,7 @@ public class RetrospectionRepositoryImpl implements RetrospectionRepository {
   }
 
   @Override
-  public Retrospection findById(Long id) {
+  public Retrospection getById(Long id) {
     return jpaRetrospectionRepository
         .findById(id)
         .orElseThrow(() -> new ApplicationException(CodeEnum.FRS_003, "회고를 찾을 수 없습니다: " + id));

@@ -7,7 +7,7 @@ public interface RetrospectionRepository {
 
   Retrospection save(Retrospection retrospection);
 
-  Retrospection findById(Long id);
+  Retrospection getById(Long id);
 
   List<Retrospection> findByUserId(Long userId);
 }
