@@ -43,7 +43,7 @@ jobs:
           fi
 
       - name: Upload stock-diary artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: stock-diary-jar
           path: stock-diary/build/libs/stock-diary-0.0.1-SNAPSHOT.jar
