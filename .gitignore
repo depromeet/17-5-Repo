@@ -12,3 +12,6 @@ build/
 # OS
 .DS_Store
 Thumbs.db
+
+# Token files
+stock_api_token.txt

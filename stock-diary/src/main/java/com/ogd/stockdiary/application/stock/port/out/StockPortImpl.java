@@ -6,39 +6,64 @@ import java.time.format.DateTimeFormatter;
 import org.springframework.stereotype.Component;
 
 import com.ogd.stockdiary.application.stock.port.out.dto.DailyPriceResponse;
-import com.ogd.stockdiary.application.stock.port.out.dto.TokenRequest;
-import com.ogd.stockdiary.application.stock.port.out.dto.TokenResponse;
+import com.ogd.stockdiary.application.stock.service.TokenManager;
 import com.ogd.stockdiary.domain.stock.dto.StockChartData;
 import com.ogd.stockdiary.domain.stock.dto.StockInterval;
 import com.ogd.stockdiary.domain.stock.port.out.StockPort;
 
+import feign.FeignException;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Component
 public class StockPortImpl implements StockPort {
 
     private final HanStockFeignClient hanStockFeignClient;
+    private final TokenManager tokenManager;
 
     private static final String APP_KEY = "PSOA5a8EUEzQnsbb0Stieigj9n8jUUBiwJ0A";
     private static final String APP_SECRET = "wS6taqks0+FJmyHxrFouol6EOLJhSMhyLrvsUHcqlvHxEVxa/TYXqFqD0M/eOMWGmnPPB+X/fuqr8LnJJK/ZKMlcDOxVWo5BU85hom/PgpP0H4p5pYJjESLXAuRkdrrnp/UtapmJhOVOYQrkXqz2TkqCkYGW2zwgwYXPBGLisyHWWSRI8C0=";
     private static final String TR_ID = "HHDFS76240000";
 
-    public StockPortImpl(HanStockFeignClient hanStockFeignClient) {
+    public StockPortImpl(HanStockFeignClient hanStockFeignClient, TokenManager tokenManager) {
         this.hanStockFeignClient = hanStockFeignClient;
+        this.tokenManager = tokenManager;
     }
 
     @Override
     public String getToken() {
-        TokenRequest request = new TokenRequest("client_credentials", APP_SECRET, APP_KEY);
-        TokenResponse response = hanStockFeignClient.getToken(request);
-        return response.getAccessToken();
+        return tokenManager.getValidToken();
     }
 
     @Override
     public StockChartData getChartData(String market, String symbol, LocalDate endDate, StockInterval interval) {
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0b2tlbiIsImF1ZCI6IjJjZTM5ZjhmLWRmNzMtNDBhZS1iNjM4LWFhNWU0Y2VkODUyYiIsInByZHRfY2QiOiIiLCJpc3MiOiJ1bm9ndyIsImV4cCI6MTc1Nzg2MzEyMywiaWF0IjoxNzU3Nzc2NzIzLCJqdGkiOiJQU09BNWE4RVVFelFuc2JiMFN0aWVpZ2o5bjhqVVVCaXdKMEEifQ.Z7q1cA4AI74Hrjfmg62tukt6_tsm1upj8azmV4lEnOEGD3hIP62ZHf8HcUVyB1Qxgy0rz-kdalxU_Ih0SUIRXA";
-        String authorization = "Bearer " + token;
-
-        // LocalDate를 yyyyMMdd 형식으로 변환
         String formattedEndDate = endDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+        // 첫 번째 시도
+        try {
+            return callDailyPriceApi(market, symbol, formattedEndDate, interval);
+        } catch (FeignException e) {
+            if (is4xxError(e)) {
+                log.warn("4xx error occurred, invalidating token and retrying: {}", e.getMessage());
+
+                // 현재 토큰 파일 삭제 후 새 토큰으로 두 번째 시도
+                tokenManager.invalidateToken();
+                try {
+                    return callDailyPriceApi(market, symbol, formattedEndDate, interval);
+                } catch (Exception retryException) {
+                    log.error("Retry failed: {}", retryException.getMessage());
+                    throw new RuntimeException("API call failed after token refresh", retryException);
+                }
+            } else {
+                log.error("Non-4xx error occurred: {}", e.getMessage());
+                throw new RuntimeException("API call failed", e);
+            }
+        }
+    }
+
+    private StockChartData callDailyPriceApi(String market, String symbol, String formattedEndDate, StockInterval interval) {
+        String token = tokenManager.getValidToken();
+        String authorization = "Bearer " + token;
 
         DailyPriceResponse response = hanStockFeignClient.getDailyPrice(
             authorization,
@@ -54,5 +79,10 @@ public class StockPortImpl implements StockPort {
         );
 
         return DailyPriceResponse.toStockChartData(response, market);
+    }
+
+    private boolean is4xxError(FeignException e) {
+        int status = e.status();
+        return status >= 400 && status < 500;
     }
 }
