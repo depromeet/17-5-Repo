@@ -1,0 +1,88 @@
+name: CD
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        id: aws-credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.PROD_AWS_SECRET_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: Get EC2 deployment parameters from SSM
+        uses: dkershner6/aws-ssm-getparameters-action@v2.0.3
+        id: ssm
+        with:
+          parameterPairs: |
+            /ci/ec2/host = EC2_HOST,
+            /ci/ec2/user = EC2_USER,
+            /ci/ec2/private_key = EC2_PRIVATE_KEY,
+            /ci/ec2/ssh_port = EC2_SSH_PORT
+          withDecryption: "true"
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ env.EC2_HOST }}
+          username: ${{ env.EC2_USER }}
+          key: ${{ env.EC2_PRIVATE_KEY }}
+          port: ${{ env.EC2_SSH_PORT }}
+          script: |
+            echo "🚀 Starting deployment..."
+
+            # Navigate to project directory
+            cd /home/ubuntu/depromeet
+
+            # Backup current deployment
+            if [ -f "stock-diary/build/libs/stock-diary-0.0.1-SNAPSHOT.jar" ]; then
+              echo "📦 Backing up current JAR..."
+              cp stock-diary/build/libs/stock-diary-0.0.1-SNAPSHOT.jar stock-diary-backup-$(date +%Y%m%d_%H%M%S).jar
+            fi
+
+            # Update code from repository
+            echo "📥 Pulling latest code..."
+            git checkout ${{ github.ref_name }}
+            git fetch --all
+            git reset --hard origin/${{ github.ref_name }}
+
+            # Stop existing application (if running)
+            echo "⏹️  Stopping existing application..."
+            pkill -f "stock-diary-0.0.1-SNAPSHOT.jar" || true
+
+            # Build the application
+            echo "🔨 Building application..."
+            ./gradlew :stock-diary:build --no-daemon
+
+            # Verify build success
+            if [ ! -f "stock-diary/build/libs/stock-diary-0.0.1-SNAPSHOT.jar" ]; then
+              echo "❌ Build failed - JAR not found"
+              exit 1
+            fi
+
+            echo "✅ Build successful - JAR found"
+            ls -la stock-diary/build/libs/
+
+            # Start the application
+            echo "🚀 Starting new application..."
+            nohup java -jar stock-diary/build/libs/stock-diary-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
+
+            # Wait a moment and check if application started
+            sleep 5
+            if pgrep -f "stock-diary-0.0.1-SNAPSHOT.jar" > /dev/null; then
+              echo "✅ Application started successfully"
+              echo "📋 Process info:"
+              pgrep -f "stock-diary-0.0.1-SNAPSHOT.jar" | head -1 | xargs ps -p
+            else
+              echo "❌ Application failed to start"
+              echo "📋 Recent logs:"
+              tail -100 app.log
+              exit 1
+            fi
+            
+            echo "🎉 Deployment completed successfully!"
