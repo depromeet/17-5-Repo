@@ -43,7 +43,4 @@ jobs:
             exit 1
           fi
 
-  call-cd:
-    needs: build
-    uses: ./.github/workflows/cd.yml
 
