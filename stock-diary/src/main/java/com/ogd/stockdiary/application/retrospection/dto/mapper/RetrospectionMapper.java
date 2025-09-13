@@ -42,19 +42,19 @@ public class RetrospectionMapper {
 
     public static Retrospection toEntity(CreateRetrospectionCommand command, User user) {
         Order order = new Order(
-            command.orderType(),
-            command.price(),
-            command.currency(),
-            command.volume(),
-            command.orderDate()
+            command.getOrderType(),
+            command.getPrice(),
+            command.getCurrency(),
+            command.getVolume(),
+            command.getOrderDate()
         );
 
         return new Retrospection(
             user,
-            command.symbol(),
-            command.market(),
+            command.getSymbol(),
+            command.getMarket(),
             order,
-            command.returnRate()
+            command.getReturnRate()
         );
     }
 }
