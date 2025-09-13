@@ -62,18 +62,10 @@ jobs:
               echo "❌ Fast-forward 불가(로컬 변경/이력 차이). 수동 조치 필요."; exit 1;
             }
 
-            # Stop existing application (if running)
-            echo "⏹️  Stopping existing application (if any)..."
-            PID=$(pgrep -f "stock-diary-0.0.1-SNAPSHOT.jar" | head -1)
-            if [ -n "$PID" ]; then
-              echo "📋 Found running application (PID: $PID), stopping..."
-              kill -15 $PID || true
-              sleep 3
-              if kill -0 $PID 2>/dev/null; then
-                echo "⚠️  Process still running, force killing..."
-                kill -9 $PID || true
-              fi
-              echo "✅ Application stopped"
+            # Stop existing application (if running) - skip for now to avoid SSH issues
+            echo "⏹️  Checking for existing application..."
+            if pgrep -f "stock-diary-0.0.1-SNAPSHOT.jar" > /dev/null; then
+              echo "📋 Found running application, will be replaced after build"
             else
               echo "📋 No running application found"
             fi
