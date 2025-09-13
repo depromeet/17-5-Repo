@@ -11,17 +11,17 @@ import lombok.Setter;
 @AllArgsConstructor
 public class DailyPriceRequest {
 
-    private String market;
-    private String symbol;
-    private String period;
-    private String baseDate;
-    private String modifiedPrice;
+  private String market;
+  private String symbol;
+  private String period;
+  private String baseDate;
+  private String modifiedPrice;
 
-    public DailyPriceRequest(String market, String symbol, String period) {
-        this.market = market;
-        this.symbol = symbol;
-        this.period = period;
-        this.baseDate = "";
-        this.modifiedPrice = "1";
-    }
+  public DailyPriceRequest(String market, String symbol, String period) {
+    this.market = market;
+    this.symbol = symbol;
+    this.period = period;
+    this.baseDate = "";
+    this.modifiedPrice = "1";
+  }
 }
