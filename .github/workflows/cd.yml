@@ -48,9 +48,8 @@ jobs:
 
             # Update code from repository
             echo "📥 Pulling latest code..."
-            git checkout ${{ github.ref_name }}
             git fetch --all
-            git reset --hard origin/${{ github.ref_name }}
+            git checkout -B ${{ github.ref_name }} origin/${{ github.ref_name }}
 
             # Stop existing application (if running)
             echo "⏹️  Stopping existing application..."
