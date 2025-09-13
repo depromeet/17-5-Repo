@@ -1,36 +1,18 @@
 package com.ogd.stockdiary.domain.retrospection.entity;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
+import jakarta.persistence.Embeddable;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Entity
-@Table(name = "orders")
+@Embeddable
 @Getter
 @NoArgsConstructor
 public class Order {
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
-
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "retrospection_id", nullable = false)
-  private Retrospection retrospection;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "order_type", nullable = false)
@@ -49,16 +31,7 @@ public class Order {
   @Column(name = "order_date", nullable = false)
   private LocalDate orderDate;
 
-  @Column(name = "created_at", updatable = false)
-  private LocalDateTime createdAt;
-
-  @PrePersist
-  protected void onCreate() {
-    this.createdAt = LocalDateTime.now();
-  }
-
   public Order(
-      Retrospection retrospection,
       OrderType orderType,
       BigDecimal price,
       Currency currency,
@@ -67,7 +40,6 @@ public class Order {
     validatePrice(price);
     validateVolume(volume);
 
-    this.retrospection = retrospection;
     this.orderType = orderType;
     this.price = price;
     this.currency = currency;

@@ -23,8 +23,6 @@ class OrderTest {
   @DisplayName("올바른 주문 정보로 Order를 생성할 수 있다")
   void createValidOrder() {
     // given
-    User user = createTestUser();
-    Retrospection retrospection = new Retrospection(user, "005930", "KRX");
     OrderType orderType = OrderType.BUY;
     BigDecimal price = new BigDecimal("10000");
     Currency currency = Currency.KRW;
@@ -32,10 +30,9 @@ class OrderTest {
     LocalDate orderDate = LocalDate.of(2025, 9, 13);
 
     // when
-    Order order = new Order(retrospection, orderType, price, currency, volume, orderDate);
+    Order order = new Order(orderType, price, currency, volume, orderDate);
 
     // then
-    assertThat(order.getRetrospection()).isEqualTo(retrospection);
     assertThat(order.getOrderType()).isEqualTo(orderType);
     assertThat(order.getPrice()).isEqualTo(price);
     assertThat(order.getCurrency()).isEqualTo(currency);
@@ -47,8 +44,6 @@ class OrderTest {
   @DisplayName("가격이 0 이하일 때 예외가 발생한다")
   void invalidPrice() {
     // given
-    User user = createTestUser();
-    Retrospection retrospection = new Retrospection(user, "005930", "KRX");
     OrderType orderType = OrderType.BUY;
     BigDecimal invalidPrice = BigDecimal.ZERO;
     Currency currency = Currency.KRW;
@@ -57,7 +52,7 @@ class OrderTest {
 
     // when & then
     assertThatThrownBy(
-            () -> new Order(retrospection, orderType, invalidPrice, currency, volume, orderDate))
+            () -> new Order(orderType, invalidPrice, currency, volume, orderDate))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("가격은 0보다 큰 값이어야 합니다.");
   }
@@ -66,8 +61,6 @@ class OrderTest {
   @DisplayName("거래량이 0 이하일 때 예외가 발생한다")
   void invalidVolume() {
     // given
-    User user = createTestUser();
-    Retrospection retrospection = new Retrospection(user, "005930", "KRX");
     OrderType orderType = OrderType.BUY;
     BigDecimal price = new BigDecimal("10000");
     Currency currency = Currency.KRW;
@@ -76,7 +69,7 @@ class OrderTest {
 
     // when & then
     assertThatThrownBy(
-            () -> new Order(retrospection, orderType, price, currency, invalidVolume, orderDate))
+            () -> new Order(orderType, price, currency, invalidVolume, orderDate))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("거래량은 0보다 큰 값이어야 합니다.");
   }
@@ -85,8 +78,6 @@ class OrderTest {
   @DisplayName("가격이 null일 때 예외가 발생한다")
   void nullPrice() {
     // given
-    User user = createTestUser();
-    Retrospection retrospection = new Retrospection(user, "005930", "KRX");
     OrderType orderType = OrderType.BUY;
     BigDecimal nullPrice = null;
     Currency currency = Currency.KRW;
@@ -95,7 +86,7 @@ class OrderTest {
 
     // when & then
     assertThatThrownBy(
-            () -> new Order(retrospection, orderType, nullPrice, currency, volume, orderDate))
+            () -> new Order(orderType, nullPrice, currency, volume, orderDate))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("가격은 0보다 큰 값이어야 합니다.");
   }
@@ -104,8 +95,6 @@ class OrderTest {
   @DisplayName("거래량이 null일 때 예외가 발생한다")
   void nullVolume() {
     // given
-    User user = createTestUser();
-    Retrospection retrospection = new Retrospection(user, "005930", "KRX");
     OrderType orderType = OrderType.BUY;
     BigDecimal price = new BigDecimal("10000");
     Currency currency = Currency.KRW;
@@ -114,7 +103,7 @@ class OrderTest {
 
     // when & then
     assertThatThrownBy(
-            () -> new Order(retrospection, orderType, price, currency, nullVolume, orderDate))
+            () -> new Order(orderType, price, currency, nullVolume, orderDate))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("거래량은 0보다 큰 값이어야 합니다.");
   }
