@@ -16,6 +16,7 @@ import com.ogd.stockdiary.application.stock.dto.ChartResponse;
 import com.ogd.stockdiary.application.stock.port.out.HanStockFeignClient;
 import com.ogd.stockdiary.application.stock.port.out.dto.TokenRequest;
 import com.ogd.stockdiary.application.stock.port.out.dto.TokenResponse;
+import com.ogd.stockdiary.common.httpresponse.HttpApiResponse;
 import com.ogd.stockdiary.domain.stock.dto.StockChartData;
 import com.ogd.stockdiary.domain.stock.dto.StockInterval;
 import com.ogd.stockdiary.domain.stock.usecase.ChartQueryUseCase;
@@ -33,7 +34,7 @@ public class ChartQueryController {
     }
 
     @GetMapping("/stock/charts/{market}/{symbol}")
-    public ChartResponse getStockCharts(
+    public HttpApiResponse<ChartResponse.ChartData> getStockCharts(
         @PathVariable String market,
         @PathVariable String symbol,
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
@@ -58,7 +59,7 @@ public class ChartQueryController {
             chartItems
         );
 
-        return new ChartResponse("success", chartData);
+        return HttpApiResponse.of(chartData);
     }
 
     @PostMapping("/charts/test")
