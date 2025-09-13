@@ -13,12 +13,6 @@ import org.junit.jupiter.api.Test;
 
 class OrderTest {
 
-  private User createTestUser() {
-    OAuthProviderInfo oAuthProviderInfo =
-        new OAuthProviderInfo(OAuthProvider.APPLE, "test-provider-id");
-    return new User("testUser", "test@example.com", "profile.jpg", oAuthProviderInfo);
-  }
-
   @Test
   @DisplayName("올바른 주문 정보로 Order를 생성할 수 있다")
   void createValidOrder() {
