@@ -51,6 +51,15 @@ jobs:
             echo "🧹 Cleaning up old files..."
             find /home/ubuntu -name "stock-diary-backup-*.jar" -mtime +7 -delete 2>/dev/null || true
             find /home/ubuntu -name "app_*.log" -mtime +7 -delete 2>/dev/null || true
+            # Clean up gradle cache and build directories
+            rm -rf /home/ubuntu/depromeet/.gradle/caches/* 2>/dev/null || true
+            rm -rf /home/ubuntu/depromeet/stock-diary/build/tmp 2>/dev/null || true
+            # Clean up swap files if they exist
+            if [ -f "/swapMem" ]; then
+              echo "🗑️  Cleaning up swap file..."
+              sudo swapoff /swapMem 2>/dev/null || true
+              sudo rm -f /swapMem 2>/dev/null || true
+            fi
 
             # Clean up git lock files if they exist
             rm -f /home/ubuntu/depromeet/.git/index.lock 2>/dev/null || true
