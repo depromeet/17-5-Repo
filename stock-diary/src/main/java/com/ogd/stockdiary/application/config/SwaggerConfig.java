@@ -24,11 +24,11 @@ public class SwaggerConfig {
   @Value("${server.url:http://localhost:8080}")
   private String serverUrl;
 
-  @Bean
-  public OpenAPI openAPI() {
-    Server server = new Server();
-    server.setUrl(serverUrl);
-
-    return new OpenAPI().addServersItem(server);
-  }
+//  @Bean
+//  public OpenAPI openAPI() {
+//    Server server = new Server();
+//    server.setUrl(serverUrl);
+//
+//    return new OpenAPI().addServersItem(server);
+//  }
 }
