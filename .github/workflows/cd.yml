@@ -54,11 +54,11 @@ jobs:
             # Clean up gradle cache and build directories
             rm -rf /home/ubuntu/depromeet/.gradle/caches/* 2>/dev/null || true
             rm -rf /home/ubuntu/depromeet/stock-diary/build/tmp 2>/dev/null || true
-            # Clean up swap files if they exist
+            # Check and optimize swap usage
             if [ -f "/swapMem" ]; then
-              echo "🗑️  Cleaning up swap file..."
-              sudo swapoff /swapMem 2>/dev/null || true
-              sudo rm -f /swapMem 2>/dev/null || true
+              SWAP_SIZE=$(ls -lh /swapMem | awk '{print $5}')
+              echo "⚠️  Large swap file found: $SWAP_SIZE"
+              echo "💡 Consider optimizing JVM memory settings"
             fi
 
             # Clean up git lock files if they exist
@@ -127,7 +127,7 @@ jobs:
             export DB_URL="$DB_URL"
             export DB_USERNAME="$DB_USERNAME"
             export DB_PASSWORD="$DB_PASSWORD"
-            nohup java -jar "$JAR_PATH" > app.log 2>&1 &
+            nohup java -Xmx512m -Xms256m -jar "$JAR_PATH" > app.log 2>&1 &
 
             # Wait a moment and check if application started
             sleep 5
