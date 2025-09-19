@@ -48,6 +48,12 @@ dependencies {
     // Swagger/OpenAPI
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
 
+    // spring cloud openfeign
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:4.3.0'
+
+    // webclient
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
     compileOnly 'org.projectlombok:lombok'
 
     runtimeOnly 'com.h2database:h2'
