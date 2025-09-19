@@ -11,31 +11,31 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import reactor.core.publisher.Flux;
 
 @ControllerAdvice
-public class MediaTypeResponseBodyAdvice implements ResponseBodyAdvice<Object>{
+public class MediaTypeResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
+  @Override
+  public boolean supports(
+      MethodParameter methodParameter, Class<? extends HttpMessageConverter<?>> aClass) {
+    if (Flux.class.isAssignableFrom(methodParameter.getParameterType())) {
+      return false;
+    }
+    return true;
+  }
 
-    @Override
-    public boolean supports(MethodParameter methodParameter, Class<? extends HttpMessageConverter<?>> aClass){
-        if (Flux.class.isAssignableFrom(methodParameter.getParameterType())){
-            return false;
-        }
-        return true;
+  @Override
+  public Object beforeBodyWrite(
+      Object body,
+      MethodParameter returnType,
+      MediaType selectedContentType,
+      Class selectedConverterType,
+      ServerHttpRequest request,
+      ServerHttpResponse response) {
+
+    //         예외 또는 특정 타입 응답 시 JSON 미디어 타입으로 강제 변경 예시
+    if (body instanceof HttpApiResponse) {
+      response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
     }
 
-    @Override
-    public Object beforeBodyWrite(
-            Object body,
-            MethodParameter returnType,
-            MediaType selectedContentType,
-            Class selectedConverterType,
-            ServerHttpRequest request,
-            ServerHttpResponse response) {
-
-//         예외 또는 특정 타입 응답 시 JSON 미디어 타입으로 강제 변경 예시
-        if (body instanceof HttpApiResponse) {
-            response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-        }
-
-        return body;
-    }
+    return body;
+  }
 }

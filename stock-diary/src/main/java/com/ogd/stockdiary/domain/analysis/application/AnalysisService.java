@@ -2,7 +2,6 @@ package com.ogd.stockdiary.domain.analysis.application;
 
 import com.ogd.stockdiary.domain.analysis.dto.RequestDto;
 import com.ogd.stockdiary.domain.analysis.dto.RequestDtoFactory;
-import com.ogd.stockdiary.domain.analysis.dto.ResponseDto;
 import com.ogd.stockdiary.domain.analysis.dto.WebClientResDto;
 import com.ogd.stockdiary.domain.analysis.port.AnalysisWebClient;
 import java.time.LocalDateTime;

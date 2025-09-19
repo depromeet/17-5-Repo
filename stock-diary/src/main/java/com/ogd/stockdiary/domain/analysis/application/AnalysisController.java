@@ -1,11 +1,8 @@
 package com.ogd.stockdiary.domain.analysis.application;
 
-import com.ogd.stockdiary.domain.analysis.dto.ResponseDto;
-
+import com.ogd.stockdiary.domain.analysis.dto.WebClientResDto;
 import java.awt.*;
 import java.time.LocalDateTime;
-
-import com.ogd.stockdiary.domain.analysis.dto.WebClientResDto;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +19,7 @@ public class AnalysisController {
   }
 
   @GetMapping(value = "/{modelName}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-//    @GetMapping(value = "/{modelName}")
+  //    @GetMapping(value = "/{modelName}")
   public Flux<WebClientResDto> analyze(
       @PathVariable String modelName,
       @RequestParam String market,

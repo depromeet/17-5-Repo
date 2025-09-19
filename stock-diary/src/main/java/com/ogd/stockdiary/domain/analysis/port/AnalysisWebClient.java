@@ -1,7 +1,6 @@
 package com.ogd.stockdiary.domain.analysis.port;
 
 import com.ogd.stockdiary.domain.analysis.dto.RequestDto;
-import com.ogd.stockdiary.domain.analysis.dto.ResponseDto;
 import com.ogd.stockdiary.domain.analysis.dto.WebClientResDto;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
@@ -24,7 +23,7 @@ import reactor.core.publisher.Flux;
                   ClientRequest filteredRequest =
                       ClientRequest.from(clientRequest)
                           .header("Authorization", "Bearer nv-18cb916bc90a40fdbf2fa23111d76a26sqRG")
-                              .header("Content-Type", "application/json")
+                          .header("Content-Type", "application/json")
                           .header("Accept", "text/event-stream")
                           .build();
                   return nextFilter.exchange(filteredRequest);
@@ -40,11 +39,11 @@ import reactor.core.publisher.Flux;
         .bodyValue(requestDto)
         .retrieve()
         .bodyToFlux(WebClientResDto.class)
-            .onErrorResume(e -> Flux.just(
+        .onErrorResume(
+            e ->
+                Flux.just(
                     new WebClientResDto(
-                            new WebClientResDto.Message(
-                                    WebClientResDto.Role.assistant,
-                                    "Error: " + e.getMessage()
-                            ))));
+                        new WebClientResDto.Message(
+                            WebClientResDto.Role.assistant, "Error: " + e.getMessage()))));
   }
 }
