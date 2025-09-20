@@ -1,14 +1,23 @@
-name: 통합 CI/CD (manual) - Build & Deploy
+name: 통합 CI/CD [Stock Diary] Container Build, Push & Deploy
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target Server Environment'
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+        default: 'dev'
 
 jobs:
   ci:
-    uses: ./.github/workflows/ci.yml
+    uses: ./.github/workflows/ci-container.yml
     secrets: inherit
 
   cd:
     needs: ci
-    uses: ./.github/workflows/cd.yml
+    uses: ./.github/workflows/cd-container.yml
     secrets: inherit
