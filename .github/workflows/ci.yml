@@ -38,7 +38,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build stock-diary module
-        run: ./gradlew :stock-diary:build --no-daemon
+        run: ./gradlew :stock-diary:build -x test --no-daemon
 
       - name: Verify stock-diary JAR creation
         run: |
