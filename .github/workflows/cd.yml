@@ -114,22 +114,27 @@ jobs:
               exit 1
             fi
 
-            # Clean up old Docker images
+            # Clean up old Docker images (keep only current)
             echo "🧹 Cleaning up old Docker images..."
 
-            # Get current image ID
-            CURRENT_IMAGE_ID=$(docker images "$TARGET_IMAGE" --format "{{.ID}}" | head -n 1)
-            echo "Current image ID: $CURRENT_IMAGE_ID"
+            # Get current running container's image ID
+            CURRENT_IMAGE_ID=$(docker inspect "$CONTAINER_NAME" --format='{{.Image}}' 2>/dev/null || echo "")
 
-            # Get all images for this repository (excluding the current one)
-            OLD_IMAGES=$(docker images "$REGISTRY/$DOCKER_USERNAME/$IMAGE_NAME" --format "{{.ID}} {{.Tag}}" | grep -v "$CURRENT_IMAGE_ID" | head -n -1 | awk '{print $1}')
+            if [ -n "$CURRENT_IMAGE_ID" ]; then
+              echo "Current container image ID: $CURRENT_IMAGE_ID"
 
-            if [ -n "$OLD_IMAGES" ]; then
-              echo "Removing old images (keeping 1 backup):"
-              echo "$OLD_IMAGES"
-              echo "$OLD_IMAGES" | xargs -r docker rmi -f || true
+              # Remove all juni416/stock-diary images except the current one
+              OLD_IMAGES=$(docker images juni416/stock-diary --format "{{.ID}}" | grep -v "$CURRENT_IMAGE_ID" || echo "")
+
+              if [ -n "$OLD_IMAGES" ]; then
+                echo "Removing old images (keeping only current):"
+                echo "$OLD_IMAGES"
+                echo "$OLD_IMAGES" | xargs -r docker rmi -f || true
+              else
+                echo "No old images to clean up"
+              fi
             else
-              echo "No old images to clean up"
+              echo "⚠️ Could not get current container image ID"
             fi
 
             # Clean up dangling images
@@ -235,22 +240,27 @@ jobs:
               exit 1
             fi
 
-            # Clean up old Docker images
+            # Clean up old Docker images (keep only current)
             echo "🧹 Cleaning up old Docker images..."
 
-            # Get current image ID
-            CURRENT_IMAGE_ID=$(docker images "$TARGET_IMAGE" --format "{{.ID}}" | head -n 1)
-            echo "Current image ID: $CURRENT_IMAGE_ID"
+            # Get current running container's image ID
+            CURRENT_IMAGE_ID=$(docker inspect "$CONTAINER_NAME" --format='{{.Image}}' 2>/dev/null || echo "")
 
-            # Get all images for this repository (excluding the current one)
-            OLD_IMAGES=$(docker images "$REGISTRY/$DOCKER_USERNAME/$IMAGE_NAME" --format "{{.ID}} {{.Tag}}" | grep -v "$CURRENT_IMAGE_ID" | head -n -1 | awk '{print $1}')
+            if [ -n "$CURRENT_IMAGE_ID" ]; then
+              echo "Current container image ID: $CURRENT_IMAGE_ID"
 
-            if [ -n "$OLD_IMAGES" ]; then
-              echo "Removing old images (keeping 1 backup):"
-              echo "$OLD_IMAGES"
-              echo "$OLD_IMAGES" | xargs -r docker rmi -f || true
+              # Remove all juni416/stock-diary images except the current one
+              OLD_IMAGES=$(docker images juni416/stock-diary --format "{{.ID}}" | grep -v "$CURRENT_IMAGE_ID" || echo "")
+
+              if [ -n "$OLD_IMAGES" ]; then
+                echo "Removing old images (keeping only current):"
+                echo "$OLD_IMAGES"
+                echo "$OLD_IMAGES" | xargs -r docker rmi -f || true
+              else
+                echo "No old images to clean up"
+              fi
             else
-              echo "No old images to clean up"
+              echo "⚠️ Could not get current container image ID"
             fi
 
             # Clean up dangling images
