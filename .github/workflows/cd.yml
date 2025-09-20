@@ -100,22 +100,19 @@ jobs:
             echo "⏳ Waiting for application to start..."
             sleep 15
 
-            # Health check with retry
-            for i in {1..5}; do
-              if curl -f -s http://localhost:$DEPLOY_PORT/actuator/health > /dev/null 2>&1; then
-                echo "✅ Development health check passed"
-                break
-              else
-                echo "⏳ Development health check attempt $i/5 failed, retrying in 5s..."
-                sleep 5
-              fi
+            # Check if container is running
+            if docker ps --filter "name=$CONTAINER_NAME" --filter "status=running" | grep -q $CONTAINER_NAME; then
+              echo "✅ Development container is running successfully"
 
-              if [ $i -eq 5 ]; then
-                echo "⚠️ Development health check endpoint not responding"
-                echo "📋 Container logs:"
-                docker logs --tail 20 "$CONTAINER_NAME"
-              fi
-            done
+              # Show container logs
+              echo "📋 Container logs (last 10 lines):"
+              docker logs --tail 10 "$CONTAINER_NAME"
+            else
+              echo "❌ Development container failed to start"
+              echo "📋 Container logs:"
+              docker logs "$CONTAINER_NAME"
+              exit 1
+            fi
 
             # Clean up old Docker images
             echo "🧹 Cleaning up old Docker images..."
@@ -224,22 +221,19 @@ jobs:
             echo "⏳ Waiting for application to start..."
             sleep 15
 
-            # Health check with retry
-            for i in {1..5}; do
-              if curl -f -s http://localhost:$DEPLOY_PORT/actuator/health > /dev/null 2>&1; then
-                echo "✅ Production health check passed"
-                break
-              else
-                echo "⏳ Production health check attempt $i/5 failed, retrying in 5s..."
-                sleep 5
-              fi
+            # Check if container is running
+            if docker ps --filter "name=$CONTAINER_NAME" --filter "status=running" | grep -q $CONTAINER_NAME; then
+              echo "✅ Production container is running successfully"
 
-              if [ $i -eq 5 ]; then
-                echo "⚠️ Production health check endpoint not responding"
-                echo "📋 Container logs:"
-                docker logs --tail 20 "$CONTAINER_NAME"
-              fi
-            done
+              # Show container logs
+              echo "📋 Container logs (last 10 lines):"
+              docker logs --tail 10 "$CONTAINER_NAME"
+            else
+              echo "❌ Production container failed to start"
+              echo "📋 Container logs:"
+              docker logs "$CONTAINER_NAME"
+              exit 1
+            fi
 
             # Clean up old Docker images
             echo "🧹 Cleaning up old Docker images..."
