@@ -1,15 +1,32 @@
-name: CI
+name: CI - Stock Diary Container
 
 on:
   workflow_dispatch:
-  workflow_call:
+    inputs:
+      environment:
+        description: 'Target Server Environment'
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+        default: 'dev'
+  workflow_call: {}
+
+env:
+  REGISTRY: docker.io
+  IMAGE_NAME: stock-diary
 
 jobs:
   build:
+    name: Build Docker Image
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -17,21 +34,11 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Cache Gradle dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
       - name: Grant execute permission for Gradle
         run: chmod +x ./gradlew
 
       - name: Build stock-diary module
-        run: ./gradlew :stock-diary:build --no-daemon
+        run: ./gradlew :stock-diary:build -x test --no-daemon
 
       - name: Verify stock-diary JAR creation
         run: |
@@ -43,4 +50,85 @@ jobs:
             exit 1
           fi
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_ID }}
+          password: ${{ secrets.DOCKER_PW }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ secrets.DOCKER_ID }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ github.event.inputs.environment || 'dev' }}-${{ github.sha }}
+            type=raw,value=${{ github.event.inputs.environment || 'dev' }}-latest
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./stock-diary
+          file: ./stock-diary/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64
+
+      - name: Output image digest
+        run: echo ${{ steps.build.outputs.digest }}
+
+      - name: Clean up local Docker images
+        run: |
+          echo "Cleaning up local Docker images..."
+          docker image prune -f
+          docker system prune -f --volumes
+          echo "Local cleanup completed"
+
+      - name: Clean up old Docker images (keep latest 2)
+        run: |
+          echo "Cleaning up old Docker images on Docker Hub..."
+
+          # Get all tags for the repository
+          REPO_NAME="${{ secrets.DOCKER_ID }}/${{ env.IMAGE_NAME }}"
+
+          # Get Bearer token from Docker Hub API
+          if [ -n "${{ secrets.DOCKER_HUB_TOKEN }}" ]; then
+            echo "Getting Docker Hub Bearer token..."
+            HUB_TOKEN=$(curl -s -X POST \
+              -H "Content-Type: application/json" \
+              -d '{"username": "${{ secrets.DOCKER_ID }}", "password": "${{ secrets.DOCKER_HUB_TOKEN }}"}' \
+              https://hub.docker.com/v2/users/login/ | jq -r .token 2>/dev/null || echo "")
+
+            if [ -n "$HUB_TOKEN" ] && [ "$HUB_TOKEN" != "null" ]; then
+              # Get all tags
+              TAGS_JSON=$(curl -s "https://hub.docker.com/v2/repositories/${REPO_NAME}/tags?page_size=100" || echo '{"results":[]}')
+
+              # Extract tag names, exclude 'latest' and current branch tags, get old tags
+              OLD_TAGS=$(echo "$TAGS_JSON" | jq -r '.results[] | select(.name != "latest" and (.name | test("^(develop|main)$") | not)) | .name' | tail -n +3 2>/dev/null || echo "")
+
+              if [ -n "$OLD_TAGS" ]; then
+                echo "Found old tags to delete:"
+                echo "$OLD_TAGS"
+
+                # Delete old tags using Docker Hub API
+                for tag in $OLD_TAGS; do
+                  echo "Deleting tag: $tag"
+                  curl -X DELETE \
+                    -H "Authorization: JWT $HUB_TOKEN" \
+                    "https://hub.docker.com/v2/repositories/${REPO_NAME}/tags/$tag/" || true
+                done
+
+                echo "Old images cleanup completed"
+              else
+                echo "No old images to clean up"
+              fi
+            else
+              echo "⚠️ Failed to get Docker Hub Bearer token"
+            fi
+          else
+            echo "⚠️ DOCKER_HUB_TOKEN not configured - skipping cleanup"
+          fi
