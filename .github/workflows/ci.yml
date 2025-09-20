@@ -95,25 +95,40 @@ jobs:
           # Get all tags for the repository
           REPO_NAME="${{ secrets.DOCKER_ID }}/${{ env.IMAGE_NAME }}"
 
-          # Get all tags and sort by creation date (requires Docker Hub API)
-          TAGS_JSON=$(curl -s "https://registry.hub.docker.com/v2/repositories/${REPO_NAME}/tags?page_size=100" || echo '{"results":[]}')
+          # Get Bearer token from Docker Hub API
+          if [ -n "${{ secrets.DOCKER_HUB_TOKEN }}" ]; then
+            echo "Getting Docker Hub Bearer token..."
+            HUB_TOKEN=$(curl -s -X POST \
+              -H "Content-Type: application/json" \
+              -d '{"username": "${{ secrets.DOCKER_ID }}", "password": "${{ secrets.DOCKER_HUB_TOKEN }}"}' \
+              https://hub.docker.com/v2/users/login/ | jq -r .token 2>/dev/null || echo "")
 
-          # Extract tag names, exclude 'latest' and current branch tags, get old tags
-          OLD_TAGS=$(echo "$TAGS_JSON" | jq -r '.results[] | select(.name != "latest" and (.name | test("^(develop|main)$") | not)) | .name' | tail -n +3)
+            if [ -n "$HUB_TOKEN" ] && [ "$HUB_TOKEN" != "null" ]; then
+              # Get all tags
+              TAGS_JSON=$(curl -s "https://hub.docker.com/v2/repositories/${REPO_NAME}/tags?page_size=100" || echo '{"results":[]}')
 
-          if [ -n "$OLD_TAGS" ]; then
-            echo "Found old tags to delete:"
-            echo "$OLD_TAGS"
+              # Extract tag names, exclude 'latest' and current branch tags, get old tags
+              OLD_TAGS=$(echo "$TAGS_JSON" | jq -r '.results[] | select(.name != "latest" and (.name | test("^(develop|main)$") | not)) | .name' | tail -n +3 2>/dev/null || echo "")
 
-            # Delete old tags using Docker Hub API
-            for tag in $OLD_TAGS; do
-              echo "Deleting tag: $tag"
-              curl -X DELETE \
-                -H "Authorization: JWT ${{ secrets.DOCKER_HUB_TOKEN }}" \
-                "https://hub.docker.com/v2/repositories/${REPO_NAME}/tags/$tag/" || true
-            done
+              if [ -n "$OLD_TAGS" ]; then
+                echo "Found old tags to delete:"
+                echo "$OLD_TAGS"
 
-            echo "Old images cleanup completed"
+                # Delete old tags using Docker Hub API
+                for tag in $OLD_TAGS; do
+                  echo "Deleting tag: $tag"
+                  curl -X DELETE \
+                    -H "Authorization: JWT $HUB_TOKEN" \
+                    "https://hub.docker.com/v2/repositories/${REPO_NAME}/tags/$tag/" || true
+                done
+
+                echo "Old images cleanup completed"
+              else
+                echo "No old images to clean up"
+              fi
+            else
+              echo "⚠️ Failed to get Docker Hub Bearer token"
+            fi
           else
-            echo "No old images to clean up"
+            echo "⚠️ DOCKER_HUB_TOKEN not configured - skipping cleanup"
           fi
