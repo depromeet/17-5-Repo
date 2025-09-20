@@ -24,18 +24,46 @@ jobs:
             /ci/ec2/host = EC2_HOST,
             /ci/ec2/user = EC2_USER,
             /ci/ec2/private_key = EC2_PRIVATE_KEY,
-            /ci/ec2/ssh_port = EC2_SSH_PORT
+            /ci/ec2/ssh_port = EC2_SSH_PORT,
+            spring.datasource.url = DB_URL,
+            spring.datasource.username = DB_USERNAME,
+            spring.datasource.password = DB_PASSWORD
           withDecryption: "true"
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.6
+        env:
+          GITHUB_BRANCH: ${{ github.ref_name }}
         with:
           host: ${{ env.EC2_HOST }}
           username: ${{ env.EC2_USER }}
           key: ${{ env.EC2_PRIVATE_KEY }}
           port: ${{ env.EC2_SSH_PORT }}
+          envs: DB_URL,DB_USERNAME,DB_PASSWORD,GITHUB_BRANCH
           script: |
             echo "🚀 Starting deployment..."
+
+            # Check disk space and clean up if needed
+            echo "📊 Checking disk space..."
+            df -h
+
+            # Clean up old backups and logs
+            echo "🧹 Cleaning up old files..."
+            find /home/ubuntu -name "stock-diary-backup-*.jar" -mtime +7 -delete 2>/dev/null || true
+            find /home/ubuntu -name "app_*.log" -mtime +7 -delete 2>/dev/null || true
+            # Clean up gradle cache and build directories
+            rm -rf /home/ubuntu/depromeet/.gradle/caches/* 2>/dev/null || true
+            rm -rf /home/ubuntu/depromeet/stock-diary/build/tmp 2>/dev/null || true
+            # Check and optimize swap usage
+            if [ -f "/swapMem" ]; then
+              SWAP_SIZE=$(ls -lh /swapMem | awk '{print $5}')
+              echo "⚠️  Large swap file found: $SWAP_SIZE"
+              echo "💡 Consider optimizing JVM memory settings"
+            fi
+
+            # Clean up git lock files if they exist
+            rm -f /home/ubuntu/depromeet/.git/index.lock 2>/dev/null || true
+            rm -f /home/ubuntu/depromeet/.git/*.lock 2>/dev/null || true
 
             # Create and navigate to project directory
             mkdir -p /home/ubuntu/depromeet
@@ -48,23 +76,26 @@ jobs:
               echo "✅ Repository cloned"
             fi
 
-            # (선택) 현재 JAR 백업
+            # (선택) 현재 JAR 백업 - 공간 부족시 생략
             if [ -f "stock-diary/build/libs/stock-diary-0.0.1-SNAPSHOT.jar" ]; then
-              echo "📦 Backing up current JAR..."
-              cp stock-diary/build/libs/stock-diary-0.0.1-SNAPSHOT.jar stock-diary-backup-$(date +%Y%m%d_%H%M%S).jar || true
+              echo "📦 Trying to backup current JAR..."
+              AVAILABLE_SPACE=$(df . | tail -1 | awk '{print $4}')
+              if [ "$AVAILABLE_SPACE" -gt 100000 ]; then
+                cp stock-diary/build/libs/stock-diary-0.0.1-SNAPSHOT.jar stock-diary-backup-$(date +%Y%m%d_%H%M%S).jar || echo "⚠️  Backup failed but continuing..."
+              else
+                echo "⚠️  Skipping backup due to low disk space"
+              fi
             fi
 
-            # Update code from repository (현재 체크아웃된 브랜치 그대로)
-            echo "📥 Pulling latest code for current branch..."
-            CUR_BRANCH="$(git rev-parse --abbrev-ref HEAD)" || { echo "❌ Not a git repo"; exit 1; }
-            if [ "$CUR_BRANCH" = "HEAD" ]; then
-              echo "❌ Detached HEAD 상태입니다. 브랜치가 필요합니다."
-              exit 1
-            fi
-            echo "🔎 Current branch: $CUR_BRANCH"
+            # Update code from repository (GitHub Actions에서 실행된 브랜치 사용)
+            echo "📥 Switching to GitHub Actions branch: $GITHUB_BRANCH"
             git fetch --prune origin
+            git checkout "$GITHUB_BRANCH" || {
+              echo "❌ 브랜치 체크아웃 실패: $GITHUB_BRANCH"; exit 1;
+            }
+            echo "🔎 Current branch: $(git rev-parse --abbrev-ref HEAD)"
             # 로컬 변경을 덮어쓰지 않도록 fast-forward만 허용
-            git pull --ff-only origin "$CUR_BRANCH" || {
+            git pull --ff-only origin "$GITHUB_BRANCH" || {
               echo "❌ Fast-forward 불가(로컬 변경/이력 차이). 수동 조치 필요."; exit 1;
             }
 
@@ -93,7 +124,10 @@ jobs:
             # Start the application
             echo "🚀 Starting new application..."
             [ -f app.log ] && mv app.log "app_$(date +%Y%m%d_%H%M%S).log" || true
-            nohup java -jar "$JAR_PATH" > app.log 2>&1 &
+            export DB_URL="$DB_URL"
+            export DB_USERNAME="$DB_USERNAME"
+            export DB_PASSWORD="$DB_PASSWORD"
+            nohup java -Xmx512m -Xms256m -jar "$JAR_PATH" > app.log 2>&1 &
 
             # Wait a moment and check if application started
             sleep 5
