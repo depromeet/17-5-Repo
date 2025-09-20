@@ -1,15 +1,43 @@
-name: CD
+name: CD - Deploy Stock Diary Container
 
 on:
   workflow_dispatch:
-  workflow_call:
+    inputs:
+      environment:
+        description: 'Target Server Environment'
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+        default: 'dev'
+  workflow_call: {}
+
+env:
+  REGISTRY: docker.io
+  IMAGE_NAME: stock-diary
 
 jobs:
-  deploy:
+  deploy-dev:
+    if: github.event.inputs.environment == 'dev'
+    name: Deploy to Development
     runs-on: ubuntu-latest
+    environment: dev
+
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up environment variables
+        run: |
+          echo "DOCKER_USERNAME=${{ secrets.DOCKER_ID }}" >> $GITHUB_ENV
+          echo "DOCKER_PASSWORD=${{ secrets.DOCKER_PW }}" >> $GITHUB_ENV
+          echo "CONTAINER_NAME=stock-diary-dev" >> $GITHUB_ENV
+          echo "DEPLOY_PORT=8080" >> $GITHUB_ENV
+          echo "IMAGE_TAG=dev-${{ github.sha }}" >> $GITHUB_ENV
+          echo "TARGET_IMAGE=${{ env.REGISTRY }}/${{ secrets.DOCKER_ID }}/${{ env.IMAGE_NAME }}:dev-${{ github.sha }}" >> $GITHUB_ENV
+
       - name: Configure AWS credentials
-        id: aws-credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
@@ -30,116 +58,210 @@ jobs:
             spring.datasource.password = DB_PASSWORD
           withDecryption: "true"
 
-      - name: Deploy to EC2
+      - name: Deploy to development environment
         uses: appleboy/ssh-action@v0.1.6
-        env:
-          GITHUB_BRANCH: ${{ github.ref_name }}
         with:
           host: ${{ env.EC2_HOST }}
           username: ${{ env.EC2_USER }}
           key: ${{ env.EC2_PRIVATE_KEY }}
           port: ${{ env.EC2_SSH_PORT }}
-          envs: DB_URL,DB_USERNAME,DB_PASSWORD,GITHUB_BRANCH
+          envs: DOCKER_USERNAME,DOCKER_PASSWORD,CONTAINER_NAME,DEPLOY_PORT,TARGET_IMAGE,DB_URL,DB_USERNAME,DB_PASSWORD
           script: |
-            echo "🚀 Starting deployment..."
+            echo "🚀 Starting container deployment to development..."
 
-            # Check disk space and clean up if needed
-            echo "📊 Checking disk space..."
-            df -h
+            # Login to Docker Hub
+            echo "🔐 Logging into Docker Hub..."
+            echo "$DOCKER_PASSWORD" | docker login docker.io -u "$DOCKER_USERNAME" --password-stdin
 
-            # Clean up old backups and logs
-            echo "🧹 Cleaning up old files..."
-            find /home/ubuntu -name "stock-diary-backup-*.jar" -mtime +7 -delete 2>/dev/null || true
-            find /home/ubuntu -name "app_*.log" -mtime +7 -delete 2>/dev/null || true
-            # Clean up gradle cache and build directories
-            rm -rf /home/ubuntu/depromeet/.gradle/caches/* 2>/dev/null || true
-            rm -rf /home/ubuntu/depromeet/stock-diary/build/tmp 2>/dev/null || true
-            # Check and optimize swap usage
-            if [ -f "/swapMem" ]; then
-              SWAP_SIZE=$(ls -lh /swapMem | awk '{print $5}')
-              echo "⚠️  Large swap file found: $SWAP_SIZE"
-              echo "💡 Consider optimizing JVM memory settings"
-            fi
+            # Pull Docker image
+            echo "📥 Pulling Docker image: $TARGET_IMAGE"
+            docker pull "$TARGET_IMAGE"
 
-            # Clean up git lock files if they exist
-            rm -f /home/ubuntu/depromeet/.git/index.lock 2>/dev/null || true
-            rm -f /home/ubuntu/depromeet/.git/*.lock 2>/dev/null || true
+            # Stop and remove existing container
+            echo "⏹️ Stopping existing container..."
+            docker stop "$CONTAINER_NAME" || true
+            docker rm "$CONTAINER_NAME" || true
 
-            # Create and navigate to project directory
-            mkdir -p /home/ubuntu/depromeet
-            cd /home/ubuntu/depromeet
+            # Start new container
+            echo "🚀 Starting new container..."
+            docker run -d \
+              --name "$CONTAINER_NAME" \
+              --restart unless-stopped \
+              -p "$DEPLOY_PORT":8080 \
+              -e DB_URL="$DB_URL" \
+              -e DB_USERNAME="$DB_USERNAME" \
+              -e DB_PASSWORD="$DB_PASSWORD" \
+              "$TARGET_IMAGE"
 
-            # Initialize git repository if not exists
-            if [ ! -d ".git" ]; then
-              echo "📋 Initializing git repository..."
-              git clone https://github.com/depromeet/17-5-Repo.git .
-              echo "✅ Repository cloned"
-            fi
+            echo "✅ Development container started successfully"
+            docker ps --filter "name=$CONTAINER_NAME"
 
-            # (선택) 현재 JAR 백업 - 공간 부족시 생략
-            if [ -f "stock-diary/build/libs/stock-diary-0.0.1-SNAPSHOT.jar" ]; then
-              echo "📦 Trying to backup current JAR..."
-              AVAILABLE_SPACE=$(df . | tail -1 | awk '{print $4}')
-              if [ "$AVAILABLE_SPACE" -gt 100000 ]; then
-                cp stock-diary/build/libs/stock-diary-0.0.1-SNAPSHOT.jar stock-diary-backup-$(date +%Y%m%d_%H%M%S).jar || echo "⚠️  Backup failed but continuing..."
+            # Wait for application to start
+            echo "⏳ Waiting for application to start..."
+            sleep 15
+
+            # Health check with retry
+            for i in {1..5}; do
+              if curl -f -s http://localhost:$DEPLOY_PORT/actuator/health > /dev/null 2>&1; then
+                echo "✅ Development health check passed"
+                break
               else
-                echo "⚠️  Skipping backup due to low disk space"
+                echo "⏳ Development health check attempt $i/5 failed, retrying in 5s..."
+                sleep 5
               fi
-            fi
 
-            # Update code from repository (GitHub Actions에서 실행된 브랜치 사용)
-            echo "📥 Switching to GitHub Actions branch: $GITHUB_BRANCH"
-            git fetch --prune origin
-            git checkout "$GITHUB_BRANCH" || {
-              echo "❌ 브랜치 체크아웃 실패: $GITHUB_BRANCH"; exit 1;
-            }
-            echo "🔎 Current branch: $(git rev-parse --abbrev-ref HEAD)"
-            # 로컬 변경을 덮어쓰지 않도록 fast-forward만 허용
-            git pull --ff-only origin "$GITHUB_BRANCH" || {
-              echo "❌ Fast-forward 불가(로컬 변경/이력 차이). 수동 조치 필요."; exit 1;
-            }
+              if [ $i -eq 5 ]; then
+                echo "⚠️ Development health check endpoint not responding"
+                echo "📋 Container logs:"
+                docker logs --tail 20 "$CONTAINER_NAME"
+              fi
+            done
 
-            # Stop existing application (if running) - skip for now to avoid SSH issues
-            echo "⏹️  Checking for existing application..."
-            if pgrep -f "stock-diary-0.0.1-SNAPSHOT.jar" > /dev/null; then
-              echo "📋 Found running application, will be replaced after build"
+            # Clean up old Docker images
+            echo "🧹 Cleaning up old Docker images..."
+
+            # Get current image ID
+            CURRENT_IMAGE_ID=$(docker images "$TARGET_IMAGE" --format "{{.ID}}" | head -n 1)
+            echo "Current image ID: $CURRENT_IMAGE_ID"
+
+            # Get all images for this repository (excluding the current one)
+            OLD_IMAGES=$(docker images "$REGISTRY/$DOCKER_USERNAME/$IMAGE_NAME" --format "{{.ID}} {{.Tag}}" | grep -v "$CURRENT_IMAGE_ID" | head -n -1 | awk '{print $1}')
+
+            if [ -n "$OLD_IMAGES" ]; then
+              echo "Removing old images (keeping 1 backup):"
+              echo "$OLD_IMAGES"
+              echo "$OLD_IMAGES" | xargs -r docker rmi -f || true
             else
-              echo "📋 No running application found"
+              echo "No old images to clean up"
             fi
 
-            # Build the application
-            echo "🔨 Building application..."
-            chmod +x ./gradlew || true
-            ./gradlew :stock-diary:build -x test --no-daemon
+            # Clean up dangling images
+            echo "Cleaning up dangling images..."
+            docker image prune -f || true
 
-            # Verify build success
-            JAR_PATH="stock-diary/build/libs/stock-diary-0.0.1-SNAPSHOT.jar"
-            if [ ! -f "$JAR_PATH" ]; then
-              echo "❌ Build failed - JAR not found at $JAR_PATH"
-              exit 1
-            fi
-            echo "✅ Build successful - JAR found"
-            ls -la stock-diary/build/libs/ || true
+            echo "🎉 Development deployment completed successfully!"
+            echo "🌐 Access URL: http://localhost:$DEPLOY_PORT"
 
-            # Start the application
-            echo "🚀 Starting new application..."
-            [ -f app.log ] && mv app.log "app_$(date +%Y%m%d_%H%M%S).log" || true
-            export DB_URL="$DB_URL"
-            export DB_USERNAME="$DB_USERNAME"
-            export DB_PASSWORD="$DB_PASSWORD"
-            nohup java -Xmx512m -Xms256m -jar "$JAR_PATH" > app.log 2>&1 &
+  deploy-prod:
+    if: github.event.inputs.environment == 'prod'
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    environment: prod
 
-            # Wait a moment and check if application started
-            sleep 5
-            if pgrep -f "stock-diary-0.0.1-SNAPSHOT.jar" > /dev/null; then
-              APP_PID="$(pgrep -f "stock-diary-0.0.1-SNAPSHOT.jar" | head -n1 || true)"
-              echo "✅ Application started successfully (pid=$APP_PID)"
-              [ -n "$APP_PID" ] && ps -o pid,ppid,etime,cmd -p "$APP_PID" || true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up environment variables
+        run: |
+          echo "DOCKER_USERNAME=${{ secrets.DOCKER_ID }}" >> $GITHUB_ENV
+          echo "DOCKER_PASSWORD=${{ secrets.DOCKER_PW }}" >> $GITHUB_ENV
+          echo "CONTAINER_NAME=stock-diary-prod" >> $GITHUB_ENV
+          echo "DEPLOY_PORT=8080" >> $GITHUB_ENV
+          echo "IMAGE_TAG=prod-${{ github.sha }}" >> $GITHUB_ENV
+          echo "TARGET_IMAGE=${{ env.REGISTRY }}/${{ secrets.DOCKER_ID }}/${{ env.IMAGE_NAME }}:prod-${{ github.sha }}" >> $GITHUB_ENV
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.PROD_AWS_SECRET_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: Get EC2 deployment parameters from SSM
+        uses: dkershner6/aws-ssm-getparameters-action@v2.0.3
+        id: ssm
+        with:
+          parameterPairs: |
+            /ci/ec2/host = EC2_HOST,
+            /ci/ec2/user = EC2_USER,
+            /ci/ec2/private_key = EC2_PRIVATE_KEY,
+            /ci/ec2/ssh_port = EC2_SSH_PORT,
+            spring.datasource.url = DB_URL,
+            spring.datasource.username = DB_USERNAME,
+            spring.datasource.password = DB_PASSWORD
+          withDecryption: "true"
+
+      - name: Deploy to production environment
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ env.EC2_HOST }}
+          username: ${{ env.EC2_USER }}
+          key: ${{ env.EC2_PRIVATE_KEY }}
+          port: ${{ env.EC2_SSH_PORT }}
+          envs: DOCKER_USERNAME,DOCKER_PASSWORD,CONTAINER_NAME,DEPLOY_PORT,TARGET_IMAGE,DB_URL,DB_USERNAME,DB_PASSWORD
+          script: |
+            echo "🚀 Starting container deployment to production..."
+
+            # Login to Docker Hub
+            echo "🔐 Logging into Docker Hub..."
+            echo "$DOCKER_PASSWORD" | docker login docker.io -u "$DOCKER_USERNAME" --password-stdin
+
+            # Pull Docker image
+            echo "📥 Pulling Docker image: $TARGET_IMAGE"
+            docker pull "$TARGET_IMAGE"
+
+            # Stop and remove existing container
+            echo "⏹️ Stopping existing container..."
+            docker stop "$CONTAINER_NAME" || true
+            docker rm "$CONTAINER_NAME" || true
+
+            # Start new container
+            echo "🚀 Starting new container..."
+            docker run -d \
+              --name "$CONTAINER_NAME" \
+              --restart unless-stopped \
+              -p "$DEPLOY_PORT":8080 \
+              -e DB_URL="$DB_URL" \
+              -e DB_USERNAME="$DB_USERNAME" \
+              -e DB_PASSWORD="$DB_PASSWORD" \
+              "$TARGET_IMAGE"
+
+            echo "✅ Production container started successfully"
+            docker ps --filter "name=$CONTAINER_NAME"
+
+            # Wait for application to start
+            echo "⏳ Waiting for application to start..."
+            sleep 15
+
+            # Health check with retry
+            for i in {1..5}; do
+              if curl -f -s http://localhost:$DEPLOY_PORT/actuator/health > /dev/null 2>&1; then
+                echo "✅ Production health check passed"
+                break
+              else
+                echo "⏳ Production health check attempt $i/5 failed, retrying in 5s..."
+                sleep 5
+              fi
+
+              if [ $i -eq 5 ]; then
+                echo "⚠️ Production health check endpoint not responding"
+                echo "📋 Container logs:"
+                docker logs --tail 20 "$CONTAINER_NAME"
+              fi
+            done
+
+            # Clean up old Docker images
+            echo "🧹 Cleaning up old Docker images..."
+
+            # Get current image ID
+            CURRENT_IMAGE_ID=$(docker images "$TARGET_IMAGE" --format "{{.ID}}" | head -n 1)
+            echo "Current image ID: $CURRENT_IMAGE_ID"
+
+            # Get all images for this repository (excluding the current one)
+            OLD_IMAGES=$(docker images "$REGISTRY/$DOCKER_USERNAME/$IMAGE_NAME" --format "{{.ID}} {{.Tag}}" | grep -v "$CURRENT_IMAGE_ID" | head -n -1 | awk '{print $1}')
+
+            if [ -n "$OLD_IMAGES" ]; then
+              echo "Removing old images (keeping 1 backup):"
+              echo "$OLD_IMAGES"
+              echo "$OLD_IMAGES" | xargs -r docker rmi -f || true
             else
-              echo "❌ Application failed to start"
-              echo "📋 Recent logs:"
-              tail -100 app.log || true
-              exit 1
+              echo "No old images to clean up"
             fi
 
-            echo "🎉 Deployment completed successfully!"
+            # Clean up dangling images
+            echo "Cleaning up dangling images..."
+            docker image prune -f || true
+
+            echo "🎉 Production deployment completed successfully!"
+            echo "🌐 Access URL: http://localhost:$DEPLOY_PORT"
