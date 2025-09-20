@@ -14,10 +14,10 @@ on:
 
 jobs:
   ci:
-    uses: ./.github/workflows/ci-container.yml
+    uses: ./.github/workflows/ci.yml
     secrets: inherit
 
   cd:
     needs: ci
-    uses: ./.github/workflows/cd-container.yml
+    uses: ./.github/workflows/cd.yml
     secrets: inherit
