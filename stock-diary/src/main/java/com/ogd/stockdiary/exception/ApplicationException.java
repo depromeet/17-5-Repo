@@ -1,13 +1,16 @@
 package com.ogd.stockdiary.exception;
 
-import com.ogd.stockdiary.common.httpresponse.CodeEnum;
 import java.util.Map;
+
 import lombok.Getter;
+
+import com.ogd.stockdiary.common.httpresponse.CodeEnum;
 
 @Getter
 public class ApplicationException extends RuntimeException {
   private final CodeEnum code;
-  @Getter private final Map<String, Object> data;
+  @Getter
+  private final Map<String, Object> data;
 
   public ApplicationException(CodeEnum code, String message, Map<String, Object> data) {
     super(message);

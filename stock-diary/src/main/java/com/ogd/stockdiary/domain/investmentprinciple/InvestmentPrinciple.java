@@ -1,8 +1,7 @@
-package com.ogd.stockdiary.domain.retrospection.entity;
+package com.ogd.stockdiary.domain.investmentprinciple;
 
 import java.time.LocalDateTime;
 import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -20,10 +19,10 @@ import lombok.NoArgsConstructor;
 import com.ogd.stockdiary.domain.user.entity.User;
 
 @Entity
-@Table(name = "retrospections")
+@Table(name = "investment_principles")
 @Getter
 @NoArgsConstructor
-public class Retrospection {
+public class InvestmentPrinciple {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,16 +32,7 @@ public class Retrospection {
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
 
-  @Column(nullable = false, length = 20)
-  private String symbol;
-
-  @Column(nullable = false, length = 20)
-  private String market;
-
-  @Embedded
-  private Order order;
-
-  private Double returnRate;
+  private String principle;
 
   @Column(updatable = false)
   private LocalDateTime createdAt;
@@ -60,11 +50,14 @@ public class Retrospection {
     this.updatedAt = LocalDateTime.now();
   }
 
-  public Retrospection(User user, String symbol, String market, Order order, Double returnRate) {
-    this.user = user;
-    this.symbol = symbol;
-    this.market = market;
-    this.order = order;
-    this.returnRate = returnRate;
+  public static InvestmentPrinciple create(User user, String principle) {
+    InvestmentPrinciple investmentPrinciple = new InvestmentPrinciple();
+    investmentPrinciple.user = user;
+    investmentPrinciple.principle = principle;
+    return investmentPrinciple;
+  }
+
+  public void updatePrinciple(String principle) {
+    this.principle = principle;
   }
 }

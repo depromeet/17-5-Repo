@@ -1,16 +1,18 @@
 package com.ogd.stockdiary.application.stock.port.out.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.ogd.stockdiary.domain.stock.dto.StockChartData;
-import com.ogd.stockdiary.domain.stock.dto.StockChartItem;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.ogd.stockdiary.domain.stock.dto.StockChartData;
+import com.ogd.stockdiary.domain.stock.dto.StockChartItem;
 
 @Getter
 @Setter
@@ -35,10 +37,8 @@ public class DailyPriceResponse {
   public static StockChartData toStockChartData(DailyPriceResponse response, String market) {
     String currency = getCurrencyByMarket(market);
 
-    List<StockChartItem> chartItems =
-        response.getOutput2().stream()
-            .map(DailyPriceResponse::toStockChartItem)
-            .collect(Collectors.toList());
+    List<StockChartItem> chartItems = response.getOutput2().stream().map(DailyPriceResponse::toStockChartItem)
+        .collect(Collectors.toList());
 
     return new StockChartData(currency, chartItems);
   }
@@ -58,19 +58,19 @@ public class DailyPriceResponse {
 
   private static String getCurrencyByMarket(String market) {
     switch (market.toUpperCase()) {
-      case "NAS":
-      case "NYSE":
-      case "AMEX":
+      case "NAS" :
+      case "NYSE" :
+      case "AMEX" :
         return "USD";
-      case "TSE":
+      case "TSE" :
         return "JPY";
-      case "LSE":
+      case "LSE" :
         return "GBP";
-      case "FRA":
+      case "FRA" :
         return "EUR";
-      case "HKG":
+      case "HKG" :
         return "HKD";
-      default:
+      default :
         return "USD";
     }
   }

@@ -1,9 +1,10 @@
 package com.ogd.stockdiary.application.user.dto;
 
-import com.ogd.stockdiary.domain.user.entity.OAuthProvider;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import com.ogd.stockdiary.domain.user.entity.OAuthProvider;
 
 @Getter
 @NoArgsConstructor

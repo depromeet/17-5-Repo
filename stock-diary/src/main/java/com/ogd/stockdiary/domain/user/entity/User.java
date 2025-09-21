@@ -1,5 +1,6 @@
 package com.ogd.stockdiary.domain.user.entity;
 
+import java.time.LocalDateTime;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -9,7 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -34,7 +35,8 @@ public class User {
   @Column(name = "profile_image_url", length = 500)
   private String profileImageUrl;
 
-  @Embedded private OAuthProviderInfo oAuthProviderInfo;
+  @Embedded
+  private OAuthProviderInfo oAuthProviderInfo;
 
   @Column(name = "created_at", updatable = false)
   private LocalDateTime createdAt;
@@ -57,8 +59,7 @@ public class User {
     this.updatedAt = LocalDateTime.now();
   }
 
-  public User(
-      String nickname, String email, String profileImageUrl, OAuthProviderInfo oAuthProviderInfo) {
+  public User(String nickname, String email, String profileImageUrl, OAuthProviderInfo oAuthProviderInfo) {
     this.nickname = nickname;
     this.email = email;
     this.profileImageUrl = profileImageUrl;

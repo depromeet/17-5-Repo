@@ -1,11 +1,12 @@
 package com.ogd.stockdiary.domain.retrospection.entity;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import java.math.BigDecimal;
-import java.time.LocalDate;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -31,12 +32,7 @@ public class Order {
   @Column(name = "order_date", nullable = false)
   private LocalDate orderDate;
 
-  public Order(
-      OrderType orderType,
-      BigDecimal price,
-      Currency currency,
-      Integer volume,
-      LocalDate orderDate) {
+  public Order(OrderType orderType, BigDecimal price, Currency currency, Integer volume, LocalDate orderDate) {
     validatePrice(price);
     validateVolume(volume);
 

@@ -1,12 +1,14 @@
 package com.ogd.stockdiary.application.stock.controller;
 
+import java.util.Arrays;
+import java.util.List;
+
+import org.springframework.web.bind.annotation.*;
+
 import com.ogd.stockdiary.common.httpresponse.HttpApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.Arrays;
-import java.util.List;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -16,11 +18,9 @@ public class StockSearchController {
   @Operation(summary = "주식 검색", description = "종목명 또는 종목 코드로 주식을 검색합니다.")
   @GetMapping("/stock/search")
   public HttpApiResponse<List<StockSearchResponse>> searchStock(
-      @Parameter(description = "검색 키워드 (종목명 또는 종목 코드)", required = true) @RequestParam
-          String query) {
+      @Parameter(description = "검색 키워드 (종목명 또는 종목 코드)", required = true) @RequestParam String query) {
 
-    List<StockSearchResponse> mockData =
-        Arrays.asList(new StockSearchResponse("TSLA", "테슬라", "NAS"));
+    List<StockSearchResponse> mockData = Arrays.asList(new StockSearchResponse("TSLA", "테슬라", "NAS"));
 
     return HttpApiResponse.of(mockData);
   }

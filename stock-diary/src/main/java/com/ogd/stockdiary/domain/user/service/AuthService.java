@@ -1,5 +1,11 @@
 package com.ogd.stockdiary.domain.user.service;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import com.ogd.stockdiary.application.user.repository.AppleAuthTokenRepository;
 import com.ogd.stockdiary.application.user.repository.UserRepository;
 import com.ogd.stockdiary.domain.user.entity.AppleAuthToken;
@@ -11,10 +17,6 @@ import com.ogd.stockdiary.domain.user.port.out.oauth.OIDCPayload;
 import com.ogd.stockdiary.domain.user.port.out.oauth.OIDCPublicKeyList;
 import com.ogd.stockdiary.domain.user.port.out.oauth.client.OAuthClient;
 import com.ogd.stockdiary.domain.user.port.out.oauth.client.OAuthClientFactory;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,8 +29,7 @@ public class AuthService {
   private final AppleAuthTokenRepository appleAuthTokenRepository;
 
   @Transactional
-  public AuthResult socialLogin(
-      OAuthProvider provider, String authCode, String email, String nickname) {
+  public AuthResult socialLogin(OAuthProvider provider, String authCode, String email, String nickname) {
     OAuthClient client = oAuthClientFactory.getClient(provider);
 
     // 1. 토큰 획득
@@ -38,18 +39,14 @@ public class AuthService {
     OIDCPublicKeyList publicKeys = client.getPublicKeys();
 
     // 3. ID 토큰 검증
-    OIDCPayload payload =
-        oidcTokenVerification.verifyIdToken(tokenResponse.getIdToken(), publicKeys);
+    OIDCPayload payload = oidcTokenVerification.verifyIdToken(tokenResponse.getIdToken(), publicKeys);
 
     // 4. 기존 사용자 확인
-    boolean isNewUser =
-        !userRepository.findByOAuthProviderAndSubject(provider, payload.getSubject()).isPresent();
+    boolean isNewUser = !userRepository.findByOAuthProviderAndSubject(provider, payload.getSubject()).isPresent();
 
     // 5. 회원 조회 또는 생성
-    User user =
-        userRepository
-            .findByOAuthProviderAndSubject(provider, payload.getSubject())
-            .orElseGet(() -> createNewUser(provider, payload, email, nickname));
+    User user = userRepository.findByOAuthProviderAndSubject(provider, payload.getSubject())
+        .orElseGet(() -> createNewUser(provider, payload, email, nickname));
 
     // 6. Apple의 경우 refresh token 저장
     if (provider == OAuthProvider.APPLE && tokenResponse.getRefreshToken() != null) {
@@ -59,8 +56,8 @@ public class AuthService {
     return new AuthResult(user, isNewUser);
   }
 
-  private User createNewUser(
-      OAuthProvider provider, OIDCPayload payload, String providedEmail, String providedNickname) {
+  private User createNewUser(OAuthProvider provider, OIDCPayload payload, String providedEmail,
+      String providedNickname) {
     String email = payload.getEmail() != null ? payload.getEmail() : providedEmail;
     String nickname = payload.getName() != null ? payload.getName() : providedNickname;
 
@@ -85,20 +82,15 @@ public class AuthService {
 
   @Transactional
   public void unlinkSocialAccount(Long userId) {
-    User user =
-        userRepository
-            .findById(userId)
-            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
 
     OAuthProvider provider = user.getOAuthProviderInfo().getOauthProvider();
     OAuthClient client = oAuthClientFactory.getClient(provider);
 
     if (provider == OAuthProvider.APPLE) {
       // Apple의 경우 저장된 refresh token으로 연결 해제
-      AppleAuthToken appleAuthToken =
-          appleAuthTokenRepository
-              .findById(userId)
-              .orElseThrow(() -> new IllegalArgumentException("Apple auth token not found"));
+      AppleAuthToken appleAuthToken = appleAuthTokenRepository.findById(userId)
+          .orElseThrow(() -> new IllegalArgumentException("Apple auth token not found"));
 
       client.unlink(appleAuthToken.getRefreshToken());
       appleAuthTokenRepository.delete(appleAuthToken);

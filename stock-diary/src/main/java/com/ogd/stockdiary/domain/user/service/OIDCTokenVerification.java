@@ -1,10 +1,5 @@
 package com.ogd.stockdiary.domain.user.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ogd.stockdiary.domain.user.port.out.oauth.OIDCPayload;
-import com.ogd.stockdiary.domain.user.port.out.oauth.OIDCPublicKey;
-import com.ogd.stockdiary.domain.user.port.out.oauth.OIDCPublicKeyList;
-import io.jsonwebtoken.*;
 import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -13,9 +8,17 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.Base64;
 import java.util.Map;
+
+import org.springframework.stereotype.Component;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ogd.stockdiary.domain.user.port.out.oauth.OIDCPayload;
+import com.ogd.stockdiary.domain.user.port.out.oauth.OIDCPublicKey;
+import com.ogd.stockdiary.domain.user.port.out.oauth.OIDCPublicKeyList;
+import io.jsonwebtoken.*;
 
 @Component
 @RequiredArgsConstructor
@@ -33,22 +36,15 @@ public class OIDCTokenVerification {
       String kid = (String) headerMap.get("kid");
       String alg = (String) headerMap.get("alg");
 
-      OIDCPublicKey matchingKey =
-          oidcPublicKeys.getKeys().stream()
-              .filter(key -> key.getKid().equals(kid))
-              .findFirst()
-              .orElseThrow(() -> new RuntimeException("No matching public key found"));
+      OIDCPublicKey matchingKey = oidcPublicKeys.getKeys().stream().filter(key -> key.getKid().equals(kid))
+          .findFirst().orElseThrow(() -> new RuntimeException("No matching public key found"));
 
       PublicKey publicKey = generateRSAPublicKey(matchingKey.getN(), matchingKey.getE());
 
-      Claims claims =
-          Jwts.parserBuilder().setSigningKey(publicKey).build().parseClaimsJws(idToken).getBody();
+      Claims claims = Jwts.parserBuilder().setSigningKey(publicKey).build().parseClaimsJws(idToken).getBody();
 
-      return new OIDCPayload(
-          claims.getSubject(),
-          claims.get("email", String.class),
-          claims.get("picture", String.class),
-          claims.get("name", String.class));
+      return new OIDCPayload(claims.getSubject(), claims.get("email", String.class),
+          claims.get("picture", String.class), claims.get("name", String.class));
 
     } catch (ExpiredJwtException e) {
       log.error("ID token has expired", e);

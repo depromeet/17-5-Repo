@@ -1,9 +1,11 @@
 package com.ogd.stockdiary.domain.user.port.out.oauth.client;
 
+import org.springframework.stereotype.Component;
+
+import lombok.RequiredArgsConstructor;
+
 import com.ogd.stockdiary.application.user.port.out.oauth.client.AppleOAuthClient;
 import com.ogd.stockdiary.domain.user.entity.OAuthProvider;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
@@ -14,8 +16,7 @@ public class OAuthClientFactory {
   public OAuthClient getClient(OAuthProvider provider) {
     return switch (provider) {
       case APPLE -> appleOAuthClient;
-      case GOOGLE, KAKAO ->
-          throw new UnsupportedOperationException(provider + " not implemented yet");
+      case GOOGLE, KAKAO -> throw new UnsupportedOperationException(provider + " not implemented yet");
     };
   }
 }

@@ -1,6 +1,7 @@
 package com.ogd.stockdiary.common.httpresponse;
 
 import java.util.Map;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,8 +26,7 @@ public class HttpApiResponse<T> {
     return HttpApiResponse.builder().code(code).data(null).message(message).build();
   }
 
-  public static HttpApiResponse fromExceptionMessage(
-      String message, CodeEnum code, Map<String, Object> data) {
+  public static HttpApiResponse fromExceptionMessage(String message, CodeEnum code, Map<String, Object> data) {
     return HttpApiResponse.builder().code(CodeEnum.FRS_001).data(data).message(message).build();
   }
 }

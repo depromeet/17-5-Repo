@@ -1,15 +1,18 @@
 package com.ogd.stockdiary.application.stock.port.out;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
+import org.springframework.stereotype.Component;
+
+import lombok.extern.slf4j.Slf4j;
+
 import com.ogd.stockdiary.application.stock.port.out.dto.DailyPriceResponse;
 import com.ogd.stockdiary.application.stock.service.TokenManager;
 import com.ogd.stockdiary.domain.stock.dto.StockChartData;
 import com.ogd.stockdiary.domain.stock.dto.StockInterval;
 import com.ogd.stockdiary.domain.stock.port.out.StockPort;
 import feign.FeignException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
@@ -19,8 +22,7 @@ public class StockPortImpl implements StockPort {
   private final TokenManager tokenManager;
 
   private static final String APP_KEY = "PSOA5a8EUEzQnsbb0Stieigj9n8jUUBiwJ0A";
-  private static final String APP_SECRET =
-      "wS6taqks0+FJmyHxrFouol6EOLJhSMhyLrvsUHcqlvHxEVxa/TYXqFqD0M/eOMWGmnPPB+X/fuqr8LnJJK/ZKMlcDOxVWo5BU85hom/PgpP0H4p5pYJjESLXAuRkdrrnp/UtapmJhOVOYQrkXqz2TkqCkYGW2zwgwYXPBGLisyHWWSRI8C0=";
+  private static final String APP_SECRET = "wS6taqks0+FJmyHxrFouol6EOLJhSMhyLrvsUHcqlvHxEVxa/TYXqFqD0M/eOMWGmnPPB+X/fuqr8LnJJK/ZKMlcDOxVWo5BU85hom/PgpP0H4p5pYJjESLXAuRkdrrnp/UtapmJhOVOYQrkXqz2TkqCkYGW2zwgwYXPBGLisyHWWSRI8C0=";
   private static final String TR_ID = "HHDFS76240000";
 
   public StockPortImpl(HanStockFeignClient hanStockFeignClient, TokenManager tokenManager) {
@@ -34,8 +36,7 @@ public class StockPortImpl implements StockPort {
   }
 
   @Override
-  public StockChartData getChartData(
-      String market, String symbol, LocalDate endDate, StockInterval interval) {
+  public StockChartData getChartData(String market, String symbol, LocalDate endDate, StockInterval interval) {
     String formattedEndDate = endDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
     // 첫 번째 시도
@@ -60,23 +61,13 @@ public class StockPortImpl implements StockPort {
     }
   }
 
-  private StockChartData callDailyPriceApi(
-      String market, String symbol, String formattedEndDate, StockInterval interval) {
+  private StockChartData callDailyPriceApi(String market, String symbol, String formattedEndDate,
+      StockInterval interval) {
     String token = tokenManager.getValidToken();
     String authorization = "Bearer " + token;
 
-    DailyPriceResponse response =
-        hanStockFeignClient.getDailyPrice(
-            authorization,
-            APP_KEY,
-            APP_SECRET,
-            TR_ID,
-            "",
-            market,
-            symbol,
-            interval.getCode(),
-            formattedEndDate,
-            "1");
+    DailyPriceResponse response = hanStockFeignClient.getDailyPrice(authorization, APP_KEY, APP_SECRET, TR_ID, "",
+        market, symbol, interval.getCode(), formattedEndDate, "1");
 
     return DailyPriceResponse.toStockChartData(response, market);
   }

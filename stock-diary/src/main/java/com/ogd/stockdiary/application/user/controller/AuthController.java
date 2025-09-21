@@ -1,13 +1,15 @@
 package com.ogd.stockdiary.application.user.controller;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import com.ogd.stockdiary.application.user.dto.SocialLoginRequest;
 import com.ogd.stockdiary.application.user.dto.SocialLoginResponse;
 import com.ogd.stockdiary.domain.user.service.AuthResult;
 import com.ogd.stockdiary.domain.user.service.AuthService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -20,15 +22,10 @@ public class AuthController {
   @PostMapping("/social/login")
   public ResponseEntity<SocialLoginResponse> socialLogin(@RequestBody SocialLoginRequest request) {
     try {
-      AuthResult authResult =
-          authService.socialLogin(
-              request.getProvider(),
-              request.getAuthCode(),
-              request.getEmail(),
-              request.getNickname());
+      AuthResult authResult = authService.socialLogin(request.getProvider(), request.getAuthCode(),
+          request.getEmail(), request.getNickname());
 
-      SocialLoginResponse response =
-          SocialLoginResponse.from(authResult.getUser(), authResult.isNewUser());
+      SocialLoginResponse response = SocialLoginResponse.from(authResult.getUser(), authResult.isNewUser());
       return ResponseEntity.ok(response);
 
     } catch (Exception e) {

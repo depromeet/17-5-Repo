@@ -1,10 +1,12 @@
 package com.ogd.stockdiary.domain.user.port.out.oauth;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Getter
 @NoArgsConstructor

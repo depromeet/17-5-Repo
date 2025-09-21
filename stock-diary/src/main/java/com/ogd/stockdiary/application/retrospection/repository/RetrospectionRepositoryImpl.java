@@ -1,12 +1,15 @@
 package com.ogd.stockdiary.application.retrospection.repository;
 
+import java.util.List;
+
+import org.springframework.stereotype.Repository;
+
+import lombok.RequiredArgsConstructor;
+
 import com.ogd.stockdiary.common.httpresponse.CodeEnum;
 import com.ogd.stockdiary.domain.retrospection.entity.Retrospection;
 import com.ogd.stockdiary.domain.retrospection.port.out.RetrospectionRepository;
 import com.ogd.stockdiary.exception.ApplicationException;
-import java.util.List;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
@@ -21,8 +24,7 @@ public class RetrospectionRepositoryImpl implements RetrospectionRepository {
 
   @Override
   public Retrospection getById(Long id) {
-    return jpaRetrospectionRepository
-        .findById(id)
+    return jpaRetrospectionRepository.findById(id)
         .orElseThrow(() -> new ApplicationException(CodeEnum.FRS_003, "회고를 찾을 수 없습니다: " + id));
   }
 

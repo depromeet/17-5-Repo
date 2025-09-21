@@ -1,8 +1,9 @@
 package com.ogd.stockdiary.domain.user.service;
 
-import com.ogd.stockdiary.domain.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import com.ogd.stockdiary.domain.user.entity.User;
 
 @Getter
 @AllArgsConstructor

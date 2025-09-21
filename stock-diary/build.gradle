@@ -70,14 +70,16 @@ spotless {
                 '\\#',
                 '\\#org.junit'
         )
-        
-        googleJavaFormat()
-        
+
+        // 기본 Eclipse formatter 사용 (Google Java Format보다 덜 엄격함)
+        eclipse()
+
         formatAnnotations()
         removeUnusedImports()
         trimTrailingWhitespace()
+        indentWithSpaces(2)  // 들여쓰기 2칸으로 고정
         endWithNewline()
-        
+
         target '**/*.java'
         targetExclude 'build/**'
     }

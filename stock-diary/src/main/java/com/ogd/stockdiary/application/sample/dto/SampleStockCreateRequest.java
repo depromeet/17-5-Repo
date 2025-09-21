@@ -1,8 +1,9 @@
 package com.ogd.stockdiary.application.sample.dto;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @AllArgsConstructor
 @Getter
@@ -21,16 +22,10 @@ public class SampleStockCreateRequest {
   @Schema(description = "매매수량", example = "10", requiredMode = Schema.RequiredMode.REQUIRED)
   private Integer quantity;
 
-  @Schema(
-      description = "매매타입 (BUY/SELL)",
-      example = "BUY",
-      allowableValues = {"BUY", "SELL"},
-      requiredMode = Schema.RequiredMode.REQUIRED)
+  @Schema(description = "매매타입 (BUY/SELL)", example = "BUY", allowableValues = {"BUY",
+      "SELL"}, requiredMode = Schema.RequiredMode.REQUIRED)
   private String tradeType;
 
-  @Schema(
-      description = "메모",
-      example = "기술적 분석에 따른 매수",
-      requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+  @Schema(description = "메모", example = "기술적 분석에 따른 매수", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
   private String memo;
 }

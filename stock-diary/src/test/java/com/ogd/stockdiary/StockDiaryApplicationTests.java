@@ -1,11 +1,13 @@
 package com.ogd.stockdiary;
 
-import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import org.junit.jupiter.api.Test;
 
 @SpringBootTest
 class StockDiaryApplicationTests {
 
   @Test
-  void contextLoads() {}
+  void contextLoads() {
+  }
 }
