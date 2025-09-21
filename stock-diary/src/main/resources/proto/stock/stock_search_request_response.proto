@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package stock_search;
+
+// 주식 종목 검색 요청 메시지 (페이지네이션)
+message SearchStockSliceRequest {
+  string company_name = 1;      // 검색할 회사명
+  string next_cursor = 2;       // 다음 페이지 커서 (첫 페이지는 null)
+  int32 size = 3;              // 페이지 크기 (기본값: 10)
+}
+
+// 시장 타입 enum
+enum Market {
+  KOSPI = 0;
+  KOSDAQ = 1;
+  NAS = 2;
+  NYSE = 3;
+}
+
+// 주식 검색 응답 정보
+message StockSearchResponse {
+  Market market = 1;          // 시장
+  string code = 2;            // 종목 코드
+  string company_name = 3;    // 회사명
+}
+
+// 슬라이스 컨텐츠 (페이지네이션)
+message SliceContent {
+  repeated StockSearchResponse content = 1;  // 주식 종목 리스트
+  string next_cursor = 2;                    // 다음 페이지 커서
+}
+
+// 주식 종목 검색 응답 메시지 (페이지네이션)
+message SearchStockSliceResponse {
+  SliceContent data = 1;      // 슬라이스 데이터
+}

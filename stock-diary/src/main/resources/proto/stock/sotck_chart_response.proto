@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package stock_chart;
+
+// 주식 차트 데이터를 조회하기 위한 API 정의입니다.
+// 요청과 응답에 사용될 데이터 구조를 정의합니다.
+// 이 파일은 다양한 프로그래밍 언어의 코드를 생성하는 데 사용됩니다.
+
+// 주식 차트 데이터의 시간 간격을 정의하는 열거형(Enum)입니다.
+// 일별, 주별, 월별 데이터만 지원합니다.
+enum Interval {
+  DAILY = 0;                // 일별 데이터 포인트 하나를 나타냅니다.
+  WEEKLY = 1;               // 주별 데이터 포인트 하나를 나타냅니다.
+  MONTHLY = 2;              // 월별 데이터 포인트 하나를 나타냅니다.
+}
+
+// 주식 차트의 개별 데이터 포인트(점)를 나타내는 메시지입니다.
+// 특정 기간 동안의 주식 가격 정보와 거래량을 담고 있습니다.
+message ChartPoint {
+  string date = 1;                    // 데이터 포인트의 날짜 (YYYY-MM-DD 형식).
+  double open = 2;                    // 해당 기간의 시가(Opening Price).
+  double high = 3;                    // 해당 기간 동안의 최고가(Highest Price).
+  double low = 4;                     // 해당 기간 동안의 최저가(Lowest Price).
+  double close = 5;                   // 해당 기간의 종가(Closing Price).
+  int64 volume = 6;                   // 해당 기간 동안의 거래량(Volume).
+}
+
+// 주식 차트 데이터 조회를 위한 요청 메시지입니다.
+// 주식, 기간, 간격을 지정하는 데 필요한 매개변수를 포함합니다.
+message GetStockChartRequest {
+  string market = 1;                  // 주식 시장 (예: "NASDAQ", "KOSPI").
+  string code = 2;                    // 주식 종목 코드 (예: "TSLA", "005930").
+  string start_date = 3;              // 차트 데이터의 시작 날짜 (YYYY-MM-DD 형식).
+  string end_date = 4;                // 차트 데이터의 종료 날짜 (YYYY-MM-DD 형식).
+  Interval interval = 5;              // 요청된 데이터 간격 (예: DAILY, WEEKLY).
+}
+
+// 요청된 주식 차트 데이터를 포함하는 응답 메시지입니다.
+// 요청에 대한 메타데이터와 차트 데이터 포인트 목록을 포함합니다.
+message GetStockChartResponse {
+  string code = 1;                    // 요청된 주식 종목 코드.
+  string market = 2;                  // 요청된 주식 시장.
+  string start_date = 3;              // 요청된 시작 날짜.
+  string end_date = 4;                // 요청된 종료 날짜.
+  Interval interval = 5;              // 요청된 데이터 간격.
+  string currency = 6;                // 주식 가격의 통화 단위 (예: NASDAQ의 경우 "USD").
+  repeated ChartPoint chart_data = 7; // 차트 데이터 포인트 목록.
+}
