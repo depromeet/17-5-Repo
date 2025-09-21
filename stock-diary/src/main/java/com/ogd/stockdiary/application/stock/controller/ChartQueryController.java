@@ -23,15 +23,15 @@ public class ChartQueryController {
   }
 
   @Tag(name = "Stock Chart", description = "주식 조회")
-  @GetMapping("/stock/charts/{market}/{symbol}")
+  @GetMapping("/stock/charts/{market}/{code}")
   public HttpApiResponse<ChartResponse.ChartData> getStockCharts(
       @PathVariable String market,
-      @PathVariable String symbol,
+      @PathVariable String code,
       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
       @RequestParam(defaultValue = "DAILY") StockInterval interval) {
     StockChartData stockChartData =
-        chartQueryUseCase.getStockChart(market, symbol, startDate, endDate, interval);
+        chartQueryUseCase.getStockChart(market, code, startDate, endDate, interval);
 
     List<ChartResponse.ChartItem> chartItems =
         stockChartData.getChartData().stream()
