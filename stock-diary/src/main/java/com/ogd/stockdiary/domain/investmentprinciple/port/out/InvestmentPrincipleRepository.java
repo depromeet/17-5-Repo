@@ -3,7 +3,7 @@ package com.ogd.stockdiary.domain.investmentprinciple.port.out;
 import java.util.List;
 import java.util.Optional;
 
-import com.ogd.stockdiary.domain.investmentprinciple.InvestmentPrinciple;
+import com.ogd.stockdiary.domain.investmentprinciple.entity.InvestmentPrinciple;
 
 public interface InvestmentPrincipleRepository {
 

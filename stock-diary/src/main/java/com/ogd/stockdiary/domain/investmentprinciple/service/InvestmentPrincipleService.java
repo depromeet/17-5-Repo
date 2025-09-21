@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 
 import com.ogd.stockdiary.application.user.repository.UserRepository;
 import com.ogd.stockdiary.common.httpresponse.CodeEnum;
-import com.ogd.stockdiary.domain.investmentprinciple.InvestmentPrinciple;
+import com.ogd.stockdiary.domain.investmentprinciple.entity.InvestmentPrinciple;
 import com.ogd.stockdiary.domain.investmentprinciple.dto.BatchProcessCommand;
 import com.ogd.stockdiary.domain.investmentprinciple.dto.BatchProcessResult;
 import com.ogd.stockdiary.domain.investmentprinciple.dto.CreateMultiplePrinciplesCommand;

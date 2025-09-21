@@ -1,4 +1,4 @@
-package com.ogd.stockdiary.domain.investmentprinciple;
+package com.ogd.stockdiary.domain.investmentprinciple.entity;
 
 import java.time.LocalDateTime;
 import jakarta.persistence.Column;

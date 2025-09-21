@@ -9,7 +9,7 @@ import com.ogd.stockdiary.application.investmentprinciple.dto.request.CreatePrin
 import com.ogd.stockdiary.application.investmentprinciple.dto.request.UpdatePrincipleRequest;
 import com.ogd.stockdiary.application.investmentprinciple.dto.response.BatchProcessResponse;
 import com.ogd.stockdiary.application.investmentprinciple.dto.response.InvestmentPrincipleResponse;
-import com.ogd.stockdiary.domain.investmentprinciple.InvestmentPrinciple;
+import com.ogd.stockdiary.domain.investmentprinciple.entity.InvestmentPrinciple;
 import com.ogd.stockdiary.domain.investmentprinciple.dto.BatchProcessCommand;
 import com.ogd.stockdiary.domain.investmentprinciple.dto.BatchProcessResult;
 import com.ogd.stockdiary.domain.investmentprinciple.dto.CreateMultiplePrinciplesCommand;

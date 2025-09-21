@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import lombok.RequiredArgsConstructor;
 
-import com.ogd.stockdiary.domain.investmentprinciple.InvestmentPrinciple;
+import com.ogd.stockdiary.domain.investmentprinciple.entity.InvestmentPrinciple;
 import com.ogd.stockdiary.domain.investmentprinciple.port.out.InvestmentPrincipleRepository;
 
 @Repository

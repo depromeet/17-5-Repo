@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.ogd.stockdiary.domain.investmentprinciple.InvestmentPrinciple;
+import com.ogd.stockdiary.domain.investmentprinciple.entity.InvestmentPrinciple;
 
 @Repository
 public interface JpaInvestmentPrincipleRepository extends JpaRepository<InvestmentPrinciple, Long> {
