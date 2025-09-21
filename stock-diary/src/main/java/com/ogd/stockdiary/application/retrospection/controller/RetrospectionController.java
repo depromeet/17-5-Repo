@@ -2,11 +2,8 @@ package com.ogd.stockdiary.application.retrospection.controller;
 
 import jakarta.validation.Valid;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,8 +29,7 @@ public class RetrospectionController {
 
   @PostMapping
   @Operation(summary = "회고 생성", description = "주식 거래 회고를 생성합니다.")
-  public ResponseEntity<HttpApiResponse<CreateRetrospectionResponse>> createRetrospection(
-      @RequestHeader("Authorization_code") String authorizationCode,
+  public HttpApiResponse<CreateRetrospectionResponse> createRetrospection(
       @Valid @RequestBody CreateRetrospectionRequest request) {
 
     // TODO: Spring Security에서 User 정보 가져오기
@@ -43,6 +39,6 @@ public class RetrospectionController {
     Retrospection retrospection = createRetrospectionUseCase.createRetrospection(command);
     CreateRetrospectionResponse response = RetrospectionMapper.toResponse(retrospection);
 
-    return ResponseEntity.status(HttpStatus.CREATED).body(HttpApiResponse.of(response));
+    return HttpApiResponse.of(response);
   }
 }
