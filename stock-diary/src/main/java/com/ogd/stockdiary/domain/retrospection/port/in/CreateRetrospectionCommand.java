@@ -2,11 +2,14 @@ package com.ogd.stockdiary.domain.retrospection.port.in;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import com.ogd.stockdiary.domain.principlecheck.dto.PrincipleCheckCommand;
 import com.ogd.stockdiary.domain.retrospection.entity.Currency;
+import com.ogd.stockdiary.domain.retrospection.entity.InvestmentEmotion;
 import com.ogd.stockdiary.domain.retrospection.entity.OrderType;
 
 @Getter
@@ -22,4 +25,6 @@ public class CreateRetrospectionCommand {
   private final Integer volume;
   private final LocalDate orderDate;
   private final Double returnRate;
+  private final InvestmentEmotion emotion;
+  private final List<PrincipleCheckCommand> principleChecks;
 }

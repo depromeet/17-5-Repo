@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import com.ogd.stockdiary.domain.retrospection.entity.Currency;
+import com.ogd.stockdiary.domain.retrospection.entity.InvestmentEmotion;
 import com.ogd.stockdiary.domain.retrospection.entity.OrderType;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -45,6 +46,9 @@ public class CreateRetrospectionResponse {
 
   @Schema(description = "수익률", example = "-15.67")
   private Double returnRate;
+
+  @Schema(description = "투자 감정", example = "CONFIDENCE")
+  private InvestmentEmotion emotion;
 
   @Schema(description = "생성일시", example = "2025-09-14T10:00:00")
   private LocalDateTime createdAt;
