@@ -1,27 +1,49 @@
 package com.ogd.stockdiary.domain.analysis.application;
 
-import com.ogd.stockdiary.domain.analysis.dto.RequestDto;
-import com.ogd.stockdiary.domain.analysis.dto.RequestDtoFactory;
-import com.ogd.stockdiary.domain.analysis.dto.WebClientResDto;
-import com.ogd.stockdiary.domain.analysis.port.AnalysisWebClient;
+import com.ogd.stockdiary.domain.analysis.port.PromptLoader;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 import lombok.AllArgsConstructor;
+import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.chat.prompt.SystemPromptTemplate;
+import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
 @Service
 @AllArgsConstructor
 public class AnalysisService {
-  //  private final AnalysisClient analysisClient;
-  private final RequestDtoFactory requestDtoFactory;
-  private final AnalysisWebClient analysisClient;
+  private final PromptLoader promptLoader;
+  private final ChatModel chatModel;
 
-  public Flux<WebClientResDto> analyze(
-      String market, String symbol, LocalDateTime time, String modelName) {
-    RequestDto requestDto = requestDtoFactory.createRequestDto(market, symbol, time);
+  public Flux<ChatResponse> analyze(
+      String modelName, String market, String symbol, LocalDateTime time) {
+    String systemText =
+        """
+            Today market is {market} and symbol is {symbol}.
+            Time is {time}.
+            You should reply to the user's request.
+            """;
+    Message systemMessage =
+        new SystemPromptTemplate(systemText)
+            .createMessage(
+                Map.of(
+                    "market", market,
+                    "symbol", symbol,
+                    "time", time.toString()));
+    Message userMessage = new UserMessage(promptLoader.getPrompt());
 
-    Flux<WebClientResDto> responseDtoFlux = analysisClient.analysisMarket(modelName, requestDto);
+    OpenAiChatOptions options = OpenAiChatOptions.builder().model(modelName).maxTokens(250).build();
 
-    return responseDtoFlux;
+    Prompt prompt = new Prompt(List.of(systemMessage, userMessage), options);
+
+    Flux<ChatResponse> chatResponse = chatModel.stream(prompt);
+
+    return chatResponse;
   }
 }

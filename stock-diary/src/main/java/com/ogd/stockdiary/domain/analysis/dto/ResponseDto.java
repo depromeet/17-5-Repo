@@ -1,7 +1,7 @@
 package com.ogd.stockdiary.domain.analysis.dto;
 
-public record ResponseDto(Result result) {
-  public record Result(Message message) {}
+public record ResponseDto(Choices choices) {
+  public record Choices(Delta delta) {}
 
-  public record Message(String content) {}
+  public record Delta(String content) {}
 }
