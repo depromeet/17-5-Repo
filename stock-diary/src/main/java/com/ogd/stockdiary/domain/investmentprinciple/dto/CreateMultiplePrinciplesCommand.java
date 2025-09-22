@@ -9,6 +9,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CreateMultiplePrinciplesCommand {
 
-  private final Long userId;
-  private final List<String> principles;
+    private final Long userId;
+    private final List<String> principles;
 }

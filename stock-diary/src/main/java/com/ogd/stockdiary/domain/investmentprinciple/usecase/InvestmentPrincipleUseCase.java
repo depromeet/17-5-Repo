@@ -11,15 +11,15 @@ import com.ogd.stockdiary.domain.investmentprinciple.entity.InvestmentPrinciple;
 
 public interface InvestmentPrincipleUseCase {
 
-  List<InvestmentPrinciple> getUserPrinciples(Long userId);
+    List<InvestmentPrinciple> getUserPrinciples(Long userId);
 
-  InvestmentPrinciple createPrinciple(CreatePrincipleCommand command);
+    InvestmentPrinciple createPrinciple(CreatePrincipleCommand command);
 
-  List<InvestmentPrinciple> createMultiplePrinciples(CreateMultiplePrinciplesCommand command);
+    List<InvestmentPrinciple> createMultiplePrinciples(CreateMultiplePrinciplesCommand command);
 
-  InvestmentPrinciple updatePrinciple(UpdatePrincipleCommand command);
+    InvestmentPrinciple updatePrinciple(UpdatePrincipleCommand command);
 
-  void deletePrinciple(Long principleId, Long userId);
+    void deletePrinciple(Long principleId, Long userId);
 
-  BatchProcessResult batchProcessPrinciples(BatchProcessCommand command);
+    BatchProcessResult batchProcessPrinciples(BatchProcessCommand command);
 }

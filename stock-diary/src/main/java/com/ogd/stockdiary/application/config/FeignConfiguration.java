@@ -10,8 +10,8 @@ import feign.Logger;
 @EnableFeignClients(basePackages = {"com.ogd.stockdiary"})
 public class FeignConfiguration {
 
-  @Bean
-  public Logger.Level feignLoggerLevel() {
-    return Logger.Level.FULL;
-  }
+    @Bean
+    public Logger.Level feignLoggerLevel() {
+        return Logger.Level.FULL;
+    }
 }

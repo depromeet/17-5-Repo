@@ -1,11 +1,11 @@
 package com.ogd.stockdiary.application.stock.port.out.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Getter
 @Setter
@@ -13,12 +13,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @AllArgsConstructor
 public class TokenRequest {
 
-  @JsonProperty("grant_type")
-  private String grantType;
+    @JsonProperty("grant_type")
+    private String grantType;
 
-  @JsonProperty("appsecret")
-  private String appSecret;
+    @JsonProperty("appsecret")
+    private String appSecret;
 
-  @JsonProperty("appkey")
-  private String appKey;
+    @JsonProperty("appkey")
+    private String appKey;
 }

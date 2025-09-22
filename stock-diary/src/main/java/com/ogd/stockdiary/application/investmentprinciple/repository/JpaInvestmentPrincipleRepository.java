@@ -14,15 +14,17 @@ import com.ogd.stockdiary.domain.investmentprinciple.entity.InvestmentPrinciple;
 @Repository
 public interface JpaInvestmentPrincipleRepository extends JpaRepository<InvestmentPrinciple, Long> {
 
-  List<InvestmentPrinciple> findByUserId(Long userId);
+    List<InvestmentPrinciple> findByUserId(Long userId);
 
-  Optional<InvestmentPrinciple> findByIdAndUserId(Long id, Long userId);
+    Optional<InvestmentPrinciple> findByIdAndUserId(Long id, Long userId);
 
-  @Modifying
-  @Query("DELETE FROM InvestmentPrinciple ip WHERE ip.id = :principleId AND ip.user.id = :userId")
-  void deleteByIdAndUserId(@Param("principleId") Long principleId, @Param("userId") Long userId);
+    @Modifying
+    @Query("DELETE FROM InvestmentPrinciple ip WHERE ip.id = :principleId AND ip.user.id = :userId")
+    void deleteByIdAndUserId(@Param("principleId") Long principleId, @Param("userId") Long userId);
 
-  @Modifying
-  @Query("DELETE FROM InvestmentPrinciple ip WHERE ip.id IN :principleIds AND ip.user.id = :userId")
-  void deleteAllByIdInAndUserId(@Param("principleIds") List<Long> principleIds, @Param("userId") Long userId);
+    @Modifying
+    @Query(
+            "DELETE FROM InvestmentPrinciple ip WHERE ip.id IN :principleIds AND ip.user.id = :userId")
+    void deleteAllByIdInAndUserId(
+            @Param("principleIds") List<Long> principleIds, @Param("userId") Long userId);
 }

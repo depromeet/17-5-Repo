@@ -8,5 +8,5 @@ import com.ogd.stockdiary.domain.retrospection.entity.Retrospection;
 
 public interface JpaRetrospectionRepository extends JpaRepository<Retrospection, Long> {
 
-  List<Retrospection> findByUserId(Long userId);
+    List<Retrospection> findByUserId(Long userId);
 }
