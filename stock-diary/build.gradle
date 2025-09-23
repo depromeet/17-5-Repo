@@ -91,4 +91,3 @@ tasks.named('compileJava') {
 tasks.named('test') {
     useJUnitPlatform()
 }
-

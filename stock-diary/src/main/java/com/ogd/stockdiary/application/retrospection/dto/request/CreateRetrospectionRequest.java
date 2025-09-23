@@ -2,12 +2,16 @@ package com.ogd.stockdiary.application.retrospection.dto.request;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
+import com.ogd.stockdiary.application.principlecheck.dto.request.PrincipleCheckRequest;
 import com.ogd.stockdiary.domain.retrospection.entity.Currency;
+import com.ogd.stockdiary.domain.retrospection.entity.InvestmentEmotion;
 import com.ogd.stockdiary.domain.retrospection.entity.OrderType;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -28,11 +32,7 @@ public class CreateRetrospectionRequest {
     @NotBlank(message = "시장 정보는 필수입니다")
     private String market;
 
-    @Schema(
-            description = "주문 타입",
-            example = "SELL",
-            allowableValues = {"BUY", "SELL"},
-            requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "주문 타입", example = "SELL", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "주문 타입은 필수입니다")
     private OrderType orderType;
 
@@ -41,11 +41,7 @@ public class CreateRetrospectionRequest {
     @Positive(message = "가격은 0보다 큰 값이어야 합니다")
     private BigDecimal price;
 
-    @Schema(
-            description = "통화",
-            example = "KRW",
-            allowableValues = {"KRW", "USD", "EUR", "JPY"},
-            requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "통화", example = "KRW", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "통화는 필수입니다")
     private Currency currency;
 
@@ -63,4 +59,17 @@ public class CreateRetrospectionRequest {
 
     @Schema(description = "수익률", example = "-15.67", requiredMode = RequiredMode.NOT_REQUIRED)
     private Double returnRate;
+
+    @Schema(
+            description = "회고 내용",
+            example = "이번 매도는 시장 상황을 잘 반영한 결정이었다.",
+            requiredMode = RequiredMode.NOT_REQUIRED)
+    private String content;
+
+    @Schema(description = "투자원칙 체크 목록", requiredMode = RequiredMode.NOT_REQUIRED)
+    @Valid
+    private List<PrincipleCheckRequest> principleChecks;
+
+    @Schema(description = "투자 감정", example = "CONFIDENCE", requiredMode = RequiredMode.NOT_REQUIRED)
+    private InvestmentEmotion emotion;
 }

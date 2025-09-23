@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -44,6 +46,13 @@ public class Retrospection {
 
     private Double returnRate;
 
+    @Column(columnDefinition = "TEXT")
+    private String content;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "emotion")
+    private InvestmentEmotion emotion;
+
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
@@ -60,11 +69,20 @@ public class Retrospection {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public Retrospection(User user, String symbol, String market, Order order, Double returnRate) {
+    public Retrospection(
+            User user,
+            String symbol,
+            String market,
+            Order order,
+            Double returnRate,
+            String content,
+            InvestmentEmotion emotion) {
         this.user = user;
         this.symbol = symbol;
         this.market = market;
         this.order = order;
         this.returnRate = returnRate;
+        this.content = content;
+        this.emotion = emotion;
     }
 }
