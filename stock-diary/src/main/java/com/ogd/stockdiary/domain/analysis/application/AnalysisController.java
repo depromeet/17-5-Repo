@@ -1,7 +1,7 @@
 package com.ogd.stockdiary.domain.analysis.application;
 
-import java.awt.*;
 import java.time.LocalDateTime;
+import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
@@ -19,11 +19,17 @@ public class AnalysisController {
   }
 
   @GetMapping(value = "/{modelName}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-  public Flux<ChatResponse> analyze(
+  public Flux<AssistantMessage> analyze(
       @PathVariable String modelName,
       @RequestParam String market,
       @RequestParam String symbol,
       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime time) {
-    return analysisService.analyze(modelName, market, symbol, time);
+
+      Flux<ChatResponse> chatResponseFlux = analysisService.analyze(modelName, market, symbol, time);
+
+
+      return chatResponseFlux
+              .map(chatResponse -> chatResponse.getResult())
+              .map(generation -> generation.getOutput());
   }
 }
