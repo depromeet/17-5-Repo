@@ -2,7 +2,7 @@ package com.ogd.stockdiary.application.report.repository;
 
 import com.ogd.stockdiary.common.httpresponse.CodeEnum;
 import com.ogd.stockdiary.domain.report.entity.RetrospectionForReport;
-import com.ogd.stockdiary.domain.report.port.RetrospectionForReportRepository;
+import com.ogd.stockdiary.domain.report.port.out.RetrospectionForReportRepository;
 import com.ogd.stockdiary.exception.ApplicationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
