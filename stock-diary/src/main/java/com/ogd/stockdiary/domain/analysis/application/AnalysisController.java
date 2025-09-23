@@ -25,11 +25,10 @@ public class AnalysisController {
       @RequestParam String symbol,
       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime time) {
 
-      Flux<ChatResponse> chatResponseFlux = analysisService.analyze(modelName, market, symbol, time);
+    Flux<ChatResponse> chatResponseFlux = analysisService.analyze(modelName, market, symbol, time);
 
-
-      return chatResponseFlux
-              .map(chatResponse -> chatResponse.getResult())
-              .map(generation -> generation.getOutput());
+    return chatResponseFlux
+        .map(chatResponse -> chatResponse.getResult())
+        .map(generation -> generation.getOutput());
   }
 }
