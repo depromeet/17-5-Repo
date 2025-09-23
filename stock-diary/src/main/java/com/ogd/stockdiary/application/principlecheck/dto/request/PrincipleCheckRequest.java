@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Schema(description = "투자원칙 체크 요청 정보")
 public class PrincipleCheckRequest {
 
-    @Schema(description = "투자원칙 ID", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "투자원칙 ID", example = "2", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "투자원칙 ID는 필수입니다")
     private Long principleId;
 

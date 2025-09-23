@@ -33,6 +33,7 @@ public class RetrospectionMapper {
                 request.getVolume(),
                 request.getOrderDate(),
                 request.getReturnRate(),
+                request.getContent(),
                 request.getEmotion(),
                 principleCheckCommands);
     }
@@ -53,6 +54,7 @@ public class RetrospectionMapper {
                 retrospection.getOrder().getVolume(),
                 retrospection.getOrder().getOrderDate(),
                 retrospection.getReturnRate(),
+                retrospection.getContent(),
                 retrospection.getEmotion(),
                 retrospection.getCreatedAt(),
                 retrospection.getUpdatedAt());
@@ -73,6 +75,7 @@ public class RetrospectionMapper {
                 command.getMarket(),
                 order,
                 command.getReturnRate(),
+                command.getContent(),
                 command.getEmotion());
     }
 }

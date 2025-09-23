@@ -60,6 +60,12 @@ public class CreateRetrospectionRequest {
     @Schema(description = "수익률", example = "-15.67", requiredMode = RequiredMode.NOT_REQUIRED)
     private Double returnRate;
 
+    @Schema(
+            description = "회고 내용",
+            example = "이번 매도는 시장 상황을 잘 반영한 결정이었다.",
+            requiredMode = RequiredMode.NOT_REQUIRED)
+    private String content;
+
     @Schema(description = "투자원칙 체크 목록", requiredMode = RequiredMode.NOT_REQUIRED)
     @Valid
     private List<PrincipleCheckRequest> principleChecks;

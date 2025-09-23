@@ -46,6 +46,9 @@ public class Retrospection {
 
     private Double returnRate;
 
+    @Column(columnDefinition = "TEXT")
+    private String content;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "emotion")
     private InvestmentEmotion emotion;
@@ -72,12 +75,14 @@ public class Retrospection {
             String market,
             Order order,
             Double returnRate,
+            String content,
             InvestmentEmotion emotion) {
         this.user = user;
         this.symbol = symbol;
         this.market = market;
         this.order = order;
         this.returnRate = returnRate;
+        this.content = content;
         this.emotion = emotion;
     }
 }

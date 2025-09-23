@@ -47,6 +47,9 @@ public class CreateRetrospectionResponse {
     @Schema(description = "수익률", example = "-15.67")
     private Double returnRate;
 
+    @Schema(description = "회고 내용", example = "이번 매도는 시장 상황을 잘 반영한 결정이었다.")
+    private String content;
+
     @Schema(description = "투자 감정", example = "CONFIDENCE")
     private InvestmentEmotion emotion;
 

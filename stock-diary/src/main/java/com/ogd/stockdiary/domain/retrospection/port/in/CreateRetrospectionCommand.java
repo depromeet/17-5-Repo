@@ -25,6 +25,7 @@ public class CreateRetrospectionCommand {
     private final Integer volume;
     private final LocalDate orderDate;
     private final Double returnRate;
+    private final String content;
     private final InvestmentEmotion emotion;
     private final List<PrincipleCheckCommand> principleChecks;
 }
