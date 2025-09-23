@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class BatchProcessResponse {
 
-  private final List<InvestmentPrincipleResponse> createdPrinciples;
-  private final List<InvestmentPrincipleResponse> updatedPrinciples;
-  private final List<Long> deletedPrincipleIds;
+    private final List<InvestmentPrincipleResponse> createdPrinciples;
+    private final List<InvestmentPrincipleResponse> updatedPrinciples;
+    private final List<Long> deletedPrincipleIds;
 }

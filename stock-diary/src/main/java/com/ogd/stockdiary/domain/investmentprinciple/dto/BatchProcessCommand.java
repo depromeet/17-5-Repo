@@ -9,8 +9,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class BatchProcessCommand {
 
-  private final Long userId;
-  private final List<String> createPrinciples;
-  private final List<UpdatePrincipleCommand> updatePrinciples;
-  private final List<Long> deletePrincipleIds;
+    private final Long userId;
+    private final List<String> createPrinciples;
+    private final List<UpdatePrincipleCommand> updatePrinciples;
+    private final List<Long> deletePrincipleIds;
 }

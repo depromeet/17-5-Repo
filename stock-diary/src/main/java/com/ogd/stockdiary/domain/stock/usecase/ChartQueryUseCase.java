@@ -7,6 +7,10 @@ import com.ogd.stockdiary.domain.stock.dto.StockInterval;
 
 public interface ChartQueryUseCase {
 
-  StockChartData getStockChart(String market, String symbol, LocalDate startDate, LocalDate endDate,
-      StockInterval interval);
+    StockChartData getStockChart(
+            String market,
+            String symbol,
+            LocalDate startDate,
+            LocalDate endDate,
+            StockInterval interval);
 }

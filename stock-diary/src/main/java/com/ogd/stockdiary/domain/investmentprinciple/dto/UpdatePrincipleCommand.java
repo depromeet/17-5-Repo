@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UpdatePrincipleCommand {
 
-  private final Long principleId;
-  private final Long userId;
-  private final String principle;
+    private final Long principleId;
+    private final Long userId;
+    private final String principle;
 }

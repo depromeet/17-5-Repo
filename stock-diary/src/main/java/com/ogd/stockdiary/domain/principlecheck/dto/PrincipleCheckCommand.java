@@ -7,6 +7,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PrincipleCheckCommand {
 
-  private final Long principleId;
-  private final Boolean isFollowed;
+    private final Long principleId;
+    private final Boolean isFollowed;
 }

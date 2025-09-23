@@ -6,7 +6,8 @@ import com.ogd.stockdiary.domain.stock.dto.StockChartData;
 import com.ogd.stockdiary.domain.stock.dto.StockInterval;
 
 public interface StockPort {
-  String getToken();
+    String getToken();
 
-  StockChartData getChartData(String market, String symbol, LocalDate endDate, StockInterval interval);
+    StockChartData getChartData(
+            String market, String symbol, LocalDate endDate, StockInterval interval);
 }

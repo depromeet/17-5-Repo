@@ -7,15 +7,15 @@ import com.ogd.stockdiary.domain.investmentprinciple.entity.InvestmentPrinciple;
 
 public interface InvestmentPrincipleRepository {
 
-  List<InvestmentPrinciple> findByUserId(Long userId);
+    List<InvestmentPrinciple> findByUserId(Long userId);
 
-  InvestmentPrinciple save(InvestmentPrinciple investmentPrinciple);
+    InvestmentPrinciple save(InvestmentPrinciple investmentPrinciple);
 
-  List<InvestmentPrinciple> saveAll(List<InvestmentPrinciple> investmentPrinciples);
+    List<InvestmentPrinciple> saveAll(List<InvestmentPrinciple> investmentPrinciples);
 
-  Optional<InvestmentPrinciple> findByIdAndUserId(Long principleId, Long userId);
+    Optional<InvestmentPrinciple> findByIdAndUserId(Long principleId, Long userId);
 
-  void deleteByIdAndUserId(Long principleId, Long userId);
+    void deleteByIdAndUserId(Long principleId, Long userId);
 
-  void deleteAllByIdInAndUserId(List<Long> principleIds, Long userId);
+    void deleteAllByIdInAndUserId(List<Long> principleIds, Long userId);
 }

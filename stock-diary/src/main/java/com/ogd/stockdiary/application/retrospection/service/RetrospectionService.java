@@ -6,8 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import lombok.RequiredArgsConstructor;
-
 import com.ogd.stockdiary.application.retrospection.dto.mapper.RetrospectionMapper;
 import com.ogd.stockdiary.application.user.repository.UserRepository;
 import com.ogd.stockdiary.common.httpresponse.CodeEnum;
@@ -23,47 +21,69 @@ import com.ogd.stockdiary.domain.retrospection.port.out.RetrospectionRepository;
 import com.ogd.stockdiary.domain.user.entity.User;
 import com.ogd.stockdiary.exception.ApplicationException;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
 @RequiredArgsConstructor
 public class RetrospectionService implements CreateRetrospectionUseCase {
 
-  private final RetrospectionRepository retrospectionRepository;
-  private final UserRepository userRepository;
-  private final PrincipleCheckRepository principleCheckRepository;
-  private final InvestmentPrincipleRepository investmentPrincipleRepository;
+    private final RetrospectionRepository retrospectionRepository;
+    private final UserRepository userRepository;
+    private final PrincipleCheckRepository principleCheckRepository;
+    private final InvestmentPrincipleRepository investmentPrincipleRepository;
 
-  @Override
-  @Transactional
-  public Retrospection createRetrospection(CreateRetrospectionCommand command) {
-    // 사용자 조회
-    User user = userRepository.findById(command.getUserId()).orElseThrow(
-        () -> new ApplicationException(CodeEnum.FRS_003, "사용자를 찾을 수 없습니다: " + command.getUserId()));
+    @Override
+    @Transactional
+    public Retrospection createRetrospection(CreateRetrospectionCommand command) {
+        // 사용자 조회
+        User user =
+                userRepository
+                        .findById(command.getUserId())
+                        .orElseThrow(
+                                () ->
+                                        new ApplicationException(
+                                                CodeEnum.FRS_003,
+                                                "사용자를 찾을 수 없습니다: " + command.getUserId()));
 
-    // 엔티티 생성
-    Retrospection retrospection = RetrospectionMapper.toEntity(command, user);
+        // 엔티티 생성
+        Retrospection retrospection = RetrospectionMapper.toEntity(command, user);
 
-    // 회고 저장
-    Retrospection savedRetrospection = retrospectionRepository.save(retrospection);
+        // 회고 저장
+        Retrospection savedRetrospection = retrospectionRepository.save(retrospection);
 
-    // 원칙 체크 저장
-    if (!CollectionUtils.isEmpty(command.getPrincipleChecks())) {
-      savePrincipleChecks(savedRetrospection, command.getPrincipleChecks(), user.getId());
+        // 원칙 체크 저장
+        if (!CollectionUtils.isEmpty(command.getPrincipleChecks())) {
+            savePrincipleChecks(savedRetrospection, command.getPrincipleChecks(), user.getId());
+        }
+
+        return savedRetrospection;
     }
 
-    return savedRetrospection;
-  }
+    private void savePrincipleChecks(
+            Retrospection retrospection,
+            List<PrincipleCheckCommand> principleCheckCommands,
+            Long userId) {
+        List<PrincipleCheck> principleChecks =
+                principleCheckCommands.stream()
+                        .map(
+                                command -> {
+                                    InvestmentPrinciple principle =
+                                            investmentPrincipleRepository
+                                                    .findByIdAndUserId(
+                                                            command.getPrincipleId(), userId)
+                                                    .orElseThrow(
+                                                            () ->
+                                                                    new ApplicationException(
+                                                                            CodeEnum.FRS_003,
+                                                                            "투자원칙을 찾을 수 없습니다: "
+                                                                                    + command
+                                                                                            .getPrincipleId()));
 
-  private void savePrincipleChecks(Retrospection retrospection, List<PrincipleCheckCommand> principleCheckCommands,
-      Long userId) {
-    List<PrincipleCheck> principleChecks = principleCheckCommands.stream().map(command -> {
-      InvestmentPrinciple principle = investmentPrincipleRepository
-          .findByIdAndUserId(command.getPrincipleId(), userId)
-          .orElseThrow(() -> new ApplicationException(CodeEnum.FRS_003,
-              "투자원칙을 찾을 수 없습니다: " + command.getPrincipleId()));
+                                    return PrincipleCheck.create(
+                                            retrospection, principle, command.getIsFollowed());
+                                })
+                        .toList();
 
-      return PrincipleCheck.create(retrospection, principle, command.getIsFollowed());
-    }).toList();
-
-    principleCheckRepository.saveAll(principleChecks);
-  }
+        principleCheckRepository.saveAll(principleChecks);
+    }
 }

@@ -8,7 +8,7 @@ import com.ogd.stockdiary.domain.principlecheck.entity.PrincipleCheck;
 
 public interface JpaPrincipleCheckRepository extends JpaRepository<PrincipleCheck, Long> {
 
-  List<PrincipleCheck> findByRetrospectionId(Long retrospectionId);
+    List<PrincipleCheck> findByRetrospectionId(Long retrospectionId);
 
-  void deleteByRetrospectionId(Long retrospectionId);
+    void deleteByRetrospectionId(Long retrospectionId);
 }

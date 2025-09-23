@@ -14,13 +14,19 @@ import com.ogd.stockdiary.application.stock.port.out.dto.TokenResponse;
 @FeignClient(name = "han-stock", url = "https://openapivts.koreainvestment.com:29443")
 public interface HanStockFeignClient {
 
-  @PostMapping(value = "/oauth2/tokenP", consumes = "application/json")
-  TokenResponse getToken(@RequestBody TokenRequest request);
+    @PostMapping(value = "/oauth2/tokenP", consumes = "application/json")
+    TokenResponse getToken(@RequestBody TokenRequest request);
 
-  @GetMapping("/uapi/overseas-price/v1/quotations/dailyprice")
-  DailyPriceResponse getDailyPrice(@RequestHeader("authorization") String authorization,
-      @RequestHeader("appkey") String appkey, @RequestHeader("appsecret") String appsecret,
-      @RequestHeader("tr_id") String trId, @RequestParam("AUTH") String auth, @RequestParam("EXCD") String market,
-      @RequestParam("SYMB") String symbol, @RequestParam("GUBN") String period,
-      @RequestParam("BYMD") String baseDate, @RequestParam("MODP") String modifiedPrice);
+    @GetMapping("/uapi/overseas-price/v1/quotations/dailyprice")
+    DailyPriceResponse getDailyPrice(
+            @RequestHeader("authorization") String authorization,
+            @RequestHeader("appkey") String appkey,
+            @RequestHeader("appsecret") String appsecret,
+            @RequestHeader("tr_id") String trId,
+            @RequestParam("AUTH") String auth,
+            @RequestParam("EXCD") String market,
+            @RequestParam("SYMB") String symbol,
+            @RequestParam("GUBN") String period,
+            @RequestParam("BYMD") String baseDate,
+            @RequestParam("MODP") String modifiedPrice);
 }

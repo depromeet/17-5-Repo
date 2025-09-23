@@ -6,11 +6,11 @@ import com.ogd.stockdiary.domain.principlecheck.entity.PrincipleCheck;
 
 public interface PrincipleCheckRepository {
 
-  PrincipleCheck save(PrincipleCheck principleCheck);
+    PrincipleCheck save(PrincipleCheck principleCheck);
 
-  List<PrincipleCheck> saveAll(List<PrincipleCheck> principleChecks);
+    List<PrincipleCheck> saveAll(List<PrincipleCheck> principleChecks);
 
-  List<PrincipleCheck> findByRetrospectionId(Long retrospectionId);
+    List<PrincipleCheck> findByRetrospectionId(Long retrospectionId);
 
-  void deleteByRetrospectionId(Long retrospectionId);
+    void deleteByRetrospectionId(Long retrospectionId);
 }

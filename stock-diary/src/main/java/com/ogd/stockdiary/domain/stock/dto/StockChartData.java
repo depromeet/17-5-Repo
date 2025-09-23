@@ -13,6 +13,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class StockChartData {
 
-  private String currency;
-  private List<StockChartItem> chartData;
+    private String currency;
+    private List<StockChartItem> chartData;
 }

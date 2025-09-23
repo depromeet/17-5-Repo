@@ -11,10 +11,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AppleProperties {
-  private String clientId;
-  private String redirectUri;
-  private String aud;
-  private String teamId;
-  private String keyId;
-  private String privateKey;
+    private String clientId;
+    private String redirectUri;
+    private String aud;
+    private String teamId;
+    private String keyId;
+    private String privateKey;
 }

@@ -15,21 +15,29 @@ import com.ogd.stockdiary.domain.stock.usecase.ChartQueryUseCase;
 @Service
 public class ChartQueryService implements ChartQueryUseCase {
 
-  private final StockPort stockPort;
+    private final StockPort stockPort;
 
-  public ChartQueryService(StockPort stockPort) {
-    this.stockPort = stockPort;
-  }
+    public ChartQueryService(StockPort stockPort) {
+        this.stockPort = stockPort;
+    }
 
-  @Override
-  public StockChartData getStockChart(String market, String symbol, LocalDate startDate, LocalDate endDate,
-      StockInterval interval) {
-    StockChartData allData = stockPort.getChartData(market, symbol, endDate, interval);
+    @Override
+    public StockChartData getStockChart(
+            String market,
+            String symbol,
+            LocalDate startDate,
+            LocalDate endDate,
+            StockInterval interval) {
+        StockChartData allData = stockPort.getChartData(market, symbol, endDate, interval);
 
-    List<StockChartItem> filteredChartData = allData.getChartData().stream()
-        .filter(item -> !item.getDate().isBefore(startDate) && !item.getDate().isAfter(endDate))
-        .collect(Collectors.toList());
+        List<StockChartItem> filteredChartData =
+                allData.getChartData().stream()
+                        .filter(
+                                item ->
+                                        !item.getDate().isBefore(startDate)
+                                                && !item.getDate().isAfter(endDate))
+                        .collect(Collectors.toList());
 
-    return new StockChartData(allData.getCurrency(), filteredChartData);
-  }
+        return new StockChartData(allData.getCurrency(), filteredChartData);
+    }
 }

@@ -9,8 +9,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class InvestmentPrincipleResponse {
 
-  private final Long id;
-  private final String principle;
-  private final LocalDateTime createdAt;
-  private final LocalDateTime updatedAt;
+    private final Long id;
+    private final String principle;
+    private final LocalDateTime createdAt;
+    private final LocalDateTime updatedAt;
 }
