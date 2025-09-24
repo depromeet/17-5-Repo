@@ -19,7 +19,7 @@ import com.ogd.stockdiary.domain.report.entity.RetrospectionForReport;
 import com.ogd.stockdiary.domain.report.port.in.CreateFeedbackCommand;
 import com.ogd.stockdiary.domain.report.port.in.CreateFeedbackUseCase;
 import com.ogd.stockdiary.domain.report.port.out.FeedbackRepository;
-import com.ogd.stockdiary.domain.report.port.out.PromptLoader;
+import com.ogd.stockdiary.domain.report.port.out.ReportPromptLoader;
 import com.ogd.stockdiary.domain.report.port.out.RetrospectionForReportRepository;
 import com.ogd.stockdiary.domain.retrospection.entity.Order;
 import com.ogd.stockdiary.domain.retrospection.entity.Retrospection;
@@ -34,7 +34,7 @@ public class ReportService implements CreateFeedbackUseCase {
     private final RetrospectionForReportRepository retrospectionForReportRepository;
     private final RetrospectionRepository retrospectionRepository;
     private final FeedbackRepository feedbackRepository;
-    private final PromptLoader promptLoader;
+    private final ReportPromptLoader reportPromptLoader;
     private final ChatModel chatModel;
 
     @Override
@@ -59,7 +59,7 @@ public class ReportService implements CreateFeedbackUseCase {
                 new SystemPromptTemplate(systemText)
                         .createMessage(Map.of("symbol", symbol, "market", market, "order", order));
 
-        Message userMessage = new UserMessage(promptLoader.getPrompt());
+        Message userMessage = new UserMessage(reportPromptLoader.getPrompt());
 
         OpenAiChatOptions options =
                 new OpenAiChatOptions.Builder().model(command.modelName()).maxTokens(200).build();
