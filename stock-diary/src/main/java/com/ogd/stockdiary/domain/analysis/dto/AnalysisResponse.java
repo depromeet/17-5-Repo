@@ -4,7 +4,4 @@ public record AnalysisResponse(
         String text
 ) {
 
-    public AnalysisResponse toResponse() {
-        return new AnalysisResponse(text);
-    }
 }

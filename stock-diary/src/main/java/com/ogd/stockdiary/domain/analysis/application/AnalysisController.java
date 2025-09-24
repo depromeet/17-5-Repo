@@ -33,7 +33,7 @@ public class AnalysisController {
 
     String text = chatResponse.getResult().getOutput().getText();
 
-    AnalysisResponse analysisResponse = new AnalysisResponse(text).toResponse();
+    AnalysisResponse analysisResponse = new AnalysisResponse(text);
 
     return ResponseEntity.status(HttpStatus.OK).body(HttpApiResponse.of(analysisResponse));
   }
