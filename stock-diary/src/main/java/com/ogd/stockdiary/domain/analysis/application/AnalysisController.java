@@ -41,7 +41,7 @@ public class AnalysisController {
         return ResponseEntity.status(HttpStatus.OK).body(HttpApiResponse.of(analysisResponse));
     }
 
-    @GetMapping(value = "v2/{modelName}", path = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "v2/{modelName}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public ResponseEntity<HttpApiResponse<Flux<AssistantMessage>>> analyzeSteamData(
             @PathVariable String modelName,
             @RequestParam String market,
