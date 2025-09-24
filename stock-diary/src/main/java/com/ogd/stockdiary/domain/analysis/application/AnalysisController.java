@@ -1,37 +1,39 @@
 package com.ogd.stockdiary.domain.analysis.application;
 
-import com.ogd.stockdiary.common.httpresponse.HttpApiResponse;
-import com.ogd.stockdiary.domain.analysis.dto.AnalysisResponse;
 import java.time.LocalDateTime;
+
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.ogd.stockdiary.common.httpresponse.HttpApiResponse;
+import com.ogd.stockdiary.domain.analysis.dto.AnalysisResponse;
+
 @RestController
 @RequestMapping(value = "/api/analysis")
 public class AnalysisController {
 
-  private final AnalysisService analysisService;
+    private final AnalysisService analysisService;
 
-  public AnalysisController(AnalysisService analysisService) {
-    this.analysisService = analysisService;
-  }
+    public AnalysisController(AnalysisService analysisService) {
+        this.analysisService = analysisService;
+    }
 
-  @GetMapping(value = "/{modelName}")
-  public ResponseEntity<HttpApiResponse<AnalysisResponse>> analyze(
-      @PathVariable String modelName,
-      @RequestParam String market,
-      @RequestParam String symbol,
-      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime time) {
+    @GetMapping(value = "/{modelName}")
+    public ResponseEntity<HttpApiResponse<AnalysisResponse>> analyze(
+            @PathVariable String modelName,
+            @RequestParam String market,
+            @RequestParam String symbol,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime time) {
 
-    ChatResponse chatResponse = analysisService.analyze(modelName, market, symbol, time);
+        ChatResponse chatResponse = analysisService.analyze(modelName, market, symbol, time);
 
-    String text = chatResponse.getResult().getOutput().getText();
+        String text = chatResponse.getResult().getOutput().getText();
 
-    AnalysisResponse analysisResponse = new AnalysisResponse(text);
+        AnalysisResponse analysisResponse = new AnalysisResponse(text);
 
-    return ResponseEntity.status(HttpStatus.OK).body(HttpApiResponse.of(analysisResponse));
-  }
+        return ResponseEntity.status(HttpStatus.OK).body(HttpApiResponse.of(analysisResponse));
+    }
 }
