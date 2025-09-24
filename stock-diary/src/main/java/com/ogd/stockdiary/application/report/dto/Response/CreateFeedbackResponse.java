@@ -1,6 +1,3 @@
 package com.ogd.stockdiary.application.report.dto.Response;
 
-public record CreateFeedbackResponse(
-        String feedback
-) {
-}
+public record CreateFeedbackResponse(String feedback) {}

@@ -1,7 +1,9 @@
 package com.ogd.stockdiary.domain.report.entity;
 
-import com.ogd.stockdiary.domain.retrospection.entity.Order;
 import jakarta.persistence.*;
+
+import com.ogd.stockdiary.domain.retrospection.entity.Order;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 

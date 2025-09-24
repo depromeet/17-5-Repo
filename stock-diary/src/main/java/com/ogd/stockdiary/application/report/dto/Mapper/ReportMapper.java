@@ -7,17 +7,12 @@ import com.ogd.stockdiary.domain.report.port.in.CreateFeedbackCommand;
 
 public class ReportMapper {
 
-    public static CreateFeedbackCommand toCommand(CreateFeedbackRequest request, Long retrospectionId) {
-        return new CreateFeedbackCommand(
-                retrospectionId,
-                request.modelName()
-        );
-
+    public static CreateFeedbackCommand toCommand(
+            CreateFeedbackRequest request, Long retrospectionId) {
+        return new CreateFeedbackCommand(retrospectionId, request.modelName());
     }
-    public static CreateFeedbackResponse toResponse(Feedback feedback){
-        return new CreateFeedbackResponse(
-                feedback.getFeedback()
-        );
 
+    public static CreateFeedbackResponse toResponse(Feedback feedback) {
+        return new CreateFeedbackResponse(feedback.getFeedback());
     }
 }

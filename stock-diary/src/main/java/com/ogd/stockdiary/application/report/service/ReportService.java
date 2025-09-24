@@ -1,5 +1,19 @@
 package com.ogd.stockdiary.application.report.service;
 
+import java.util.List;
+import java.util.Map;
+
+import jakarta.transaction.Transactional;
+
+import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.chat.prompt.SystemPromptTemplate;
+import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.stereotype.Service;
+
 import com.ogd.stockdiary.domain.report.entity.Feedback;
 import com.ogd.stockdiary.domain.report.entity.RetrospectionForReport;
 import com.ogd.stockdiary.domain.report.port.in.CreateFeedbackCommand;
@@ -10,19 +24,8 @@ import com.ogd.stockdiary.domain.report.port.out.RetrospectionForReportRepositor
 import com.ogd.stockdiary.domain.retrospection.entity.Order;
 import com.ogd.stockdiary.domain.retrospection.entity.Retrospection;
 import com.ogd.stockdiary.domain.retrospection.port.out.RetrospectionRepository;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import org.springframework.ai.chat.messages.Message;
-import org.springframework.ai.chat.messages.UserMessage;
-import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.chat.prompt.SystemPromptTemplate;
-import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -36,11 +39,12 @@ public class ReportService implements CreateFeedbackUseCase {
 
     @Override
     @Transactional
-    public Feedback createFeedbackUseCase(CreateFeedbackCommand command){
+    public Feedback createFeedbackUseCase(CreateFeedbackCommand command) {
 
         Retrospection retrospection = retrospectionRepository.getById(command.retrospectionId());
 
-        RetrospectionForReport retrospectionForReport = retrospectionForReportRepository.getById(command.retrospectionId());
+        RetrospectionForReport retrospectionForReport =
+                retrospectionForReportRepository.getById(command.retrospectionId());
 
         String symbol = retrospectionForReport.getSymbol();
         String market = retrospectionForReport.getMarket();
@@ -51,20 +55,16 @@ public class ReportService implements CreateFeedbackUseCase {
                         Today symbol is {symbol} and market is {market}.Order is {order}.
                         """;
 
-        Message systemMessage = new SystemPromptTemplate(systemText)
-                .createMessage(
-                        Map.of("symbol", symbol, "market", market, "order", order)
-                );
+        Message systemMessage =
+                new SystemPromptTemplate(systemText)
+                        .createMessage(Map.of("symbol", symbol, "market", market, "order", order));
 
         Message userMessage = new UserMessage(promptLoader.getPrompt());
 
+        OpenAiChatOptions options =
+                new OpenAiChatOptions.Builder().model(command.modelName()).maxTokens(200).build();
 
-        OpenAiChatOptions options = new OpenAiChatOptions.Builder()
-                .model(command.modelName())
-                .maxTokens(200)
-                .build();
-
-        Prompt prompt = new Prompt(List.of(systemMessage, userMessage),options);
+        Prompt prompt = new Prompt(List.of(systemMessage, userMessage), options);
 
         // 동기 처리
         ChatResponse response = chatModel.call(prompt);
