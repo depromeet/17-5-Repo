@@ -13,7 +13,6 @@ import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 
 @Service
 @AllArgsConstructor
@@ -21,8 +20,7 @@ public class AnalysisService {
   private final PromptLoader promptLoader;
   private final ChatModel chatModel;
 
-  public ChatResponse analyze(
-      String modelName, String market, String symbol, LocalDateTime time) {
+  public ChatResponse analyze(String modelName, String market, String symbol, LocalDateTime time) {
     String systemText =
         """
             Today market is {market} and symbol is {symbol}.

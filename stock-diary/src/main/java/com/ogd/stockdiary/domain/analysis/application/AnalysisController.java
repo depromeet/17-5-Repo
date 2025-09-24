@@ -1,12 +1,9 @@
 package com.ogd.stockdiary.domain.analysis.application;
 
-import java.time.LocalDateTime;
-
-import com.ogd.stockdiary.common.httpresponse.CodeEnum;
 import com.ogd.stockdiary.common.httpresponse.HttpApiResponse;
 import com.ogd.stockdiary.domain.analysis.dto.AnalysisResponse;
+import java.time.LocalDateTime;
 import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.boot.diagnostics.FailureAnalysisReporter;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
