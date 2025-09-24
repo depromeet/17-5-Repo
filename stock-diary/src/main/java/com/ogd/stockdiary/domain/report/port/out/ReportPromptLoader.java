@@ -8,11 +8,11 @@ import lombok.Getter;
 
 @Getter
 @Component
-public class PromptLoader {
+public class ReportPromptLoader {
 
     private final String prompt;
 
-    public PromptLoader(ResourceLoader resourceLoader) throws Exception {
+    public ReportPromptLoader(ResourceLoader resourceLoader) throws Exception {
 
         Resource resource =
                 resourceLoader.getResource("classpath:RetrospectionForReportPrompt.txt");
