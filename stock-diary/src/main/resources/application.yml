@@ -16,9 +16,6 @@ spring:
 #        dialect: org.hibernate.dialect.H2Dialect
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
-  ai:
-    openai:
-      api-key: ${OPENAI_API_KEY}
   
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -38,13 +35,7 @@ springdoc:
 server:
   url: ${SERVER_URL:http://localhost:8080}
 
-#logging:
-#  level:
-#    com.dpm05.user: DEBUG
-#    org.springframework.security: DEBUG
-
 logging:
   level:
     com.dpm05.user: DEBUG
     org.springframework.security: DEBUG
-    org.springframework.web.reactive.function.client.ExchangeFunctions: DEBUG
