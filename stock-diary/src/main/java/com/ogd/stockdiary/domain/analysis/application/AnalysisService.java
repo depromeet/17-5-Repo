@@ -50,6 +50,7 @@ public class AnalysisService {
 
         return chatResponse;
     }
+
     public Flux<ChatResponse> analyzeStreamData(
             String modelName, String market, String symbol, LocalDateTime time) {
         String systemText =

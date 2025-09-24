@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.ogd.stockdiary.common.httpresponse.HttpApiResponse;
 import com.ogd.stockdiary.domain.analysis.dto.AnalysisResponse;
+
 import reactor.core.publisher.Flux;
 
 @RestController
@@ -47,11 +48,13 @@ public class AnalysisController {
             @RequestParam String symbol,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime time) {
 
-        Flux<ChatResponse> chatResponse = analysisService.analyzeStreamData(modelName, market, symbol, time);
+        Flux<ChatResponse> chatResponse =
+                analysisService.analyzeStreamData(modelName, market, symbol, time);
 
-        Flux<AssistantMessage> messageFlux=  chatResponse
-                .map(response -> response.getResult())
-                .map(generation -> generation.getOutput());
+        Flux<AssistantMessage> messageFlux =
+                chatResponse
+                        .map(response -> response.getResult())
+                        .map(generation -> generation.getOutput());
 
         return ResponseEntity.status(HttpStatus.OK).body(HttpApiResponse.of(messageFlux));
     }
