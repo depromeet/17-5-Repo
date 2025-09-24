@@ -56,6 +56,7 @@ jobs:
             spring.datasource.url = DB_URL,
             spring.datasource.username = DB_USERNAME,
             spring.datasource.password = DB_PASSWORD
+            openai.api.key = OPENAI_API_KEY
           withDecryption: "true"
 
       - name: Deploy to development environment
@@ -91,6 +92,7 @@ jobs:
               -e DB_URL="$DB_URL" \
               -e DB_USERNAME="$DB_USERNAME" \
               -e DB_PASSWORD="$DB_PASSWORD" \
+              -e OPENAI_API_KEY="$OPENAI_API_KEY" \
               "$TARGET_IMAGE"
 
             echo "✅ Development container started successfully"
@@ -182,6 +184,7 @@ jobs:
             spring.datasource.url = DB_URL,
             spring.datasource.username = DB_USERNAME,
             spring.datasource.password = DB_PASSWORD
+            openai.api.key = OPENAI_API_KEY
           withDecryption: "true"
 
       - name: Deploy to production environment
@@ -217,6 +220,7 @@ jobs:
               -e DB_URL="$DB_URL" \
               -e DB_USERNAME="$DB_USERNAME" \
               -e DB_PASSWORD="$DB_PASSWORD" \
+              -e OPENAI_API_KEY="$OPENAI_API_KEY" \
               "$TARGET_IMAGE"
 
             echo "✅ Production container started successfully"
