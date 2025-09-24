@@ -21,7 +21,7 @@ public class AnalysisService {
   private final PromptLoader promptLoader;
   private final ChatModel chatModel;
 
-  public Flux<ChatResponse> analyze(
+  public ChatResponse analyze(
       String modelName, String market, String symbol, LocalDateTime time) {
     String systemText =
         """
@@ -42,7 +42,7 @@ public class AnalysisService {
 
     Prompt prompt = new Prompt(List.of(systemMessage, userMessage), options);
 
-    Flux<ChatResponse> chatResponse = chatModel.stream(prompt);
+    ChatResponse chatResponse = chatModel.call(prompt);
 
     return chatResponse;
   }

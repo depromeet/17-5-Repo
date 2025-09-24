@@ -1,12 +1,16 @@
 package com.ogd.stockdiary.domain.analysis.application;
 
 import java.time.LocalDateTime;
-import org.springframework.ai.chat.messages.AssistantMessage;
+
+import com.ogd.stockdiary.common.httpresponse.CodeEnum;
+import com.ogd.stockdiary.common.httpresponse.HttpApiResponse;
+import com.ogd.stockdiary.domain.analysis.dto.AnalysisResponse;
 import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.boot.diagnostics.FailureAnalysisReporter;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
 
 @RestController
 @RequestMapping(value = "/api/analysis")
@@ -18,17 +22,19 @@ public class AnalysisController {
     this.analysisService = analysisService;
   }
 
-  @GetMapping(value = "/{modelName}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-  public Flux<AssistantMessage> analyze(
+  @GetMapping(value = "/{modelName}")
+  public ResponseEntity<HttpApiResponse<AnalysisResponse>> analyze(
       @PathVariable String modelName,
       @RequestParam String market,
       @RequestParam String symbol,
       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime time) {
 
-    Flux<ChatResponse> chatResponseFlux = analysisService.analyze(modelName, market, symbol, time);
+    ChatResponse chatResponse = analysisService.analyze(modelName, market, symbol, time);
 
-    return chatResponseFlux
-        .map(chatResponse -> chatResponse.getResult())
-        .map(generation -> generation.getOutput());
+    String text = chatResponse.getResult().getOutput().getText();
+
+    AnalysisResponse analysisResponse = new AnalysisResponse(text).toResponse();
+
+    return ResponseEntity.status(HttpStatus.OK).body(HttpApiResponse.of(analysisResponse));
   }
 }
