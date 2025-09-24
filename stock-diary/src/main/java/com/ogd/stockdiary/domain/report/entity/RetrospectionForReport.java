@@ -2,11 +2,13 @@ package com.ogd.stockdiary.domain.report.entity;
 
 import com.ogd.stockdiary.domain.retrospection.entity.Order;
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "retrospections")
 @NoArgsConstructor
+@Getter
 public class RetrospectionForReport {
 
     @Id
