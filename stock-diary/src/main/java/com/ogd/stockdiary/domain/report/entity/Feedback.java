@@ -17,7 +17,7 @@ public class Feedback {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 200)
+    @Column(nullable = false, length = 500)
     private String feedback;
 
     @OneToOne(fetch = FetchType.LAZY)

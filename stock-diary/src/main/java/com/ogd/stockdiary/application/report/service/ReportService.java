@@ -6,11 +6,11 @@ import java.util.Map;
 import jakarta.transaction.Transactional;
 
 import org.springframework.ai.chat.messages.Message;
-import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.chat.prompt.SystemPromptTemplate;
+import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.stereotype.Service;
 
@@ -50,19 +50,23 @@ public class ReportService implements CreateFeedbackUseCase {
         String market = retrospectionForReport.getMarket();
         Order order = retrospectionForReport.getOrder();
 
-        String systemText =
+        String userText =
                 """
-                        Today symbol is {symbol} and market is {market}.Order is {order}.
-                        """;
+                Please analyze the symbol {symbol} in the {market} market based on the order: {order}.
+                """;
 
-        Message systemMessage =
-                new SystemPromptTemplate(systemText)
-                        .createMessage(Map.of("symbol", symbol, "market", market, "order", order));
+        // 시스템 메시지를 로더에서 불러오기
+        Message systemMessage = new SystemMessage(reportPromptLoader.getPrompt());
 
-        Message userMessage = new UserMessage(reportPromptLoader.getPrompt());
+        PromptTemplate promptTemplate = new PromptTemplate(userText);
+
+        Map<String, Object> variables = Map.of("symbol", symbol, "market", market, "order", order);
+
+        // 플레이스 홀더 넣은 유저 메시지 구성
+        Message userMessage = promptTemplate.createMessage(variables);
 
         OpenAiChatOptions options =
-                new OpenAiChatOptions.Builder().model(command.modelName()).maxTokens(200).build();
+                new OpenAiChatOptions.Builder().model(command.modelName()).maxTokens(400).build();
 
         Prompt prompt = new Prompt(List.of(systemMessage, userMessage), options);
 
