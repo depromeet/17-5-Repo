@@ -26,8 +26,7 @@ public class AnalysisService {
     private final PromptLoader promptLoader;
     private final ChatModel chatModel;
 
-    public ChatResponse analyze(
-            String modelName, String market, String symbol, LocalDateTime time) {
+    public ChatResponse analyze(String market, String symbol, LocalDateTime time) {
         String userText =
                 """
             Today market is {market} and symbol is {symbol}.
@@ -42,6 +41,8 @@ public class AnalysisService {
                         Map.of("market", market, "symbol", symbol, "time", time.toString()));
 
         Message systemMessage = new SystemMessage(promptLoader.getPrompt());
+
+        String modelName = "gpt-4.1-nano";
 
         OpenAiChatOptions options =
                 OpenAiChatOptions.builder().model(modelName).maxTokens(250).build();

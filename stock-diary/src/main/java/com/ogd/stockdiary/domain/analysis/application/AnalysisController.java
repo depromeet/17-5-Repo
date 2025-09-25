@@ -27,12 +27,11 @@ public class AnalysisController {
 
     @GetMapping(value = "v1/{modelName}")
     public ResponseEntity<HttpApiResponse<AnalysisResponse>> analyze(
-            @PathVariable String modelName,
             @RequestParam String market,
             @RequestParam String symbol,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime time) {
 
-        ChatResponse chatResponse = analysisService.analyze(modelName, market, symbol, time);
+        ChatResponse chatResponse = analysisService.analyze(market, symbol, time);
 
         String text = chatResponse.getResult().getOutput().getText();
 
