@@ -5,4 +5,6 @@ import com.ogd.stockdiary.domain.report.entity.Feedback;
 public interface FeedbackRepository {
 
     Feedback save(Feedback feedback);
+
+    void deleteById(Long id);
 }

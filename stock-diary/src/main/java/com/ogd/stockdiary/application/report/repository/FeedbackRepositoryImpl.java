@@ -16,4 +16,8 @@ public class FeedbackRepositoryImpl implements FeedbackRepository {
     public Feedback save(Feedback feedback) {
         return jpaFeedbackRepository.save(feedback);
     }
+
+    public void deleteById(Long id) {
+        jpaFeedbackRepository.deleteById(id);
+    }
 }
