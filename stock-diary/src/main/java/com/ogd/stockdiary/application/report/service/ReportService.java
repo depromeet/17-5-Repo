@@ -6,17 +6,14 @@ import java.util.Map;
 import jakarta.transaction.Transactional;
 
 import org.springframework.ai.chat.messages.Message;
-import org.springframework.ai.chat.messages.SystemMessage;
+import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ogd.stockdiary.application.report.dto.Response.CreateFeedbackResponse;
 import com.ogd.stockdiary.domain.report.entity.Feedback;
 import com.ogd.stockdiary.domain.report.entity.RetrospectionForReport;
 import com.ogd.stockdiary.domain.report.port.in.CreateFeedbackCommand;
@@ -39,12 +36,10 @@ public class ReportService implements CreateFeedbackUseCase {
     private final FeedbackRepository feedbackRepository;
     private final ReportPromptLoader reportPromptLoader;
     private final ChatModel chatModel;
-    private final ObjectMapper objectMapper;
 
     @Override
     @Transactional
-    public Feedback createFeedbackUseCase(CreateFeedbackCommand command)
-            throws JsonProcessingException {
+    public Feedback createFeedbackUseCase(CreateFeedbackCommand command) {
 
         Retrospection retrospection = retrospectionRepository.getById(command.retrospectionId());
 
@@ -55,25 +50,19 @@ public class ReportService implements CreateFeedbackUseCase {
         String market = retrospectionForReport.getMarket();
         Order order = retrospectionForReport.getOrder();
 
-        String userText =
+        String systemText =
                 """
-                Please analyze the symbol {symbol} in the {market} market based on the order: {order}.
-                """;
+                        Today symbol is {symbol} and market is {market}.Order is {order}.
+                        """;
 
-        // 시스템 메시지를 로더에서 불러오기
-        Message systemMessage = new SystemMessage(reportPromptLoader.getPrompt());
+        Message systemMessage =
+                new SystemPromptTemplate(systemText)
+                        .createMessage(Map.of("symbol", symbol, "market", market, "order", order));
 
-        PromptTemplate promptTemplate = new PromptTemplate(userText);
-
-        Map<String, Object> variables = Map.of("symbol", symbol, "market", market, "order", order);
-
-        // 플레이스 홀더 넣은 유저 메시지 구성
-        Message userMessage = promptTemplate.createMessage(variables);
-
-        String modelName = "gpt-4.1-nano";
+        Message userMessage = new UserMessage(reportPromptLoader.getPrompt());
 
         OpenAiChatOptions options =
-                new OpenAiChatOptions.Builder().model(modelName).maxTokens(500).build();
+                new OpenAiChatOptions.Builder().model(command.modelName()).maxTokens(200).build();
 
         Prompt prompt = new Prompt(List.of(systemMessage, userMessage), options);
 
@@ -82,21 +71,8 @@ public class ReportService implements CreateFeedbackUseCase {
 
         String text = response.getResult().getOutput().getText();
 
-        // JSON 문자열 text(LLM 응답)을 자바 객체로
-        CreateFeedbackResponse dto = objectMapper.readValue(text, CreateFeedbackResponse.class);
-
-        // principle 은 디비에서 JSON으로 저장되기에 다시 JSON 문자열로 변환
-        String principlesJson = objectMapper.writeValueAsString(dto.principles());
-
         // 피드백 객체 생성
-        Feedback feedback =
-                Feedback.builder()
-                        .feedback(text)
-                        .summerizedFeedback(dto.summerizedFeedback())
-                        .market(dto.market())
-                        .principles(principlesJson)
-                        .retrospection(retrospection)
-                        .build();
+        Feedback feedback = new Feedback(text, retrospection);
 
         // 저장
         feedbackRepository.save(feedback);
