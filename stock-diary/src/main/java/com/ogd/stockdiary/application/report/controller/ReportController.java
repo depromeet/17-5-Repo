@@ -12,6 +12,7 @@ import com.ogd.stockdiary.common.httpresponse.HttpApiResponse;
 import com.ogd.stockdiary.domain.report.entity.Feedback;
 import com.ogd.stockdiary.domain.report.port.in.CreateFeedbackCommand;
 import com.ogd.stockdiary.domain.report.port.in.CreateFeedbackUseCase;
+import com.ogd.stockdiary.domain.report.port.out.FeedbackRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/reports")
 public class ReportController {
     private final CreateFeedbackUseCase createFeedbackUseCase;
+    private final FeedbackRepository feedbackRepository;
 
     @PostMapping("/{retrospectionId}/feedback")
     public ResponseEntity<HttpApiResponse<CreateFeedbackResponse>> CreateFeedback(
@@ -35,5 +37,12 @@ public class ReportController {
         CreateFeedbackResponse text = ReportMapper.toResponse(feedback);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(HttpApiResponse.of(text));
+    }
+
+    @DeleteMapping("/{feedbackId}")
+    public ResponseEntity<HttpApiResponse<Void>> DeleteFeedback(@PathVariable Long feedbackId) {
+        feedbackRepository.deleteById(feedbackId);
+
+        return ResponseEntity.ok().build();
     }
 }
