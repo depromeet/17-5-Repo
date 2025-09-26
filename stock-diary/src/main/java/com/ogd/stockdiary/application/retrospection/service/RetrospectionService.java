@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import com.ogd.stockdiary.application.retrospection.dto.mapper.RetrospectionMapper;
+import com.ogd.stockdiary.application.retrospection.dto.response.GetRetrospectionResponse;
 import com.ogd.stockdiary.application.user.repository.UserRepository;
 import com.ogd.stockdiary.common.httpresponse.CodeEnum;
 import com.ogd.stockdiary.domain.investmentprinciple.entity.InvestmentPrinciple;
@@ -17,6 +18,7 @@ import com.ogd.stockdiary.domain.principlecheck.port.out.PrincipleCheckRepositor
 import com.ogd.stockdiary.domain.retrospection.entity.Retrospection;
 import com.ogd.stockdiary.domain.retrospection.port.in.CreateRetrospectionCommand;
 import com.ogd.stockdiary.domain.retrospection.port.in.CreateRetrospectionUseCase;
+import com.ogd.stockdiary.domain.retrospection.port.in.GetRetrospectionUseCase;
 import com.ogd.stockdiary.domain.retrospection.port.out.RetrospectionRepository;
 import com.ogd.stockdiary.domain.user.entity.User;
 import com.ogd.stockdiary.exception.ApplicationException;
@@ -25,7 +27,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class RetrospectionService implements CreateRetrospectionUseCase {
+public class RetrospectionService implements CreateRetrospectionUseCase, GetRetrospectionUseCase {
 
     private final RetrospectionRepository retrospectionRepository;
     private final UserRepository userRepository;
@@ -85,5 +87,18 @@ public class RetrospectionService implements CreateRetrospectionUseCase {
                         .toList();
 
         principleCheckRepository.saveAll(principleChecks);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public GetRetrospectionResponse getRetrospection(Long retrospectionId, Long userId) {
+        Retrospection retrospection =
+                retrospectionRepository.findByIdAndUserId(retrospectionId, userId);
+        List<PrincipleCheck> principleChecks =
+                principleCheckRepository.findByRetrospectionId(retrospectionId).stream()
+                        .filter(pc -> Boolean.TRUE.equals(pc.getIsFollowed()))
+                        .toList();
+
+        return RetrospectionMapper.toGetResponse(retrospection, principleChecks);
     }
 }

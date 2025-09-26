@@ -1,7 +1,5 @@
 package com.ogd.stockdiary.domain.retrospection.port.out;
 
-import java.util.List;
-
 import com.ogd.stockdiary.domain.retrospection.entity.Retrospection;
 
 public interface RetrospectionRepository {
@@ -10,5 +8,5 @@ public interface RetrospectionRepository {
 
     Retrospection getById(Long id);
 
-    List<Retrospection> findByUserId(Long userId);
+    Retrospection findByIdAndUserId(Long id, Long userId);
 }

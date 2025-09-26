@@ -1,7 +1,5 @@
 package com.ogd.stockdiary.application.retrospection.repository;
 
-import java.util.List;
-
 import org.springframework.stereotype.Repository;
 
 import com.ogd.stockdiary.common.httpresponse.CodeEnum;
@@ -31,7 +29,13 @@ public class RetrospectionRepositoryImpl implements RetrospectionRepository {
     }
 
     @Override
-    public List<Retrospection> findByUserId(Long userId) {
-        return jpaRetrospectionRepository.findByUserId(userId);
+    public Retrospection findByIdAndUserId(Long id, Long userId) {
+        return jpaRetrospectionRepository
+                .findByIdAndUserId(id, userId)
+                .orElseThrow(
+                        () ->
+                                new ApplicationException(
+                                        CodeEnum.FRS_003,
+                                        "유저(" + userId + ")에 해당하는 회고(" + id + ")를 찾을 수 없습니다: "));
     }
 }

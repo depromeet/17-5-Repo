@@ -6,7 +6,9 @@ import java.util.List;
 import com.ogd.stockdiary.application.principlecheck.dto.request.PrincipleCheckRequest;
 import com.ogd.stockdiary.application.retrospection.dto.request.CreateRetrospectionRequest;
 import com.ogd.stockdiary.application.retrospection.dto.response.CreateRetrospectionResponse;
+import com.ogd.stockdiary.application.retrospection.dto.response.GetRetrospectionResponse;
 import com.ogd.stockdiary.domain.principlecheck.dto.PrincipleCheckCommand;
+import com.ogd.stockdiary.domain.principlecheck.entity.PrincipleCheck;
 import com.ogd.stockdiary.domain.retrospection.entity.Order;
 import com.ogd.stockdiary.domain.retrospection.entity.Retrospection;
 import com.ogd.stockdiary.domain.retrospection.port.in.CreateRetrospectionCommand;
@@ -77,5 +79,35 @@ public class RetrospectionMapper {
                 command.getReturnRate(),
                 command.getContent(),
                 command.getEmotion());
+    }
+
+    public static GetRetrospectionResponse toGetResponse(
+            Retrospection retrospection, List<PrincipleCheck> principleChecks) {
+        List<GetRetrospectionResponse.PrincipleCheckResponse> principleCheckResponses =
+                principleChecks.stream()
+                        .map(
+                                pc ->
+                                        new GetRetrospectionResponse.PrincipleCheckResponse(
+                                                pc.getPrinciple().getId(),
+                                                pc.getPrinciple().getPrinciple(),
+                                                pc.getIsFollowed()))
+                        .toList();
+
+        return new GetRetrospectionResponse(
+                retrospection.getId(),
+                retrospection.getUser().getId(),
+                retrospection.getSymbol(),
+                retrospection.getMarket(),
+                retrospection.getOrder().getOrderType(),
+                retrospection.getOrder().getPrice(),
+                retrospection.getOrder().getCurrency(),
+                retrospection.getOrder().getVolume(),
+                retrospection.getOrder().getOrderDate(),
+                retrospection.getReturnRate(),
+                retrospection.getContent(),
+                retrospection.getEmotion(),
+                principleCheckResponses,
+                retrospection.getCreatedAt(),
+                retrospection.getUpdatedAt());
     }
 }
