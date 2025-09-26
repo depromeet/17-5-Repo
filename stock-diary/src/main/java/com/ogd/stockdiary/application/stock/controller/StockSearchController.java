@@ -1,16 +1,20 @@
 package com.ogd.stockdiary.application.stock.controller;
 
+import java.util.Arrays;
+import java.util.List;
+
+import org.springframework.web.bind.annotation.*;
+
 import com.ogd.stockdiary.common.httpresponse.HttpApiResponse;
+
 import com.ogd.stockdiary.common.httpresponse.SliceContent;
 import com.ogd.stockdiary.domain.stock.dto.response.StockSearchResponse;
 import com.ogd.stockdiary.domain.stock.entity.Market;
 import com.ogd.stockdiary.domain.stock.usecase.StockQueryUseCase;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.Arrays;
-import java.util.List;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -32,8 +36,8 @@ public class StockSearchController {
     List<StockSearchResponse> mockData =
         Arrays.asList(new StockSearchResponse(Market.NAS, "TSLA", "테슬라"));
 
-    return HttpApiResponse.of(mockData);
-  }
+        return HttpApiResponse.of(mockData);
+    }
 
   @Operation(summary = "주식 검색 (페이지네이션)", description = "종목명 또는 종목 코드로 주식을 무한스크롤 방식으로 검색합니다.")
   @GetMapping("/stock/slice")

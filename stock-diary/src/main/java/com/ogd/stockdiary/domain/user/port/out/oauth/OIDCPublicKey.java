@@ -1,6 +1,7 @@
 package com.ogd.stockdiary.domain.user.port.out.oauth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,21 +10,21 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OIDCPublicKey {
-  @JsonProperty("kty")
-  private String kty;
+    @JsonProperty("kty")
+    private String kty;
 
-  @JsonProperty("kid")
-  private String kid;
+    @JsonProperty("kid")
+    private String kid;
 
-  @JsonProperty("use")
-  private String use;
+    @JsonProperty("use")
+    private String use;
 
-  @JsonProperty("alg")
-  private String alg;
+    @JsonProperty("alg")
+    private String alg;
 
-  @JsonProperty("n")
-  private String n;
+    @JsonProperty("n")
+    private String n;
 
-  @JsonProperty("e")
-  private String e;
+    @JsonProperty("e")
+    private String e;
 }
