@@ -14,6 +14,9 @@ import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ogd.stockdiary.application.report.dto.Response.CreateFeedbackResponse;
 import com.ogd.stockdiary.domain.report.entity.Feedback;
 import com.ogd.stockdiary.domain.report.entity.RetrospectionForReport;
 import com.ogd.stockdiary.domain.report.port.in.CreateFeedbackCommand;
@@ -36,10 +39,12 @@ public class ReportService implements CreateFeedbackUseCase {
     private final FeedbackRepository feedbackRepository;
     private final ReportPromptLoader reportPromptLoader;
     private final ChatModel chatModel;
+    private final ObjectMapper objectMapper;
 
     @Override
     @Transactional
-    public Feedback createFeedbackUseCase(CreateFeedbackCommand command) {
+    public Feedback createFeedbackUseCase(CreateFeedbackCommand command)
+            throws JsonProcessingException {
 
         Retrospection retrospection = retrospectionRepository.getById(command.retrospectionId());
 
@@ -65,8 +70,10 @@ public class ReportService implements CreateFeedbackUseCase {
         // 플레이스 홀더 넣은 유저 메시지 구성
         Message userMessage = promptTemplate.createMessage(variables);
 
+        String modelName = "gpt-4.1-nano";
+
         OpenAiChatOptions options =
-                new OpenAiChatOptions.Builder().model(command.modelName()).maxTokens(400).build();
+                new OpenAiChatOptions.Builder().model(modelName).maxTokens(500).build();
 
         Prompt prompt = new Prompt(List.of(systemMessage, userMessage), options);
 
@@ -75,8 +82,21 @@ public class ReportService implements CreateFeedbackUseCase {
 
         String text = response.getResult().getOutput().getText();
 
+        // JSON 문자열 text(LLM 응답)을 자바 객체로
+        CreateFeedbackResponse dto = objectMapper.readValue(text, CreateFeedbackResponse.class);
+
+        // principle 은 디비에서 JSON으로 저장되기에 다시 JSON 문자열로 변환
+        String principlesJson = objectMapper.writeValueAsString(dto.principles());
+
         // 피드백 객체 생성
-        Feedback feedback = new Feedback(text, retrospection);
+        Feedback feedback =
+                Feedback.builder()
+                        .feedback(text)
+                        .summerizedFeedback(dto.summerizedFeedback())
+                        .market(dto.market())
+                        .principles(principlesJson)
+                        .retrospection(retrospection)
+                        .build();
 
         // 저장
         feedbackRepository.save(feedback);
