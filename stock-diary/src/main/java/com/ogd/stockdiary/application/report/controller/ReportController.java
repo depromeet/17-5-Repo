@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ogd.stockdiary.application.report.dto.Mapper.ReportMapper;
 import com.ogd.stockdiary.application.report.dto.Request.CreateFeedbackRequest;
 import com.ogd.stockdiary.application.report.dto.Response.CreateFeedbackResponse;
@@ -22,7 +23,9 @@ public class ReportController {
 
     @PostMapping("/{retrospectionId}/feedback")
     public ResponseEntity<HttpApiResponse<CreateFeedbackResponse>> CreateFeedback(
-            @RequestBody CreateFeedbackRequest request, @PathVariable Long retrospectionId) {
+            @RequestBody(required = false) CreateFeedbackRequest request,
+            @PathVariable Long retrospectionId)
+            throws JsonProcessingException {
 
         // 요청을 command 객체로 변환
         CreateFeedbackCommand command = ReportMapper.toCommand(request, retrospectionId);

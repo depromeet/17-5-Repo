@@ -5,10 +5,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.stereotype.Service;
@@ -24,22 +26,23 @@ public class AnalysisService {
     private final PromptLoader promptLoader;
     private final ChatModel chatModel;
 
-    public ChatResponse analyze(
-            String modelName, String market, String symbol, LocalDateTime time) {
-        String systemText =
+    public ChatResponse analyze(String market, String symbol, LocalDateTime time) {
+        String userText =
                 """
             Today market is {market} and symbol is {symbol}.
             Time is {time}.
             You should reply to the user's request.
             """;
-        Message systemMessage =
-                new SystemPromptTemplate(systemText)
-                        .createMessage(
-                                Map.of(
-                                        "market", market,
-                                        "symbol", symbol,
-                                        "time", time.toString()));
-        Message userMessage = new UserMessage(promptLoader.getPrompt());
+
+        PromptTemplate promptTemplate = new PromptTemplate(userText);
+
+        Message userMessage =
+                promptTemplate.createMessage(
+                        Map.of("market", market, "symbol", symbol, "time", time.toString()));
+
+        Message systemMessage = new SystemMessage(promptLoader.getPrompt());
+
+        String modelName = "gpt-4.1-nano";
 
         OpenAiChatOptions options =
                 OpenAiChatOptions.builder().model(modelName).maxTokens(250).build();
