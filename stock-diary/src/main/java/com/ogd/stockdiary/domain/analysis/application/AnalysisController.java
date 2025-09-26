@@ -25,7 +25,7 @@ public class AnalysisController {
         this.analysisService = analysisService;
     }
 
-    @GetMapping(value = "v1/{modelName}")
+    @GetMapping(value = "v1")
     public ResponseEntity<HttpApiResponse<AnalysisResponse>> analyze(
             @RequestParam String market,
             @RequestParam String symbol,
