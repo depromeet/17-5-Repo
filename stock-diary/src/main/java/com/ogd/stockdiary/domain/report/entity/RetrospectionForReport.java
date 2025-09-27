@@ -23,11 +23,14 @@ public class RetrospectionForReport {
     @Column(nullable = false, length = 20)
     private String market;
 
+    private String content;
+    
     @Embedded private Order order;
 
-    public RetrospectionForReport(String symbol, String market, Order order) {
+    public RetrospectionForReport(String symbol, String market, Order order, String content) {
         this.symbol = symbol;
         this.market = market;
         this.order = order;
+        this.content = content;
     }
 }
