@@ -37,7 +37,6 @@ jobs:
           echo "IMAGE_TAG=dev-${{ github.sha }}" >> $GITHUB_ENV
           echo "TARGET_IMAGE=${{ env.REGISTRY }}/${{ secrets.DOCKER_ID }}/${{ env.IMAGE_NAME }}:dev-${{ github.sha }}" >> $GITHUB_ENV
           echo "DB_PASSWORD=${{ env.DB_PASSWORD }}" >> $GITHUB_ENV
-          echo "DB_PORT=${{ env.DB_PORT }}" >> $GITHUB_ENV
           echo "DB_URL=${{ env.DB_URL }}" >> $GITHUB_ENV
           echo "DB_USERNAME=${{ env.DB_USERNAME }}" >> $GITHUB_ENV
           echo "OPENAI_API_KEY=${{ env.OPENAI_API_KEY }}" >> $GITHUB_ENV
