@@ -33,13 +33,13 @@ jobs:
           echo "DOCKER_USERNAME=${{ secrets.DOCKER_ID }}" >> $GITHUB_ENV
           echo "DOCKER_PASSWORD=${{ secrets.DOCKER_PW }}" >> $GITHUB_ENV
           echo "CONTAINER_NAME=stock-diary-dev" >> $GITHUB_ENV
-          echo "DEPLOY_PORT=${{ env.DEPLOY_PORT }}" >> $GITHUB_ENV
+          echo "DEPLOY_PORT=${{ vars.DEPLOY_PORT }}" >> $GITHUB_ENV
           echo "IMAGE_TAG=dev-${{ github.sha }}" >> $GITHUB_ENV
           echo "TARGET_IMAGE=${{ env.REGISTRY }}/${{ secrets.DOCKER_ID }}/${{ env.IMAGE_NAME }}:dev-${{ github.sha }}" >> $GITHUB_ENV
-          echo "DB_PASSWORD=${{ env.DB_PASSWORD }}" >> $GITHUB_ENV
-          echo "DB_URL=${{ env.DB_URL }}" >> $GITHUB_ENV
-          echo "DB_USERNAME=${{ env.DB_USERNAME }}" >> $GITHUB_ENV
-          echo "OPENAI_API_KEY=${{ env.OPENAI_API_KEY }}" >> $GITHUB_ENV
+          echo "DB_PASSWORD=${{ vars.DB_PASSWORD }}" >> $GITHUB_ENV
+          echo "DB_URL=${{ vars.DB_URL }}" >> $GITHUB_ENV
+          echo "DB_USERNAME=${{ vars.DB_USERNAME }}" >> $GITHUB_ENV
+          echo "OPENAI_API_KEY=${{ vars.OPENAI_API_KEY }}" >> $GITHUB_ENV
 
       - name: Verify deployment
         run: |
