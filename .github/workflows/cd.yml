@@ -21,7 +21,7 @@ jobs:
   deploy-dev:
     if: github.event.inputs.environment == 'dev'
     name: Deploy to Development
-    runs-on: ubuntu-latest
+    runs-on: homeserver_depromeet
     environment: dev
 
     steps:
@@ -33,118 +33,93 @@ jobs:
           echo "DOCKER_USERNAME=${{ secrets.DOCKER_ID }}" >> $GITHUB_ENV
           echo "DOCKER_PASSWORD=${{ secrets.DOCKER_PW }}" >> $GITHUB_ENV
           echo "CONTAINER_NAME=stock-diary-dev" >> $GITHUB_ENV
-          echo "DEPLOY_PORT=8080" >> $GITHUB_ENV
-          echo "IMAGE_TAG=dev-${{ github.sha }}" >> $GITHUB_ENV
-          echo "TARGET_IMAGE=${{ env.REGISTRY }}/${{ secrets.DOCKER_ID }}/${{ env.IMAGE_NAME }}:dev-${{ github.sha }}" >> $GITHUB_ENV
+          echo "DEPLOY_PORT=${{ vars.DEPLOY_PORT }}" >> $GITHUB_ENV
+          echo "IMAGE_TAG=dev-latest" >> $GITHUB_ENV
+          echo "TARGET_IMAGE=${{ env.REGISTRY }}/${{ secrets.DOCKER_ID }}/${{ env.IMAGE_NAME }}:dev-latest" >> $GITHUB_ENV
+          echo "DB_PASSWORD=${{ vars.DB_PASSWORD }}" >> $GITHUB_ENV
+          echo "DB_URL=${{ vars.DB_URL }}" >> $GITHUB_ENV
+          echo "DB_USERNAME=${{ vars.DB_USERNAME }}" >> $GITHUB_ENV
+          echo "OPENAI_API_KEY=${{ vars.OPENAI_API_KEY }}" >> $GITHUB_ENV
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.PROD_AWS_SECRET_KEY }}
-          aws-region: ap-northeast-2
+      - name: Verify deployment
+        run: |
+          echo "🚀 Starting container deployment to development..."
+          
+          # Login to Docker Hub
+          echo "🔐 Logging into Docker Hub..."
+          echo "$DOCKER_PASSWORD" | docker login docker.io -u "$DOCKER_USERNAME" --password-stdin
+          
+          # Pull Docker image
+          echo "📥 Pulling Docker image: $TARGET_IMAGE"
+          docker pull "$TARGET_IMAGE"
+          
+          # Stop and remove existing container
+          echo "⏹️ Stopping existing container..."
+          docker stop "$CONTAINER_NAME" || true
+          docker rm "$CONTAINER_NAME" || true
+          
+          # Start new container
+          echo "🚀 Starting new container..."
+          docker run -d \
+            --name "$CONTAINER_NAME" \
+            --restart unless-stopped \
+            -p "$DEPLOY_PORT":8080 \
+            -e DB_URL="$DB_URL" \
+            -e DB_USERNAME="$DB_USERNAME" \
+            -e DB_PASSWORD="$DB_PASSWORD" \
+            -e OPENAI_API_KEY="$OPENAI_API_KEY" \
+            "$TARGET_IMAGE"
 
-      - name: Get EC2 deployment parameters from SSM
-        uses: dkershner6/aws-ssm-getparameters-action@v2.0.3
-        id: ssm
-        with:
-          parameterPairs: |
-            /ci/ec2/host = EC2_HOST,
-            /ci/ec2/user = EC2_USER,
-            /ci/ec2/private_key = EC2_PRIVATE_KEY,
-            /ci/ec2/ssh_port = EC2_SSH_PORT,
-            spring.datasource.url = DB_URL,
-            spring.datasource.username = DB_USERNAME,
-            spring.datasource.password = DB_PASSWORD,
-            openai.api.key = OPENAI_API_KEY
-          withDecryption: "true"
+          echo "✅ Development container started successfully"
+          docker ps --filter "name=$CONTAINER_NAME"
 
-      - name: Deploy to development environment
-        uses: appleboy/ssh-action@v0.1.6
-        with:
-          host: ${{ env.EC2_HOST }}
-          username: ${{ env.EC2_USER }}
-          key: ${{ env.EC2_PRIVATE_KEY }}
-          port: ${{ env.EC2_SSH_PORT }}
-          envs: DOCKER_USERNAME,DOCKER_PASSWORD,CONTAINER_NAME,DEPLOY_PORT,TARGET_IMAGE,DB_URL,DB_USERNAME,DB_PASSWORD,OPENAI_API_KEY
-          script: |
-            echo "🚀 Starting container deployment to development..."
+          # Wait for application to start
+          echo "⏳ Waiting for application to start..."
+          sleep 15
 
-            # Login to Docker Hub
-            echo "🔐 Logging into Docker Hub..."
-            echo "$DOCKER_PASSWORD" | docker login docker.io -u "$DOCKER_USERNAME" --password-stdin
+          # Check if container is running
+          if docker ps --filter "name=$CONTAINER_NAME" --filter "status=running" | grep -q $CONTAINER_NAME; then
+            echo "✅ Development container is running successfully"
 
-            # Pull Docker image
-            echo "📥 Pulling Docker image: $TARGET_IMAGE"
-            docker pull "$TARGET_IMAGE"
+            # Show container logs
+            echo "📋 Container logs (last 10 lines):"
+            docker logs --tail 10 "$CONTAINER_NAME"
+          else
+            echo "❌ Development container failed to start"
+            echo "📋 Container logs:"
+            docker logs "$CONTAINER_NAME"
+            exit 1
+          fi
 
-            # Stop and remove existing container
-            echo "⏹️ Stopping existing container..."
-            docker stop "$CONTAINER_NAME" || true
-            docker rm "$CONTAINER_NAME" || true
+          # Clean up old Docker images (keep only current)
+          echo "🧹 Cleaning up old Docker images..."
 
-            # Start new container
-            echo "🚀 Starting new container..."
-            docker run -d \
-              --name "$CONTAINER_NAME" \
-              --restart unless-stopped \
-              -p "$DEPLOY_PORT":8080 \
-              -e DB_URL="$DB_URL" \
-              -e DB_USERNAME="$DB_USERNAME" \
-              -e DB_PASSWORD="$DB_PASSWORD" \
-              -e OPENAI_API_KEY="$OPENAI_API_KEY" \
-              "$TARGET_IMAGE"
+          # Get current running container's image ID
+          CURRENT_IMAGE_ID=$(docker inspect "$CONTAINER_NAME" --format='{{.Image}}' 2>/dev/null || echo "")
 
-            echo "✅ Development container started successfully"
-            docker ps --filter "name=$CONTAINER_NAME"
+          if [ -n "$CURRENT_IMAGE_ID" ]; then
+            echo "Current container image ID: $CURRENT_IMAGE_ID"
 
-            # Wait for application to start
-            echo "⏳ Waiting for application to start..."
-            sleep 15
+            # Remove all juni416/stock-diary images except the current one
+            OLD_IMAGES=$(docker images juni416/stock-diary --format "{{.ID}}" | grep -v "$CURRENT_IMAGE_ID" || echo "")
 
-            # Check if container is running
-            if docker ps --filter "name=$CONTAINER_NAME" --filter "status=running" | grep -q $CONTAINER_NAME; then
-              echo "✅ Development container is running successfully"
-
-              # Show container logs
-              echo "📋 Container logs (last 10 lines):"
-              docker logs --tail 10 "$CONTAINER_NAME"
+            if [ -n "$OLD_IMAGES" ]; then
+              echo "Removing old images (keeping only current):"
+              echo "$OLD_IMAGES"
+              echo "$OLD_IMAGES" | xargs -r docker rmi -f || true
             else
-              echo "❌ Development container failed to start"
-              echo "📋 Container logs:"
-              docker logs "$CONTAINER_NAME"
-              exit 1
+              echo "No old images to clean up"
             fi
+          else
+            echo "⚠️ Could not get current container image ID"
+          fi
 
-            # Clean up old Docker images (keep only current)
-            echo "🧹 Cleaning up old Docker images..."
+          # Clean up dangling images
+          echo "Cleaning up dangling images..."
+          docker image prune -f || true
 
-            # Get current running container's image ID
-            CURRENT_IMAGE_ID=$(docker inspect "$CONTAINER_NAME" --format='{{.Image}}' 2>/dev/null || echo "")
-
-            if [ -n "$CURRENT_IMAGE_ID" ]; then
-              echo "Current container image ID: $CURRENT_IMAGE_ID"
-
-              # Remove all juni416/stock-diary images except the current one
-              OLD_IMAGES=$(docker images juni416/stock-diary --format "{{.ID}}" | grep -v "$CURRENT_IMAGE_ID" || echo "")
-
-              if [ -n "$OLD_IMAGES" ]; then
-                echo "Removing old images (keeping only current):"
-                echo "$OLD_IMAGES"
-                echo "$OLD_IMAGES" | xargs -r docker rmi -f || true
-              else
-                echo "No old images to clean up"
-              fi
-            else
-              echo "⚠️ Could not get current container image ID"
-            fi
-
-            # Clean up dangling images
-            echo "Cleaning up dangling images..."
-            docker image prune -f || true
-
-            echo "🎉 Development deployment completed successfully!"
-            echo "🌐 Access URL: http://localhost:$DEPLOY_PORT"
+          echo "🎉 Development deployment completed successfully!"
+          echo "🌐 Access URL: http://localhost:$DEPLOY_PORT"
 
   deploy-prod:
     if: github.event.inputs.environment == 'prod'
