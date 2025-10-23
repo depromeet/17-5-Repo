@@ -6,7 +6,8 @@ import lombok.Getter;
 /**
  * 파일 업로드 응답 DTO
  *
- * <p><b>⚠️ 테스트 전용 - 추후 삭제 예정</b>
+ * <p>
+ * <b>⚠️ 테스트 전용 - 추후 삭제 예정</b>
  */
 @Getter
 @AllArgsConstructor

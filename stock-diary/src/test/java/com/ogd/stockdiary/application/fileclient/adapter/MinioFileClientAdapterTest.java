@@ -20,13 +20,16 @@ import com.ogd.stockdiary.exception.ApplicationException;
 /**
  * MinioFileClientAdapter 통합 테스트
  *
- * <p>실제 MinIO 서버와 통신하여 파일 업로드/다운로드를 테스트합니다.
+ * <p>
+ * 실제 MinIO 서버와 통신하여 파일 업로드/다운로드를 테스트합니다.
  *
- * <p><b>주의:</b> 이 테스트를 실행하려면:
+ * <p>
+ * <b>주의:</b> 이 테스트를 실행하려면:
  *
  * <ul>
- *   <li>MinIO 서버가 실행 중이어야 합니다.
- *   <li>src/test/resources/application.yml 파일이 있어야 합니다. (application.yml.example 참고)
+ * <li>MinIO 서버가 실행 중이어야 합니다.
+ * <li>src/test/resources/application.yml 파일이 있어야 합니다. (application.yml.example
+ * 참고)
  * </ul>
  */
 class MinioFileClientAdapterTest {
@@ -44,14 +47,12 @@ class MinioFileClientAdapterTest {
         String endpoint = System.getenv("STORAGE_ENDPOINT");
         String accessKey = System.getenv("STORAGE_ACCESS_KEY");
         String secretKey = System.getenv("STORAGE_SECRET_KEY");
-        String region =
-                System.getenv("STORAGE_REGION") != null
-                        ? System.getenv("STORAGE_REGION")
-                        : "us-east-1";
-        this.testBucket =
-                System.getenv("STORAGE_BUCKET") != null
-                        ? System.getenv("STORAGE_BUCKET")
-                        : "depromeet";
+        String region = System.getenv("STORAGE_REGION") != null
+            ? System.getenv("STORAGE_REGION")
+            : "us-east-1";
+        this.testBucket = System.getenv("STORAGE_BUCKET") != null
+            ? System.getenv("STORAGE_BUCKET")
+            : "depromeet";
 
         // MinioFileClientAdapter 직접 생성
         fileClient = new MinioFileClientAdapter(endpoint, testBucket, accessKey, secretKey, region);
@@ -115,8 +116,7 @@ class MinioFileClientAdapterTest {
         File downloadedFile = new File(localFilePath);
         assertThat(downloadedFile).exists();
 
-        String downloadedContent =
-                new String(Files.readAllBytes(downloadedFile.toPath()), StandardCharsets.UTF_8);
+        String downloadedContent = new String(Files.readAllBytes(downloadedFile.toPath()), StandardCharsets.UTF_8);
         assertThat(downloadedContent).isEqualTo(TEST_FILE_CONTENT);
 
         // 테스트 파일 삭제
@@ -155,9 +155,9 @@ class MinioFileClientAdapterTest {
 
         // when & then
         assertThatThrownBy(() -> fileClient.getDownloadPreSignedUrl(nonExistentObjectKey, ttl))
-                .isInstanceOf(ApplicationException.class)
-                .hasFieldOrPropertyWithValue("code", CodeEnum.FRS_003)
-                .hasMessageContaining("파일을 찾을 수 없습니다");
+            .isInstanceOf(ApplicationException.class)
+            .hasFieldOrPropertyWithValue("code", CodeEnum.FRS_003)
+            .hasMessageContaining("파일을 찾을 수 없습니다");
     }
 
     @Test

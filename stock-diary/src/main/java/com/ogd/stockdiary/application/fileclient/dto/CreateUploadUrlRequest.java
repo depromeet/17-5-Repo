@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 /**
  * 업로드 URL 생성 요청 DTO
  *
- * <p><b>⚠️ 테스트 전용 - 추후 삭제 예정</b>
+ * <p>
+ * <b>⚠️ 테스트 전용 - 추후 삭제 예정</b>
  */
 @Getter
 @NoArgsConstructor

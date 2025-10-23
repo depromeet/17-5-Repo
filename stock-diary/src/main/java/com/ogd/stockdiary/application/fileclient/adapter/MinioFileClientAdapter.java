@@ -31,9 +31,13 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 /**
  * MinIO 파일 클라이언트 어댑터
  *
- * <p>AWS SDK S3를 사용하여 MinIO와 통신합니다. MinIO는 S3 호환 API를 제공하므로 AWS SDK를 그대로 사용할 수 있습니다.
+ * <p>
+ * AWS SDK S3를 사용하여 MinIO와 통신합니다. MinIO는 S3 호환 API를 제공하므로 AWS SDK를 그대로 사용할 수
+ * 있습니다.
  *
- * <p><b>AWS S3로 전환시:</b> 구현체를 S3FileClientAdapter로 교체하고, application.yml에서 cloud.storage.endpoint
+ * <p>
+ * <b>AWS S3로 전환시:</b> 구현체를 S3FileClientAdapter로 교체하고, application.yml에서
+ * cloud.storage.endpoint
  * 설정을 제거하면 됩니다. endpointOverride 없이 S3Client를 생성하면 AWS S3에 연결됩니다.
  */
 @Component
@@ -45,65 +49,60 @@ public class MinioFileClientAdapter implements FileClientPort {
     private final S3Presigner s3Presigner;
 
     public MinioFileClientAdapter(
-            @Value("${cloud.storage.endpoint}") String endpoint,
-            @Value("${cloud.storage.bucket}") String bucketName,
-            @Value("${cloud.storage.access-key}") String accessKey,
-            @Value("${cloud.storage.secret-key}") String secretKey,
-            @Value("${cloud.storage.region:us-east-1}") String region) {
+        @Value("${cloud.storage.endpoint}") String endpoint,
+        @Value("${cloud.storage.bucket}") String bucketName,
+        @Value("${cloud.storage.access-key}") String accessKey,
+        @Value("${cloud.storage.secret-key}") String secretKey,
+        @Value("${cloud.storage.region:us-east-1}") String region) {
         this.bucketName = bucketName;
 
         logger.info(
-                "Initializing MinIO client with endpoint: {} and bucket: {}", endpoint, bucketName);
+            "Initializing MinIO client with endpoint: {} and bucket: {}", endpoint, bucketName);
 
         AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
-        StaticCredentialsProvider credentialsProvider =
-                StaticCredentialsProvider.create(credentials);
+        StaticCredentialsProvider credentialsProvider = StaticCredentialsProvider.create(credentials);
 
         // MinIO용 S3 Client 생성
-        this.s3Client =
-                S3Client.builder()
-                        .endpointOverride(URI.create(endpoint)) // MinIO 엔드포인트 설정
-                        .region(Region.of(region)) // MinIO는 region을 무시하지만 필수 설정
-                        .credentialsProvider(credentialsProvider)
-                        .forcePathStyle(true) // MinIO는 path-style 필수
-                        .build();
+        this.s3Client = S3Client.builder()
+            .endpointOverride(URI.create(endpoint)) // MinIO 엔드포인트 설정
+            .region(Region.of(region)) // MinIO는 region을 무시하지만 필수 설정
+            .credentialsProvider(credentialsProvider)
+            .forcePathStyle(true) // MinIO는 path-style 필수
+            .build();
 
         // MinIO용 S3 Presigner 생성
-        this.s3Presigner =
-                S3Presigner.builder()
-                        .endpointOverride(URI.create(endpoint))
-                        .region(Region.of(region))
-                        .credentialsProvider(credentialsProvider)
-                        .build();
+        this.s3Presigner = S3Presigner.builder()
+            .endpointOverride(URI.create(endpoint))
+            .region(Region.of(region))
+            .credentialsProvider(credentialsProvider)
+            .build();
 
         // AWS S3로 전환시 주석 해제:
         // this.s3Client = S3Client.builder()
-        //     .region(Region.of(region))  // 실제 AWS region 사용 (예: ap-northeast-2)
-        //     .credentialsProvider(credentialsProvider)
-        //     .forcePathStyle(false)  // AWS S3는 virtual-hosted-style 권장
-        //     .build();
+        // .region(Region.of(region)) // 실제 AWS region 사용 (예: ap-northeast-2)
+        // .credentialsProvider(credentialsProvider)
+        // .forcePathStyle(false) // AWS S3는 virtual-hosted-style 권장
+        // .build();
         //
         // this.s3Presigner = S3Presigner.builder()
-        //     .region(Region.of(region))
-        //     .credentialsProvider(credentialsProvider)
-        //     .build();
+        // .region(Region.of(region))
+        // .credentialsProvider(credentialsProvider)
+        // .build();
     }
 
     @Override
     public String createPreSignedUrl(String objectKey, int ttl) {
         logger.info(
-                "Generating presigned upload URL for object: {} in bucket: {}",
-                objectKey,
-                bucketName);
+            "Generating presigned upload URL for object: {} in bucket: {}",
+            objectKey,
+            bucketName);
 
-        PutObjectRequest putObjectRequest =
-                PutObjectRequest.builder().bucket(bucketName).key(objectKey).build();
+        PutObjectRequest putObjectRequest = PutObjectRequest.builder().bucket(bucketName).key(objectKey).build();
 
-        PutObjectPresignRequest presignRequest =
-                PutObjectPresignRequest.builder()
-                        .signatureDuration(Duration.ofSeconds(ttl))
-                        .putObjectRequest(putObjectRequest)
-                        .build();
+        PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
+            .signatureDuration(Duration.ofSeconds(ttl))
+            .putObjectRequest(putObjectRequest)
+            .build();
 
         return s3Presigner.presignPutObject(presignRequest).url().toString();
     }
@@ -111,10 +110,9 @@ public class MinioFileClientAdapter implements FileClientPort {
     @Override
     public void downloadFile(String objectKey, String localFilePath) {
         logger.info(
-                "Downloading object {} from bucket {} to {}", objectKey, bucketName, localFilePath);
+            "Downloading object {} from bucket {} to {}", objectKey, bucketName, localFilePath);
 
-        GetObjectRequest getObjectRequest =
-                GetObjectRequest.builder().bucket(bucketName).key(objectKey).build();
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder().bucket(bucketName).key(objectKey).build();
 
         s3Client.getObject(getObjectRequest, new File(localFilePath).toPath());
     }
@@ -123,8 +121,7 @@ public class MinioFileClientAdapter implements FileClientPort {
     public void uploadFile(InputStream inputStream, String objectKey, long contentLength) {
         logger.info("Uploading object {} to bucket {} with stream", objectKey, bucketName);
 
-        PutObjectRequest putObjectRequest =
-                PutObjectRequest.builder().bucket(bucketName).key(objectKey).build();
+        PutObjectRequest putObjectRequest = PutObjectRequest.builder().bucket(bucketName).key(objectKey).build();
 
         RequestBody requestBody = RequestBody.fromInputStream(inputStream, contentLength);
 
@@ -136,26 +133,24 @@ public class MinioFileClientAdapter implements FileClientPort {
         // 파일 존재 여부 확인
         try {
             s3Client.headObject(
-                    HeadObjectRequest.builder().bucket(bucketName).key(objectKey).build());
+                HeadObjectRequest.builder().bucket(bucketName).key(objectKey).build());
         } catch (NoSuchKeyException e) {
             logger.error("Object not found in bucket {}: {}", bucketName, objectKey);
             throw new ApplicationException(
-                    CodeEnum.FRS_003, "파일을 찾을 수 없습니다", Map.of("objectKey", objectKey));
+                CodeEnum.FRS_003, "파일을 찾을 수 없습니다", Map.of("objectKey", objectKey));
         }
 
         logger.info(
-                "Generating presigned download URL for object: {} in bucket: {}",
-                objectKey,
-                bucketName);
+            "Generating presigned download URL for object: {} in bucket: {}",
+            objectKey,
+            bucketName);
 
-        GetObjectRequest getObjectRequest =
-                GetObjectRequest.builder().bucket(bucketName).key(objectKey).build();
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder().bucket(bucketName).key(objectKey).build();
 
-        GetObjectPresignRequest presignRequest =
-                GetObjectPresignRequest.builder()
-                        .signatureDuration(Duration.ofSeconds(ttl))
-                        .getObjectRequest(getObjectRequest)
-                        .build();
+        GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
+            .signatureDuration(Duration.ofSeconds(ttl))
+            .getObjectRequest(getObjectRequest)
+            .build();
 
         return s3Presigner.presignGetObject(presignRequest).url().toString();
     }
