@@ -6,6 +6,16 @@ apple:
   key-id: ${APPLE_KEY_ID:YOUR_KEY_ID}
   private-key: ${APPLE_PRIVATE_KEY:BASE64_ENCODED_PRIVATE_KEY}
 
+# Cloud Storage 설정 (MinIO / AWS S3)
+cloud:
+  storage:
+    endpoint: ${STORAGE_ENDPOINT}
+    access-key: ${STORAGE_ACCESS_KEY}
+    secret-key: ${STORAGE_SECRET_KEY}
+    region: ${STORAGE_REGION:us-east-1}
+    bucket: ${STORAGE_BUCKET:depromeet}
+    # AWS S3로 전환시: endpoint를 제거하고 region만 사용 (예: ap-northeast-2)
+
 spring:
   jpa:
     hibernate:
