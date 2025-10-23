@@ -25,9 +25,9 @@ public class ReportController {
 
     @PostMapping("/{retrospectionId}/feedback")
     public ResponseEntity<HttpApiResponse<CreateFeedbackResponse>> CreateFeedback(
-            @RequestBody(required = false) CreateFeedbackRequest request,
-            @PathVariable Long retrospectionId)
-            throws JsonProcessingException {
+        @RequestBody(required = false) CreateFeedbackRequest request,
+        @PathVariable Long retrospectionId)
+        throws JsonProcessingException {
 
         // 요청을 command 객체로 변환
         CreateFeedbackCommand command = ReportMapper.toCommand(request, retrospectionId);

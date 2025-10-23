@@ -34,11 +34,11 @@ public class Order {
     private LocalDate orderDate;
 
     public Order(
-            OrderType orderType,
-            BigDecimal price,
-            Currency currency,
-            Integer volume,
-            LocalDate orderDate) {
+        OrderType orderType,
+        BigDecimal price,
+        Currency currency,
+        Integer volume,
+        LocalDate orderDate) {
         validatePrice(price);
         validateVolume(volume);
 

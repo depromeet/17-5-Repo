@@ -11,10 +11,9 @@ import com.ogd.stockdiary.domain.user.entity.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    @Query(
-            "SELECT u FROM User u WHERE u.oAuthProviderInfo.oauthProvider = :provider AND u.oAuthProviderInfo.subject = :subject")
+    @Query("SELECT u FROM User u WHERE u.oAuthProviderInfo.oauthProvider = :provider AND u.oAuthProviderInfo.subject = :subject")
     Optional<User> findByOAuthProviderAndSubject(
-            @Param("provider") OAuthProvider provider, @Param("subject") String subject);
+        @Param("provider") OAuthProvider provider, @Param("subject") String subject);
 
     Optional<User> findByEmail(String email);
 }

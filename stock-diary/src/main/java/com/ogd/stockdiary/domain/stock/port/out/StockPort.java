@@ -9,5 +9,5 @@ public interface StockPort {
     String getToken();
 
     StockChartData getChartData(
-            String market, String symbol, LocalDate endDate, StockInterval interval);
+        String market, String symbol, LocalDate endDate, StockInterval interval);
 }

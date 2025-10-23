@@ -14,6 +14,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
+import com.ogd.stockdiary.domain.principlegroup.entity.PrincipleGroup;
 import com.ogd.stockdiary.domain.user.entity.User;
 
 import lombok.Getter;
@@ -25,6 +26,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class InvestmentPrinciple {
 
+    public static final int MAX_PRINCIPLES_PER_GROUP = 5;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -33,7 +36,14 @@ public class InvestmentPrinciple {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "group_id")
+    private PrincipleGroup principleGroup;
+
     private String principle;
+
+    @Column(name = "display_order")
+    private Integer displayOrder;
 
     @Column(updatable = false)
     private LocalDateTime createdAt;
@@ -58,7 +68,21 @@ public class InvestmentPrinciple {
         return investmentPrinciple;
     }
 
+    public static InvestmentPrinciple create(
+        User user, PrincipleGroup principleGroup, String principle, Integer displayOrder) {
+        InvestmentPrinciple investmentPrinciple = new InvestmentPrinciple();
+        investmentPrinciple.user = user;
+        investmentPrinciple.principleGroup = principleGroup;
+        investmentPrinciple.principle = principle;
+        investmentPrinciple.displayOrder = displayOrder;
+        return investmentPrinciple;
+    }
+
     public void updatePrinciple(String principle) {
         this.principle = principle;
+    }
+
+    public void updateDisplayOrder(Integer displayOrder) {
+        this.displayOrder = displayOrder;
     }
 }

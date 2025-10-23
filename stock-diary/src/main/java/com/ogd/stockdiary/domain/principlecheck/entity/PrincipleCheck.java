@@ -58,7 +58,7 @@ public class PrincipleCheck {
     }
 
     public static PrincipleCheck create(
-            Retrospection retrospection, InvestmentPrinciple principle, Boolean isFollowed) {
+        Retrospection retrospection, InvestmentPrinciple principle, Boolean isFollowed) {
         PrincipleCheck principleCheck = new PrincipleCheck();
         principleCheck.retrospection = retrospection;
         principleCheck.principle = principle;

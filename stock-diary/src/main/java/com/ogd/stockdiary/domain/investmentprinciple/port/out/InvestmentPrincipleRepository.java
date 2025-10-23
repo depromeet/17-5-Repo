@@ -18,4 +18,8 @@ public interface InvestmentPrincipleRepository {
     void deleteByIdAndUserId(Long principleId, Long userId);
 
     void deleteAllByIdInAndUserId(List<Long> principleIds, Long userId);
+
+    List<InvestmentPrinciple> findByPrincipleGroupId(Long groupId);
+
+    void deleteByPrincipleGroupId(Long groupId);
 }

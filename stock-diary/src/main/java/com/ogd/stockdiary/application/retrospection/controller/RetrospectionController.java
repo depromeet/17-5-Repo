@@ -35,7 +35,7 @@ public class RetrospectionController {
     @PostMapping
     @Operation(summary = "회고 생성", description = "주식 거래 회고를 생성합니다.")
     public HttpApiResponse<CreateRetrospectionResponse> createRetrospection(
-            @Valid @RequestBody CreateRetrospectionRequest request) {
+        @Valid @RequestBody CreateRetrospectionRequest request) {
 
         // TODO: Spring Security에서 User 정보 가져오기
         Long userId = 1L; // 임시로 하드코딩
@@ -50,13 +50,12 @@ public class RetrospectionController {
     @GetMapping("/{retrospectionId}")
     @Operation(summary = "회고 조회", description = "특정 회고를 조회합니다.")
     public HttpApiResponse<GetRetrospectionResponse> getRetrospection(
-            @PathVariable Long retrospectionId) {
+        @PathVariable Long retrospectionId) {
 
         // TODO: Spring Security에서 User 정보 가져오기
         Long userId = 1L; // 임시로 하드코딩
 
-        GetRetrospectionResponse response =
-                getRetrospectionUseCase.getRetrospection(retrospectionId, userId);
+        GetRetrospectionResponse response = getRetrospectionUseCase.getRetrospection(retrospectionId, userId);
 
         return HttpApiResponse.of(response);
     }

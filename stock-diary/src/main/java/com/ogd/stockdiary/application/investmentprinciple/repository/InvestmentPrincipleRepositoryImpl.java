@@ -45,4 +45,15 @@ public class InvestmentPrincipleRepositoryImpl implements InvestmentPrincipleRep
     public void deleteAllByIdInAndUserId(List<Long> principleIds, Long userId) {
         jpaInvestmentPrincipleRepository.deleteAllByIdInAndUserId(principleIds, userId);
     }
+
+    @Override
+    public List<InvestmentPrinciple> findByPrincipleGroupId(Long groupId) {
+        return jpaInvestmentPrincipleRepository.findByPrincipleGroupIdOrderByDisplayOrderAsc(
+            groupId);
+    }
+
+    @Override
+    public void deleteByPrincipleGroupId(Long groupId) {
+        jpaInvestmentPrincipleRepository.deleteByPrincipleGroupId(groupId);
+    }
 }

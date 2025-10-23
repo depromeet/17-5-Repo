@@ -35,11 +35,11 @@ public class Feedback {
 
     @Builder
     public Feedback(
-            String feedback,
-            String summerizedFeedback,
-            String market,
-            String principles,
-            Retrospection retrospection) {
+        String feedback,
+        String summerizedFeedback,
+        String market,
+        String principles,
+        Retrospection retrospection) {
         this.feedback = feedback;
         this.summerizedFeedback = summerizedFeedback;
         this.market = market;

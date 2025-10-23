@@ -23,8 +23,13 @@ public interface JpaInvestmentPrincipleRepository extends JpaRepository<Investme
     void deleteByIdAndUserId(@Param("principleId") Long principleId, @Param("userId") Long userId);
 
     @Modifying
-    @Query(
-            "DELETE FROM InvestmentPrinciple ip WHERE ip.id IN :principleIds AND ip.user.id = :userId")
+    @Query("DELETE FROM InvestmentPrinciple ip WHERE ip.id IN :principleIds AND ip.user.id = :userId")
     void deleteAllByIdInAndUserId(
-            @Param("principleIds") List<Long> principleIds, @Param("userId") Long userId);
+        @Param("principleIds") List<Long> principleIds, @Param("userId") Long userId);
+
+    List<InvestmentPrinciple> findByPrincipleGroupIdOrderByDisplayOrderAsc(Long groupId);
+
+    @Modifying
+    @Query("DELETE FROM InvestmentPrinciple ip WHERE ip.principleGroup.id = :groupId")
+    void deleteByPrincipleGroupId(@Param("groupId") Long groupId);
 }

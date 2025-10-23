@@ -23,19 +23,18 @@ public class RetrospectionRepositoryImpl implements RetrospectionRepository {
     @Override
     public Retrospection getById(Long id) {
         return jpaRetrospectionRepository
-                .findById(id)
-                .orElseThrow(
-                        () -> new ApplicationException(CodeEnum.FRS_003, "회고를 찾을 수 없습니다: " + id));
+            .findById(id)
+            .orElseThrow(
+                () -> new ApplicationException(CodeEnum.FRS_003, "회고를 찾을 수 없습니다: " + id));
     }
 
     @Override
     public Retrospection findByIdAndUserId(Long id, Long userId) {
         return jpaRetrospectionRepository
-                .findByIdAndUserId(id, userId)
-                .orElseThrow(
-                        () ->
-                                new ApplicationException(
-                                        CodeEnum.FRS_003,
-                                        "유저(" + userId + ")에 해당하는 회고(" + id + ")를 찾을 수 없습니다: "));
+            .findByIdAndUserId(id, userId)
+            .orElseThrow(
+                () -> new ApplicationException(
+                    CodeEnum.FRS_003,
+                    "유저(" + userId + ")에 해당하는 회고(" + id + ")를 찾을 수 없습니다: "));
     }
 }

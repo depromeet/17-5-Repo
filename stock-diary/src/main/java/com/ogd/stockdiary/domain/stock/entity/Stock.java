@@ -17,13 +17,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(
-        name = "stock",
-        uniqueConstraints = {
-            @UniqueConstraint(
-                    name = "uk_market_code",
-                    columnNames = {"market", "code"})
-        })
+@Table(name = "stock", uniqueConstraints = {
+    @UniqueConstraint(name = "uk_market_code", columnNames = {"market", "code"})
+})
 @Getter
 @NoArgsConstructor
 public class Stock {

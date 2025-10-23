@@ -17,27 +17,26 @@ import com.ogd.stockdiary.domain.user.entity.User;
 public class RetrospectionMapper {
 
     public static CreateRetrospectionCommand toCommand(
-            CreateRetrospectionRequest request, Long userId) {
-        List<PrincipleCheckCommand> principleCheckCommands =
-                request.getPrincipleChecks() != null
-                        ? request.getPrincipleChecks().stream()
-                                .map(RetrospectionMapper::toPrincipleCheckCommand)
-                                .toList()
-                        : Collections.emptyList();
+        CreateRetrospectionRequest request, Long userId) {
+        List<PrincipleCheckCommand> principleCheckCommands = request.getPrincipleChecks() != null
+            ? request.getPrincipleChecks().stream()
+                .map(RetrospectionMapper::toPrincipleCheckCommand)
+                .toList()
+            : Collections.emptyList();
 
         return new CreateRetrospectionCommand(
-                userId,
-                request.getSymbol(),
-                request.getMarket(),
-                request.getOrderType(),
-                request.getPrice(),
-                request.getCurrency(),
-                request.getVolume(),
-                request.getOrderDate(),
-                request.getReturnRate(),
-                request.getContent(),
-                request.getEmotion(),
-                principleCheckCommands);
+            userId,
+            request.getSymbol(),
+            request.getMarket(),
+            request.getOrderType(),
+            request.getPrice(),
+            request.getCurrency(),
+            request.getVolume(),
+            request.getOrderDate(),
+            request.getReturnRate(),
+            request.getContent(),
+            request.getEmotion(),
+            principleCheckCommands);
     }
 
     private static PrincipleCheckCommand toPrincipleCheckCommand(PrincipleCheckRequest request) {
@@ -46,68 +45,65 @@ public class RetrospectionMapper {
 
     public static CreateRetrospectionResponse toResponse(Retrospection retrospection) {
         return new CreateRetrospectionResponse(
-                retrospection.getId(),
-                retrospection.getUser().getId(),
-                retrospection.getSymbol(),
-                retrospection.getMarket(),
-                retrospection.getOrder().getOrderType(),
-                retrospection.getOrder().getPrice(),
-                retrospection.getOrder().getCurrency(),
-                retrospection.getOrder().getVolume(),
-                retrospection.getOrder().getOrderDate(),
-                retrospection.getReturnRate(),
-                retrospection.getContent(),
-                retrospection.getEmotion(),
-                retrospection.getCreatedAt(),
-                retrospection.getUpdatedAt());
+            retrospection.getId(),
+            retrospection.getUser().getId(),
+            retrospection.getSymbol(),
+            retrospection.getMarket(),
+            retrospection.getOrder().getOrderType(),
+            retrospection.getOrder().getPrice(),
+            retrospection.getOrder().getCurrency(),
+            retrospection.getOrder().getVolume(),
+            retrospection.getOrder().getOrderDate(),
+            retrospection.getReturnRate(),
+            retrospection.getContent(),
+            retrospection.getEmotion(),
+            retrospection.getCreatedAt(),
+            retrospection.getUpdatedAt());
     }
 
     public static Retrospection toEntity(CreateRetrospectionCommand command, User user) {
-        Order order =
-                new Order(
-                        command.getOrderType(),
-                        command.getPrice(),
-                        command.getCurrency(),
-                        command.getVolume(),
-                        command.getOrderDate());
+        Order order = new Order(
+            command.getOrderType(),
+            command.getPrice(),
+            command.getCurrency(),
+            command.getVolume(),
+            command.getOrderDate());
 
         return new Retrospection(
-                user,
-                command.getSymbol(),
-                command.getMarket(),
-                order,
-                command.getReturnRate(),
-                command.getContent(),
-                command.getEmotion());
+            user,
+            command.getSymbol(),
+            command.getMarket(),
+            order,
+            command.getReturnRate(),
+            command.getContent(),
+            command.getEmotion());
     }
 
     public static GetRetrospectionResponse toGetResponse(
-            Retrospection retrospection, List<PrincipleCheck> principleChecks) {
-        List<GetRetrospectionResponse.PrincipleCheckResponse> principleCheckResponses =
-                principleChecks.stream()
-                        .map(
-                                pc ->
-                                        new GetRetrospectionResponse.PrincipleCheckResponse(
-                                                pc.getPrinciple().getId(),
-                                                pc.getPrinciple().getPrinciple(),
-                                                pc.getIsFollowed()))
-                        .toList();
+        Retrospection retrospection, List<PrincipleCheck> principleChecks) {
+        List<GetRetrospectionResponse.PrincipleCheckResponse> principleCheckResponses = principleChecks.stream()
+            .map(
+                pc -> new GetRetrospectionResponse.PrincipleCheckResponse(
+                    pc.getPrinciple().getId(),
+                    pc.getPrinciple().getPrinciple(),
+                    pc.getIsFollowed()))
+            .toList();
 
         return new GetRetrospectionResponse(
-                retrospection.getId(),
-                retrospection.getUser().getId(),
-                retrospection.getSymbol(),
-                retrospection.getMarket(),
-                retrospection.getOrder().getOrderType(),
-                retrospection.getOrder().getPrice(),
-                retrospection.getOrder().getCurrency(),
-                retrospection.getOrder().getVolume(),
-                retrospection.getOrder().getOrderDate(),
-                retrospection.getReturnRate(),
-                retrospection.getContent(),
-                retrospection.getEmotion(),
-                principleCheckResponses,
-                retrospection.getCreatedAt(),
-                retrospection.getUpdatedAt());
+            retrospection.getId(),
+            retrospection.getUser().getId(),
+            retrospection.getSymbol(),
+            retrospection.getMarket(),
+            retrospection.getOrder().getOrderType(),
+            retrospection.getOrder().getPrice(),
+            retrospection.getOrder().getCurrency(),
+            retrospection.getOrder().getVolume(),
+            retrospection.getOrder().getOrderDate(),
+            retrospection.getReturnRate(),
+            retrospection.getContent(),
+            retrospection.getEmotion(),
+            principleCheckResponses,
+            retrospection.getCreatedAt(),
+            retrospection.getUpdatedAt());
     }
 }

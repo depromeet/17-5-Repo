@@ -17,13 +17,11 @@ public class RetrospectionForReportRepositoryImpl implements RetrospectionForRep
 
     @Override
     public RetrospectionForReport getById(Long id) {
-        RetrospectionForReport report =
-                jpaRetrospectionForReportRepository
-                        .findById(id)
-                        .orElseThrow(
-                                () ->
-                                        new ApplicationException(
-                                                CodeEnum.FRS_003, "회고를 찾을 수 없습니다" + id));
+        RetrospectionForReport report = jpaRetrospectionForReportRepository
+            .findById(id)
+            .orElseThrow(
+                () -> new ApplicationException(
+                    CodeEnum.FRS_003, "회고를 찾을 수 없습니다" + id));
 
         return report;
     }

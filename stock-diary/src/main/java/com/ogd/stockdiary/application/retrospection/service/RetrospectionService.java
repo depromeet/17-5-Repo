@@ -38,14 +38,12 @@ public class RetrospectionService implements CreateRetrospectionUseCase, GetRetr
     @Transactional
     public Retrospection createRetrospection(CreateRetrospectionCommand command) {
         // 사용자 조회
-        User user =
-                userRepository
-                        .findById(command.getUserId())
-                        .orElseThrow(
-                                () ->
-                                        new ApplicationException(
-                                                CodeEnum.FRS_003,
-                                                "사용자를 찾을 수 없습니다: " + command.getUserId()));
+        User user = userRepository
+            .findById(command.getUserId())
+            .orElseThrow(
+                () -> new ApplicationException(
+                    CodeEnum.FRS_003,
+                    "사용자를 찾을 수 없습니다: " + command.getUserId()));
 
         // 엔티티 생성
         Retrospection retrospection = RetrospectionMapper.toEntity(command, user);
@@ -62,29 +60,26 @@ public class RetrospectionService implements CreateRetrospectionUseCase, GetRetr
     }
 
     private void savePrincipleChecks(
-            Retrospection retrospection,
-            List<PrincipleCheckCommand> principleCheckCommands,
-            Long userId) {
-        List<PrincipleCheck> principleChecks =
-                principleCheckCommands.stream()
-                        .map(
-                                command -> {
-                                    InvestmentPrinciple principle =
-                                            investmentPrincipleRepository
-                                                    .findByIdAndUserId(
-                                                            command.getPrincipleId(), userId)
-                                                    .orElseThrow(
-                                                            () ->
-                                                                    new ApplicationException(
-                                                                            CodeEnum.FRS_003,
-                                                                            "투자원칙을 찾을 수 없습니다: "
-                                                                                    + command
-                                                                                            .getPrincipleId()));
+        Retrospection retrospection,
+        List<PrincipleCheckCommand> principleCheckCommands,
+        Long userId) {
+        List<PrincipleCheck> principleChecks = principleCheckCommands.stream()
+            .map(
+                command -> {
+                    InvestmentPrinciple principle = investmentPrincipleRepository
+                        .findByIdAndUserId(
+                            command.getPrincipleId(), userId)
+                        .orElseThrow(
+                            () -> new ApplicationException(
+                                CodeEnum.FRS_003,
+                                "투자원칙을 찾을 수 없습니다: "
+                                    + command
+                                        .getPrincipleId()));
 
-                                    return PrincipleCheck.create(
-                                            retrospection, principle, command.getIsFollowed());
-                                })
-                        .toList();
+                    return PrincipleCheck.create(
+                        retrospection, principle, command.getIsFollowed());
+                })
+            .toList();
 
         principleCheckRepository.saveAll(principleChecks);
     }
@@ -92,12 +87,10 @@ public class RetrospectionService implements CreateRetrospectionUseCase, GetRetr
     @Override
     @Transactional(readOnly = true)
     public GetRetrospectionResponse getRetrospection(Long retrospectionId, Long userId) {
-        Retrospection retrospection =
-                retrospectionRepository.findByIdAndUserId(retrospectionId, userId);
-        List<PrincipleCheck> principleChecks =
-                principleCheckRepository.findByRetrospectionId(retrospectionId).stream()
-                        .filter(pc -> Boolean.TRUE.equals(pc.getIsFollowed()))
-                        .toList();
+        Retrospection retrospection = retrospectionRepository.findByIdAndUserId(retrospectionId, userId);
+        List<PrincipleCheck> principleChecks = principleCheckRepository.findByRetrospectionId(retrospectionId).stream()
+            .filter(pc -> Boolean.TRUE.equals(pc.getIsFollowed()))
+            .toList();
 
         return RetrospectionMapper.toGetResponse(retrospection, principleChecks);
     }
