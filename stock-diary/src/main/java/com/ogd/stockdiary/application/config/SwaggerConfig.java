@@ -10,12 +10,7 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 
 @Configuration
 @OpenAPIDefinition(info = @Info(title = "Stock Diary API", version = "1.0"))
-@SecurityScheme(
-        name = SwaggerConfig.SECURITY_SCHEME_NAME,
-        type = SecuritySchemeType.HTTP,
-        scheme = "bearer",
-        bearerFormat = "JWT",
-        description = "Token Authentication")
+@SecurityScheme(name = SwaggerConfig.SECURITY_SCHEME_NAME, type = SecuritySchemeType.HTTP, scheme = "bearer", bearerFormat = "JWT", description = "Token Authentication")
 public class SwaggerConfig {
     public static final String SECURITY_SCHEME_NAME = "BearerAuth";
 

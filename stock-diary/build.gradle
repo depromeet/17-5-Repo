@@ -74,13 +74,13 @@ dependencies {
 
 spotless {
     java {
-        // Google Java 포맷 적용
+        // Eclipse 포맷 적용
         /*
-            googleJavaFormat() : 탭은 2개의 공백
-            googleJavaFormat().aosp() : 탭은 4개의 공백
-            [참고] https://github.com/google/google-java-format/issues/525
+            탭: 4개의 공백
+            continuation indent: 4 (1x 기본 indent)
+            라인 길이: 120
          */
-        googleJavaFormat().aosp()
+        eclipse().configFile('eclipse-formatter.xml')
         // 아래 순서로 import문 정렬
         importOrder('java', 'javax', 'jakarta', 'org', 'com')
         // 사용하지 않는 import 제거

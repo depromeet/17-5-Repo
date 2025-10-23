@@ -19,14 +19,14 @@ public interface HanStockFeignClient {
 
     @GetMapping("/uapi/overseas-price/v1/quotations/dailyprice")
     DailyPriceResponse getDailyPrice(
-            @RequestHeader("authorization") String authorization,
-            @RequestHeader("appkey") String appkey,
-            @RequestHeader("appsecret") String appsecret,
-            @RequestHeader("tr_id") String trId,
-            @RequestParam("AUTH") String auth,
-            @RequestParam("EXCD") String market,
-            @RequestParam("SYMB") String symbol,
-            @RequestParam("GUBN") String period,
-            @RequestParam("BYMD") String baseDate,
-            @RequestParam("MODP") String modifiedPrice);
+        @RequestHeader("authorization") String authorization,
+        @RequestHeader("appkey") String appkey,
+        @RequestHeader("appsecret") String appsecret,
+        @RequestHeader("tr_id") String trId,
+        @RequestParam("AUTH") String auth,
+        @RequestParam("EXCD") String market,
+        @RequestParam("SYMB") String symbol,
+        @RequestParam("GUBN") String period,
+        @RequestParam("BYMD") String baseDate,
+        @RequestParam("MODP") String modifiedPrice);
 }

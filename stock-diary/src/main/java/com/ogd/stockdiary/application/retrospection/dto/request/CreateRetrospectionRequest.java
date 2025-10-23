@@ -50,20 +50,14 @@ public class CreateRetrospectionRequest {
     @Positive(message = "거래량은 0보다 큰 값이어야 합니다")
     private Integer volume;
 
-    @Schema(
-            description = "주문 날짜",
-            example = "2025-09-13",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "주문 날짜", example = "2025-09-13", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "주문 날짜는 필수입니다")
     private LocalDate orderDate;
 
     @Schema(description = "수익률", example = "-15.67", requiredMode = RequiredMode.NOT_REQUIRED)
     private Double returnRate;
 
-    @Schema(
-            description = "회고 내용",
-            example = "이번 매도는 시장 상황을 잘 반영한 결정이었다.",
-            requiredMode = RequiredMode.NOT_REQUIRED)
+    @Schema(description = "회고 내용", example = "이번 매도는 시장 상황을 잘 반영한 결정이었다.", requiredMode = RequiredMode.NOT_REQUIRED)
     private String content;
 
     @Schema(description = "투자원칙 체크 목록", requiredMode = RequiredMode.NOT_REQUIRED)

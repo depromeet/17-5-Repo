@@ -14,8 +14,7 @@ public class ReportPromptLoader {
 
     public ReportPromptLoader(ResourceLoader resourceLoader) throws Exception {
 
-        Resource resource =
-                resourceLoader.getResource("classpath:RetrospectionForReportPrompt.txt");
+        Resource resource = resourceLoader.getResource("classpath:RetrospectionForReportPrompt.txt");
 
         this.prompt = new String(resource.getInputStream().readAllBytes(), "UTF-8");
     }

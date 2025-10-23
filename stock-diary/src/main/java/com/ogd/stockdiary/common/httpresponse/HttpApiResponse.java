@@ -27,7 +27,7 @@ public class HttpApiResponse<T> {
     }
 
     public static HttpApiResponse fromExceptionMessage(
-            String message, CodeEnum code, Map<String, Object> data) {
+        String message, CodeEnum code, Map<String, Object> data) {
         return HttpApiResponse.builder().code(CodeEnum.FRS_001).data(data).message(message).build();
     }
 }

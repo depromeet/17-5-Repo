@@ -44,39 +44,36 @@ public class ReportService implements CreateFeedbackUseCase {
     @Override
     @Transactional
     public Feedback createFeedbackUseCase(CreateFeedbackCommand command)
-            throws JsonProcessingException {
+        throws JsonProcessingException {
 
         Retrospection retrospection = retrospectionRepository.getById(command.retrospectionId());
 
-        RetrospectionForReport retrospectionForReport =
-                retrospectionForReportRepository.getById(command.retrospectionId());
+        RetrospectionForReport retrospectionForReport = retrospectionForReportRepository
+            .getById(command.retrospectionId());
 
         String symbol = retrospectionForReport.getSymbol();
         String market = retrospectionForReport.getMarket();
         Order order = retrospectionForReport.getOrder();
         String content = retrospectionForReport.getContent();
 
-        String userText =
-                """
-                Please analyze the symbol {symbol} in the {market} market based on the order: {order}.
-                This is user message : {content}.
-                """;
+        String userText = """
+            Please analyze the symbol {symbol} in the {market} market based on the order: {order}.
+            This is user message : {content}.
+            """;
 
         // 시스템 메시지를 로더에서 불러오기
         Message systemMessage = new SystemMessage(reportPromptLoader.getPrompt());
 
         PromptTemplate promptTemplate = new PromptTemplate(userText);
 
-        Map<String, Object> variables =
-                Map.of("symbol", symbol, "market", market, "order", order, "content", content);
+        Map<String, Object> variables = Map.of("symbol", symbol, "market", market, "order", order, "content", content);
 
         // 플레이스 홀더 넣은 유저 메시지 구성
         Message userMessage = promptTemplate.createMessage(variables);
 
         String modelName = "gpt-4.1-nano";
 
-        OpenAiChatOptions options =
-                new OpenAiChatOptions.Builder().model(modelName).maxTokens(500).build();
+        OpenAiChatOptions options = new OpenAiChatOptions.Builder().model(modelName).maxTokens(500).build();
 
         Prompt prompt = new Prompt(List.of(systemMessage, userMessage), options);
 
@@ -92,14 +89,13 @@ public class ReportService implements CreateFeedbackUseCase {
         String principlesJson = objectMapper.writeValueAsString(dto.principles());
 
         // 피드백 객체 생성
-        Feedback feedback =
-                Feedback.builder()
-                        .feedback(text)
-                        .summerizedFeedback(dto.summerizedFeedback())
-                        .market(dto.market())
-                        .principles(principlesJson)
-                        .retrospection(retrospection)
-                        .build();
+        Feedback feedback = Feedback.builder()
+            .feedback(text)
+            .summerizedFeedback(dto.summerizedFeedback())
+            .market(dto.market())
+            .principles(principlesJson)
+            .retrospection(retrospection)
+            .build();
 
         // 저장
         feedbackRepository.save(feedback);

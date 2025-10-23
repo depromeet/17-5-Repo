@@ -36,7 +36,8 @@ public class User {
     @Column(name = "profile_image_url", length = 500)
     private String profileImageUrl;
 
-    @Embedded private OAuthProviderInfo oAuthProviderInfo;
+    @Embedded
+    private OAuthProviderInfo oAuthProviderInfo;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -60,10 +61,10 @@ public class User {
     }
 
     public User(
-            String nickname,
-            String email,
-            String profileImageUrl,
-            OAuthProviderInfo oAuthProviderInfo) {
+        String nickname,
+        String email,
+        String profileImageUrl,
+        OAuthProviderInfo oAuthProviderInfo) {
         this.nickname = nickname;
         this.email = email;
         this.profileImageUrl = profileImageUrl;

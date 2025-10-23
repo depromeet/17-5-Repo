@@ -21,17 +21,15 @@ public class AuthController {
 
     @PostMapping("/social/login")
     public ResponseEntity<SocialLoginResponse> socialLogin(
-            @RequestBody SocialLoginRequest request) {
+        @RequestBody SocialLoginRequest request) {
         try {
-            AuthResult authResult =
-                    authService.socialLogin(
-                            request.getProvider(),
-                            request.getAuthCode(),
-                            request.getEmail(),
-                            request.getNickname());
+            AuthResult authResult = authService.socialLogin(
+                request.getProvider(),
+                request.getAuthCode(),
+                request.getEmail(),
+                request.getNickname());
 
-            SocialLoginResponse response =
-                    SocialLoginResponse.from(authResult.getUser(), authResult.isNewUser());
+            SocialLoginResponse response = SocialLoginResponse.from(authResult.getUser(), authResult.isNewUser());
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {

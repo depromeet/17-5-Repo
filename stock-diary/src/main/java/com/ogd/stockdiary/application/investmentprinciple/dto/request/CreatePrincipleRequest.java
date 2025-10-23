@@ -11,10 +11,13 @@ import lombok.NoArgsConstructor;
 @Schema(description = "투자원칙 생성 요청 정보")
 public class CreatePrincipleRequest {
 
-    @Schema(
-            description = "투자원칙 내용",
-            example = "손절매는 반드시 10% 이내에서",
-            requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "투자원칙 그룹 ID (선택사항)", example = "1")
+    private Long groupId;
+
+    @Schema(description = "투자원칙 내용", example = "손절매는 반드시 10% 이내에서", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "투자원칙 내용은 필수입니다.")
     private String principle;
+
+    @Schema(description = "그룹 내 표시 순서 (선택사항)", example = "0")
+    private Integer displayOrder;
 }

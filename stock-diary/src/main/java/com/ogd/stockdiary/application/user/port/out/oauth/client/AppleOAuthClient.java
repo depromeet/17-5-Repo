@@ -52,22 +52,22 @@ public class AppleOAuthClient implements OAuthClient {
         params.add("redirect_uri", appleProperties.getRedirectUri());
 
         return restClient
-                .post()
-                .uri(APPLE_AUTH_URL + TOKEN_ENDPOINT)
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .body(params)
-                .retrieve()
-                .body(OAuthTokenResponse.class);
+            .post()
+            .uri(APPLE_AUTH_URL + TOKEN_ENDPOINT)
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .body(params)
+            .retrieve()
+            .body(OAuthTokenResponse.class);
     }
 
     @Override
     @Cacheable(value = "oidcPublicKeys", key = "'apple'")
     public OIDCPublicKeyList getPublicKeys() {
         return restClient
-                .get()
-                .uri(APPLE_AUTH_URL + KEYS_ENDPOINT)
-                .retrieve()
-                .body(OIDCPublicKeyList.class);
+            .get()
+            .uri(APPLE_AUTH_URL + KEYS_ENDPOINT)
+            .retrieve()
+            .body(OIDCPublicKeyList.class);
     }
 
     @Override
@@ -81,31 +81,30 @@ public class AppleOAuthClient implements OAuthClient {
         params.add("token_type_hint", "refresh_token");
 
         restClient
-                .post()
-                .uri(APPLE_AUTH_URL + REVOKE_ENDPOINT)
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .body(params)
-                .retrieve()
-                .toBodilessEntity();
+            .post()
+            .uri(APPLE_AUTH_URL + REVOKE_ENDPOINT)
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .body(params)
+            .retrieve()
+            .toBodilessEntity();
     }
 
     private String generateClientSecret() {
         try {
             LocalDateTime now = LocalDateTime.now();
             Date issuedAt = Date.from(now.atZone(ZoneId.systemDefault()).toInstant());
-            Date expiration =
-                    Date.from(now.plusMinutes(5).atZone(ZoneId.systemDefault()).toInstant());
+            Date expiration = Date.from(now.plusMinutes(5).atZone(ZoneId.systemDefault()).toInstant());
 
             return Jwts.builder()
-                    .setHeaderParam("kid", appleProperties.getKeyId())
-                    .setHeaderParam("alg", "ES256")
-                    .setIssuer(appleProperties.getTeamId())
-                    .setIssuedAt(issuedAt)
-                    .setExpiration(expiration)
-                    .setAudience(appleProperties.getAud())
-                    .setSubject(appleProperties.getClientId())
-                    .signWith(getPrivateKey(), SignatureAlgorithm.ES256)
-                    .compact();
+                .setHeaderParam("kid", appleProperties.getKeyId())
+                .setHeaderParam("alg", "ES256")
+                .setIssuer(appleProperties.getTeamId())
+                .setIssuedAt(issuedAt)
+                .setExpiration(expiration)
+                .setAudience(appleProperties.getAud())
+                .setSubject(appleProperties.getClientId())
+                .signWith(getPrivateKey(), SignatureAlgorithm.ES256)
+                .compact();
         } catch (Exception e) {
             log.error("Failed to generate Apple client secret", e);
             throw new RuntimeException("Failed to generate Apple client secret", e);
@@ -113,8 +112,7 @@ public class AppleOAuthClient implements OAuthClient {
     }
 
     private PrivateKey getPrivateKey() throws IOException {
-        String privateKeyPEM =
-                new String(Base64.getDecoder().decode(appleProperties.getPrivateKey()));
+        String privateKeyPEM = new String(Base64.getDecoder().decode(appleProperties.getPrivateKey()));
 
         try (PEMParser pemParser = new PEMParser(new StringReader(privateKeyPEM))) {
             PrivateKeyInfo privateKeyInfo = (PrivateKeyInfo) pemParser.readObject();
