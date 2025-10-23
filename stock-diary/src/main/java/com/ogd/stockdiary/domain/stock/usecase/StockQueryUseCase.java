@@ -10,5 +10,5 @@ public interface StockQueryUseCase {
     List<Stock> findByCompanyNameLike(String companyName);
 
     SliceContent<StockSearchResponse> findByCompanyNameSlice(
-            String nextCursor, String companyName, int size);
+        String nextCursor, String companyName, int size);
 }

@@ -22,8 +22,7 @@ public class StockPortImpl implements StockPort {
     private final TokenManager tokenManager;
 
     private static final String APP_KEY = "PSOA5a8EUEzQnsbb0Stieigj9n8jUUBiwJ0A";
-    private static final String APP_SECRET =
-            "wS6taqks0+FJmyHxrFouol6EOLJhSMhyLrvsUHcqlvHxEVxa/TYXqFqD0M/eOMWGmnPPB+X/fuqr8LnJJK/ZKMlcDOxVWo5BU85hom/PgpP0H4p5pYJjESLXAuRkdrrnp/UtapmJhOVOYQrkXqz2TkqCkYGW2zwgwYXPBGLisyHWWSRI8C0=";
+    private static final String APP_SECRET = "wS6taqks0+FJmyHxrFouol6EOLJhSMhyLrvsUHcqlvHxEVxa/TYXqFqD0M/eOMWGmnPPB+X/fuqr8LnJJK/ZKMlcDOxVWo5BU85hom/PgpP0H4p5pYJjESLXAuRkdrrnp/UtapmJhOVOYQrkXqz2TkqCkYGW2zwgwYXPBGLisyHWWSRI8C0=";
     private static final String TR_ID = "HHDFS76240000";
 
     public StockPortImpl(HanStockFeignClient hanStockFeignClient, TokenManager tokenManager) {
@@ -38,7 +37,7 @@ public class StockPortImpl implements StockPort {
 
     @Override
     public StockChartData getChartData(
-            String market, String symbol, LocalDate endDate, StockInterval interval) {
+        String market, String symbol, LocalDate endDate, StockInterval interval) {
         String formattedEndDate = endDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
         // 첫 번째 시도
@@ -55,7 +54,7 @@ public class StockPortImpl implements StockPort {
                 } catch (Exception retryException) {
                     log.error("Retry failed: {}", retryException.getMessage());
                     throw new RuntimeException(
-                            "API call failed after token refresh", retryException);
+                        "API call failed after token refresh", retryException);
                 }
             } else {
                 log.error("Non-4xx error occurred: {}", e.getMessage());
@@ -65,22 +64,21 @@ public class StockPortImpl implements StockPort {
     }
 
     private StockChartData callDailyPriceApi(
-            String market, String symbol, String formattedEndDate, StockInterval interval) {
+        String market, String symbol, String formattedEndDate, StockInterval interval) {
         String token = tokenManager.getValidToken();
         String authorization = "Bearer " + token;
 
-        DailyPriceResponse response =
-                hanStockFeignClient.getDailyPrice(
-                        authorization,
-                        APP_KEY,
-                        APP_SECRET,
-                        TR_ID,
-                        "",
-                        market,
-                        symbol,
-                        interval.getCode(),
-                        formattedEndDate,
-                        "1");
+        DailyPriceResponse response = hanStockFeignClient.getDailyPrice(
+            authorization,
+            APP_KEY,
+            APP_SECRET,
+            TR_ID,
+            "",
+            market,
+            symbol,
+            interval.getCode(),
+            formattedEndDate,
+            "1");
 
         return DailyPriceResponse.toStockChartData(response, market);
     }

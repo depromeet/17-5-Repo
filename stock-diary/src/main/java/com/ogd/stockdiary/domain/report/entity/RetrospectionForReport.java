@@ -24,8 +24,9 @@ public class RetrospectionForReport {
     private String market;
 
     private String content;
-    
-    @Embedded private Order order;
+
+    @Embedded
+    private Order order;
 
     public RetrospectionForReport(String symbol, String market, Order order, String content) {
         this.symbol = symbol;

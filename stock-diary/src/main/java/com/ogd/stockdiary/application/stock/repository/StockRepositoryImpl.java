@@ -24,17 +24,15 @@ public class StockRepositoryImpl implements StockRepository {
 
     @Override
     public SliceContent<Stock> findByCompanyNameSlice(
-            String nextCursor, String companyName, int size) {
+        String nextCursor, String companyName, int size) {
         List<Stock> content;
 
         if (nextCursor == null) {
-            content =
-                    jpaStockRepository.findByCompanyNameLikeOrderByIdDesc(
-                            companyName, PageRequest.of(0, size));
+            content = jpaStockRepository.findByCompanyNameLikeOrderByIdDesc(
+                companyName, PageRequest.of(0, size));
         } else {
-            content =
-                    jpaStockRepository.findByCompanyNameLikeOrderByIdDesc(
-                            companyName, Integer.parseInt(nextCursor), PageRequest.of(0, size));
+            content = jpaStockRepository.findByCompanyNameLikeOrderByIdDesc(
+                companyName, Integer.parseInt(nextCursor), PageRequest.of(0, size));
         }
 
         String id = content.isEmpty() ? null : content.get(content.size() - 1).getId().toString();

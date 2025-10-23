@@ -23,20 +23,18 @@ public class ChartQueryService implements ChartQueryUseCase {
 
     @Override
     public StockChartData getStockChart(
-            String market,
-            String symbol,
-            LocalDate startDate,
-            LocalDate endDate,
-            StockInterval interval) {
+        String market,
+        String symbol,
+        LocalDate startDate,
+        LocalDate endDate,
+        StockInterval interval) {
         StockChartData allData = stockPort.getChartData(market, symbol, endDate, interval);
 
-        List<StockChartItem> filteredChartData =
-                allData.getChartData().stream()
-                        .filter(
-                                item ->
-                                        !item.getDate().isBefore(startDate)
-                                                && !item.getDate().isAfter(endDate))
-                        .collect(Collectors.toList());
+        List<StockChartItem> filteredChartData = allData.getChartData().stream()
+            .filter(
+                item -> !item.getDate().isBefore(startDate)
+                    && !item.getDate().isAfter(endDate))
+            .collect(Collectors.toList());
 
         return new StockChartData(allData.getCurrency(), filteredChartData);
     }

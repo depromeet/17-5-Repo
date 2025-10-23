@@ -22,8 +22,7 @@ public class TokenManager {
     private final HanStockFeignClient hanStockFeignClient;
     private static final String TOKEN_FILE_PATH = "stock_api_token.txt";
     private static final String APP_KEY = "PSOA5a8EUEzQnsbb0Stieigj9n8jUUBiwJ0A";
-    private static final String APP_SECRET =
-            "wS6taqks0+FJmyHxrFouol6EOLJhSMhyLrvsUHcqlvHxEVxa/TYXqFqD0M/eOMWGmnPPB+X/fuqr8LnJJK/ZKMlcDOxVWo5BU85hom/PgpP0H4p5pYJjESLXAuRkdrrnp/UtapmJhOVOYQrkXqz2TkqCkYGW2zwgwYXPBGLisyHWWSRI8C0=";
+    private static final String APP_SECRET = "wS6taqks0+FJmyHxrFouol6EOLJhSMhyLrvsUHcqlvHxEVxa/TYXqFqD0M/eOMWGmnPPB+X/fuqr8LnJJK/ZKMlcDOxVWo5BU85hom/PgpP0H4p5pYJjESLXAuRkdrrnp/UtapmJhOVOYQrkXqz2TkqCkYGW2zwgwYXPBGLisyHWWSRI8C0=";
 
     public TokenManager(HanStockFeignClient hanStockFeignClient) {
         this.hanStockFeignClient = hanStockFeignClient;
@@ -89,8 +88,7 @@ public class TokenManager {
 
             // 토큰이 24시간 이내인지 확인
             try {
-                LocalDateTime tokenTime =
-                        LocalDateTime.parse(timestamp, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+                LocalDateTime tokenTime = LocalDateTime.parse(timestamp, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
                 if (tokenTime.plusHours(23).isAfter(LocalDateTime.now())) {
                     return token;
                 }
@@ -103,8 +101,7 @@ public class TokenManager {
     }
 
     private void saveTokenToFile(String token) throws IOException {
-        String content =
-                LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) + "\n" + token;
+        String content = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) + "\n" + token;
         Path path = Paths.get(TOKEN_FILE_PATH);
         Files.writeString(path, content);
         log.info("Token saved to file: {}", TOKEN_FILE_PATH);

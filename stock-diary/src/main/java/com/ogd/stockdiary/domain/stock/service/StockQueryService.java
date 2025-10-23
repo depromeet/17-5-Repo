@@ -25,12 +25,10 @@ public class StockQueryService implements StockQueryUseCase {
 
     @Override
     public SliceContent<StockSearchResponse> findByCompanyNameSlice(
-            String nextCursor, String companyName, int size) {
-        SliceContent<Stock> stockSlice =
-                stockRepository.findByCompanyNameSlice(nextCursor, companyName, size);
+        String nextCursor, String companyName, int size) {
+        SliceContent<Stock> stockSlice = stockRepository.findByCompanyNameSlice(nextCursor, companyName, size);
 
-        List<StockSearchResponse> responseList =
-                stockSlice.content().stream().map(StockSearchResponse::from).toList();
+        List<StockSearchResponse> responseList = stockSlice.content().stream().map(StockSearchResponse::from).toList();
 
         return new SliceContent<>(responseList, stockSlice.nextCursor());
     }

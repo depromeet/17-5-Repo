@@ -42,7 +42,8 @@ public class Retrospection {
     @Column(nullable = false, length = 20)
     private String market;
 
-    @Embedded private Order order;
+    @Embedded
+    private Order order;
 
     private Double returnRate;
 
@@ -70,13 +71,13 @@ public class Retrospection {
     }
 
     public Retrospection(
-            User user,
-            String symbol,
-            String market,
-            Order order,
-            Double returnRate,
-            String content,
-            InvestmentEmotion emotion) {
+        User user,
+        String symbol,
+        String market,
+        Order order,
+        Double returnRate,
+        String content,
+        InvestmentEmotion emotion) {
         this.user = user;
         this.symbol = symbol;
         this.market = market;

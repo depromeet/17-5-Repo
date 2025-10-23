@@ -27,8 +27,7 @@ public class AnalysisService {
     private final ChatModel chatModel;
 
     public ChatResponse analyze(String market, String symbol, LocalDateTime time) {
-        String userText =
-                """
+        String userText = """
             Today market is {market} and symbol is {symbol}.
             Time is {time}.
             You should reply to the user's request.
@@ -36,16 +35,14 @@ public class AnalysisService {
 
         PromptTemplate promptTemplate = new PromptTemplate(userText);
 
-        Message userMessage =
-                promptTemplate.createMessage(
-                        Map.of("market", market, "symbol", symbol, "time", time.toString()));
+        Message userMessage = promptTemplate.createMessage(
+            Map.of("market", market, "symbol", symbol, "time", time.toString()));
 
         Message systemMessage = new SystemMessage(promptLoader.getPrompt());
 
         String modelName = "gpt-4.1-nano";
 
-        OpenAiChatOptions options =
-                OpenAiChatOptions.builder().model(modelName).maxTokens(250).build();
+        OpenAiChatOptions options = OpenAiChatOptions.builder().model(modelName).maxTokens(250).build();
 
         Prompt prompt = new Prompt(List.of(systemMessage, userMessage), options);
 
@@ -55,24 +52,21 @@ public class AnalysisService {
     }
 
     public Flux<ChatResponse> analyzeStreamData(
-            String modelName, String market, String symbol, LocalDateTime time) {
-        String systemText =
-                """
+        String modelName, String market, String symbol, LocalDateTime time) {
+        String systemText = """
             Today market is {market} and symbol is {symbol}.
             Time is {time}.
             You should reply to the user's request.
             """;
-        Message systemMessage =
-                new SystemPromptTemplate(systemText)
-                        .createMessage(
-                                Map.of(
-                                        "market", market,
-                                        "symbol", symbol,
-                                        "time", time.toString()));
+        Message systemMessage = new SystemPromptTemplate(systemText)
+            .createMessage(
+                Map.of(
+                    "market", market,
+                    "symbol", symbol,
+                    "time", time.toString()));
         Message userMessage = new UserMessage(promptLoader.getPrompt());
 
-        OpenAiChatOptions options =
-                OpenAiChatOptions.builder().model(modelName).maxTokens(250).build();
+        OpenAiChatOptions options = OpenAiChatOptions.builder().model(modelName).maxTokens(250).build();
 
         Prompt prompt = new Prompt(List.of(systemMessage, userMessage), options);
 

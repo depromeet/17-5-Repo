@@ -17,8 +17,7 @@ public interface JpaStockRepository extends CrudRepository<Stock, Long> {
     @Query("SELECT s FROM Stock s WHERE s.companyName LIKE %:companyName% ORDER BY s.id DESC")
     List<Stock> findByCompanyNameLikeOrderByIdDesc(String companyName, Pageable pageable);
 
-    @Query(
-            "SELECT s FROM Stock s WHERE s.companyName LIKE %:companyName% AND s.id < :cursor ORDER BY s.id DESC")
+    @Query("SELECT s FROM Stock s WHERE s.companyName LIKE %:companyName% AND s.id < :cursor ORDER BY s.id DESC")
     List<Stock> findByCompanyNameLikeOrderByIdDesc(
-            String companyName, Integer cursor, Pageable pageable);
+        String companyName, Integer cursor, Pageable pageable);
 }

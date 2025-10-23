@@ -17,7 +17,7 @@ public class OAuthClientFactory {
         return switch (provider) {
             case APPLE -> appleOAuthClient;
             case GOOGLE, KAKAO ->
-                    throw new UnsupportedOperationException(provider + " not implemented yet");
+                throw new UnsupportedOperationException(provider + " not implemented yet");
         };
     }
 }

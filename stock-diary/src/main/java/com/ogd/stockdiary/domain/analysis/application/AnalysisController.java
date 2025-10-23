@@ -27,9 +27,9 @@ public class AnalysisController {
 
     @GetMapping(value = "v1")
     public ResponseEntity<HttpApiResponse<AnalysisResponse>> analyze(
-            @RequestParam String market,
-            @RequestParam String symbol,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime time) {
+        @RequestParam String market,
+        @RequestParam String symbol,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime time) {
 
         ChatResponse chatResponse = analysisService.analyze(market, symbol, time);
 
@@ -42,18 +42,16 @@ public class AnalysisController {
 
     @GetMapping(value = "v2/{modelName}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<AssistantMessage> analyzeSteamData(
-            @PathVariable String modelName,
-            @RequestParam String market,
-            @RequestParam String symbol,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime time) {
+        @PathVariable String modelName,
+        @RequestParam String market,
+        @RequestParam String symbol,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime time) {
 
-        Flux<ChatResponse> chatResponse =
-                analysisService.analyzeStreamData(modelName, market, symbol, time);
+        Flux<ChatResponse> chatResponse = analysisService.analyzeStreamData(modelName, market, symbol, time);
 
-        Flux<AssistantMessage> messageFlux =
-                chatResponse
-                        .map(response -> response.getResult())
-                        .map(generation -> generation.getOutput());
+        Flux<AssistantMessage> messageFlux = chatResponse
+            .map(response -> response.getResult())
+            .map(generation -> generation.getOutput());
 
         return messageFlux;
     }

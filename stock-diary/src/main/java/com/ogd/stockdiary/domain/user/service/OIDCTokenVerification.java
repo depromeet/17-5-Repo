@@ -36,27 +36,25 @@ public class OIDCTokenVerification {
             String kid = (String) headerMap.get("kid");
             String alg = (String) headerMap.get("alg");
 
-            OIDCPublicKey matchingKey =
-                    oidcPublicKeys.getKeys().stream()
-                            .filter(key -> key.getKid().equals(kid))
-                            .findFirst()
-                            .orElseThrow(
-                                    () -> new RuntimeException("No matching public key found"));
+            OIDCPublicKey matchingKey = oidcPublicKeys.getKeys().stream()
+                .filter(key -> key.getKid().equals(kid))
+                .findFirst()
+                .orElseThrow(
+                    () -> new RuntimeException("No matching public key found"));
 
             PublicKey publicKey = generateRSAPublicKey(matchingKey.getN(), matchingKey.getE());
 
-            Claims claims =
-                    Jwts.parserBuilder()
-                            .setSigningKey(publicKey)
-                            .build()
-                            .parseClaimsJws(idToken)
-                            .getBody();
+            Claims claims = Jwts.parserBuilder()
+                .setSigningKey(publicKey)
+                .build()
+                .parseClaimsJws(idToken)
+                .getBody();
 
             return new OIDCPayload(
-                    claims.getSubject(),
-                    claims.get("email", String.class),
-                    claims.get("picture", String.class),
-                    claims.get("name", String.class));
+                claims.getSubject(),
+                claims.get("email", String.class),
+                claims.get("picture", String.class),
+                claims.get("name", String.class));
 
         } catch (ExpiredJwtException e) {
             log.error("ID token has expired", e);
@@ -74,7 +72,7 @@ public class OIDCTokenVerification {
     }
 
     private PublicKey generateRSAPublicKey(String n, String e)
-            throws NoSuchAlgorithmException, InvalidKeySpecException {
+        throws NoSuchAlgorithmException, InvalidKeySpecException {
         byte[] nBytes = Base64.getUrlDecoder().decode(n);
         byte[] eBytes = Base64.getUrlDecoder().decode(e);
 

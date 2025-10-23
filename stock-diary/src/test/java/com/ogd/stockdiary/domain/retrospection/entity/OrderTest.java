@@ -44,8 +44,8 @@ class OrderTest {
 
         // when & then
         assertThatThrownBy(() -> new Order(orderType, invalidPrice, currency, volume, orderDate))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("가격은 0보다 큰 값이어야 합니다.");
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("가격은 0보다 큰 값이어야 합니다.");
     }
 
     @Test
@@ -60,8 +60,8 @@ class OrderTest {
 
         // when & then
         assertThatThrownBy(() -> new Order(orderType, price, currency, invalidVolume, orderDate))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("거래량은 0보다 큰 값이어야 합니다.");
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("거래량은 0보다 큰 값이어야 합니다.");
     }
 
     @Test
@@ -76,8 +76,8 @@ class OrderTest {
 
         // when & then
         assertThatThrownBy(() -> new Order(orderType, nullPrice, currency, volume, orderDate))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("가격은 0보다 큰 값이어야 합니다.");
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("가격은 0보다 큰 값이어야 합니다.");
     }
 
     @Test
@@ -92,7 +92,7 @@ class OrderTest {
 
         // when & then
         assertThatThrownBy(() -> new Order(orderType, price, currency, nullVolume, orderDate))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("거래량은 0보다 큰 값이어야 합니다.");
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("거래량은 0보다 큰 값이어야 합니다.");
     }
 }
