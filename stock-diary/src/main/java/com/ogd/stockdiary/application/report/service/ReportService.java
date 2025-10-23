@@ -55,7 +55,7 @@ public class ReportService implements CreateFeedbackUseCase {
         String market = retrospectionForReport.getMarket();
         Order order = retrospectionForReport.getOrder();
         String content = retrospectionForReport.getContent();
-                
+
         String userText =
                 """
                 Please analyze the symbol {symbol} in the {market} market based on the order: {order}.
@@ -67,7 +67,8 @@ public class ReportService implements CreateFeedbackUseCase {
 
         PromptTemplate promptTemplate = new PromptTemplate(userText);
 
-        Map<String, Object> variables = Map.of("symbol", symbol, "market", market, "order", order, "content", content);
+        Map<String, Object> variables =
+                Map.of("symbol", symbol, "market", market, "order", order, "content", content);
 
         // 플레이스 홀더 넣은 유저 메시지 구성
         Message userMessage = promptTemplate.createMessage(variables);
