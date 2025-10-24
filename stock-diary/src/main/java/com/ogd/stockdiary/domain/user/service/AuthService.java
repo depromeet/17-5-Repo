@@ -1,13 +1,18 @@
 package com.ogd.stockdiary.domain.user.service;
 
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ogd.stockdiary.application.user.repository.AppleAuthTokenRepository;
+import com.ogd.stockdiary.application.user.repository.RefreshTokenRepository;
 import com.ogd.stockdiary.application.user.repository.UserRepository;
+import com.ogd.stockdiary.domain.user.config.JwtProperties;
 import com.ogd.stockdiary.domain.user.entity.AppleAuthToken;
 import com.ogd.stockdiary.domain.user.entity.OAuthProvider;
 import com.ogd.stockdiary.domain.user.entity.OAuthProviderInfo;
+import com.ogd.stockdiary.domain.user.entity.RefreshToken;
 import com.ogd.stockdiary.domain.user.entity.User;
 import com.ogd.stockdiary.domain.user.port.out.oauth.OAuthTokenResponse;
 import com.ogd.stockdiary.domain.user.port.out.oauth.OIDCPayload;
@@ -27,14 +32,17 @@ public class AuthService {
     private final OIDCTokenVerification oidcTokenVerification;
     private final UserRepository userRepository;
     private final AppleAuthTokenRepository appleAuthTokenRepository;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final JwtProperties jwtProperties;
 
     @Transactional
     public AuthResult socialLogin(
-        OAuthProvider provider, String authCode, String email, String nickname) {
+        OAuthProvider provider, String authCode, String redirectUri, String email, String nickname) {
         OAuthClient client = oAuthClientFactory.getClient(provider);
 
-        // 1. 토큰 획득
-        OAuthTokenResponse tokenResponse = client.getToken(authCode);
+        // 1. 토큰 획득 (redirectUri가 null이면 OAuthClient가 기본값 사용)
+        OAuthTokenResponse tokenResponse = client.getToken(authCode, redirectUri);
 
         // 2. 공개키 조회
         OIDCPublicKeyList publicKeys = client.getPublicKeys();
@@ -57,7 +65,19 @@ public class AuthService {
             saveAppleRefreshToken(user.getId(), tokenResponse.getRefreshToken());
         }
 
-        return new AuthResult(user, isNewUser);
+        // 7. JWT 토큰 생성
+        String accessToken = jwtTokenProvider.generateAccessToken(user.getId());
+        String refreshToken = jwtTokenProvider.generateRefreshToken(user.getId());
+
+        // 8. Refresh Token 저장 또는 업데이트
+        LocalDateTime expiresAt = LocalDateTime.now()
+            .plusSeconds(jwtProperties.getRefreshTokenExpiration() / 1000);
+        refreshTokenRepository.findById(user.getId())
+            .ifPresentOrElse(
+                existingToken -> existingToken.updateToken(refreshToken, expiresAt),
+                () -> refreshTokenRepository.save(new RefreshToken(user.getId(), refreshToken, expiresAt)));
+
+        return new AuthResult(user, isNewUser, accessToken, refreshToken);
     }
 
     private User createNewUser(
@@ -68,8 +88,10 @@ public class AuthService {
         String email = payload.getEmail() != null ? payload.getEmail() : providedEmail;
         String nickname = payload.getName() != null ? payload.getName() : providedNickname;
 
+        // 이메일이 없으면 임시 이메일 생성 (테스트용)
         if (email == null) {
-            throw new IllegalArgumentException("Email is required for user registration");
+            email = provider.name().toLowerCase() + "_" + payload.getSubject() + "@temporary.com";
+            log.warn("Email not provided, using temporary email: {}", email);
         }
 
         if (nickname == null) {
@@ -85,6 +107,35 @@ public class AuthService {
     private void saveAppleRefreshToken(Long userId, String refreshToken) {
         AppleAuthToken appleAuthToken = new AppleAuthToken(userId, refreshToken);
         appleAuthTokenRepository.save(appleAuthToken);
+    }
+
+    @Transactional
+    public String refreshAccessToken(String refreshToken) {
+        // 1. Refresh Token 검증
+        if (!jwtTokenProvider.validateToken(refreshToken)) {
+            throw new IllegalArgumentException("Invalid refresh token");
+        }
+
+        // 2. 토큰에서 userId 추출
+        Long userId = jwtTokenProvider.getUserIdFromToken(refreshToken);
+
+        // 3. DB에서 Refresh Token 확인
+        RefreshToken storedToken = refreshTokenRepository
+            .findById(userId)
+            .orElseThrow(() -> new IllegalArgumentException("Refresh token not found"));
+
+        // 4. DB의 토큰과 일치하는지 확인
+        if (!storedToken.getToken().equals(refreshToken)) {
+            throw new IllegalArgumentException("Refresh token mismatch");
+        }
+
+        // 5. 만료 여부 확인
+        if (storedToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Refresh token expired");
+        }
+
+        // 6. 새로운 Access Token 생성
+        return jwtTokenProvider.generateAccessToken(userId);
     }
 
     @Transactional

@@ -1,19 +1,30 @@
 apple:
   client-id: ${APPLE_CLIENT_ID:your.app.bundle.id}
-  redirect-uri: ${APPLE_REDIRECT_URI:https://your-app.com/auth/apple/callback}
+  redirect-uri: ${APPLE_REDIRECT_URI:http://localhost:8080/api/v1/auth/apple/callback}
   aud: ${APPLE_AUD:https://appleid.apple.com}
   team-id: ${APPLE_TEAM_ID:YOUR_TEAM_ID}
   key-id: ${APPLE_KEY_ID:YOUR_KEY_ID}
   private-key: ${APPLE_PRIVATE_KEY:BASE64_ENCODED_PRIVATE_KEY}
 
+kakao:
+  client-id: 7d9291b42254d1adc95f2055639c2ad7
+  client-secret:
+  redirect-uri: http://localhost:8080/api/v1/auth/kakao/callback
+  admin-key: 4553248c30545de7893185925405cdc3
+
+jwt:
+  secret-key: your-very-long-secret-key-at-least-256-bits-for-hs256-algorithm-stock-diary-jwt-secret
+  access-token-expiration: 3600000    # 1시간 (밀리초)
+  refresh-token-expiration: 604800000  # 7일 (밀리초)
+
 # Cloud Storage 설정 (MinIO / AWS S3)
 cloud:
   storage:
-    endpoint: ${STORAGE_ENDPOINT}
-    access-key: ${STORAGE_ACCESS_KEY}
-    secret-key: ${STORAGE_SECRET_KEY}
-    region: ${STORAGE_REGION:us-east-1}
-    bucket: ${STORAGE_BUCKET:depromeet}
+    endpoint: http://foodiy.iptime.org:19000
+    access-key: RIw5NJg34jD2RouR5xN7
+    secret-key: mKhlJGoAQFKMJGuVwFbTeCuMNaO9tWNX09YAh7tX
+    region: us-east-1
+    bucket: depromeet
     # AWS S3로 전환시: endpoint를 제거하고 region만 사용 (예: ap-northeast-2)
 
 spring:
@@ -32,9 +43,9 @@ spring:
   
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:mysql://foodiy.iptime.org:23306/dev_db?serverTimezone=Asia/Seoul
+    username: joonhee
+    password: depromeet
   h2:
     console:
       enabled: true
