@@ -20,11 +20,11 @@ jwt:
 # Cloud Storage 설정 (MinIO / AWS S3)
 cloud:
   storage:
-    endpoint: http://foodiy.iptime.org:19000
-    access-key: RIw5NJg34jD2RouR5xN7
-    secret-key: mKhlJGoAQFKMJGuVwFbTeCuMNaO9tWNX09YAh7tX
-    region: us-east-1
-    bucket: depromeet
+    endpoint: ${STORAGE_ENDPOINT}
+    access-key: ${STORAGE_ACCESS_KEY}
+    secret-key: ${STORAGE_SECRET_KEY}
+    region: ${STORAGE_REGION:us-east-1}
+    bucket: ${STORAGE_BUCKET:depromeet}
     # AWS S3로 전환시: endpoint를 제거하고 region만 사용 (예: ap-northeast-2)
 
 spring:
@@ -43,9 +43,9 @@ spring:
   
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://foodiy.iptime.org:23306/dev_db?serverTimezone=Asia/Seoul
-    username: joonhee
-    password: depromeet
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   h2:
     console:
       enabled: true
