@@ -13,4 +13,13 @@ public interface ImageUseCase {
      * @return 저장된 이미지 메타데이터
      */
     ImageMetadata uploadImage(UploadImageCommand command);
+
+    /**
+     * 이미지 다운로드 URL을 생성합니다.
+     *
+     * @param objectKey
+     *            객체 키 (파일 경로)
+     * @return Pre-Signed 다운로드 URL
+     */
+    String getDownloadUrl(String objectKey);
 }
