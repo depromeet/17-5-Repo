@@ -20,6 +20,7 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
@@ -71,10 +72,15 @@ public class MinioFileClientAdapter implements FileClientPort {
             .build();
 
         // MinIO용 S3 Presigner 생성
+        S3Configuration s3Config = S3Configuration.builder()
+            .pathStyleAccessEnabled(true) // MinIO는 path-style 필수
+            .build();
+
         this.s3Presigner = S3Presigner.builder()
             .endpointOverride(URI.create(endpoint))
             .region(Region.of(region))
             .credentialsProvider(credentialsProvider)
+            .serviceConfiguration(s3Config)
             .build();
 
         // AWS S3로 전환시 주석 해제:
