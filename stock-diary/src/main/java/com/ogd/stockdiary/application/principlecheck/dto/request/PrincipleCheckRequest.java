@@ -19,7 +19,8 @@ public class PrincipleCheckRequest {
     @NotNull(message = "투자원칙 ID는 필수입니다")
     private Long principleId;
 
-    @Schema(description = "투자원칙 준수 상태", example = "KEPT", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "투자원칙 준수 상태 (KEPT: 지켰어요, NEUTRAL: 보통이에요, NOT_KEPT: 안지켰어요)", example = "KEPT", allowableValues = {
+        "KEPT", "NEUTRAL", "NOT_KEPT"}, requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "투자원칙 준수 상태는 필수입니다")
     private PrincipleCheckStatus status;
 }
