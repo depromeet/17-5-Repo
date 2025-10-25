@@ -22,9 +22,9 @@ spring:
   
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: ${DB_URL:jdbc:mysql://foodiy.iptime.org:23306/dev_db?serverTimezone=Asia/Seoul}
+    username: ${DB_USERNAME:joonhee}
+    password: ${DB_PASSWORD:depromeet}
   h2:
     console:
       enabled: true

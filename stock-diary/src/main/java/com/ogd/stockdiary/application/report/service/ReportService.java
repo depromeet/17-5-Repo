@@ -7,12 +7,16 @@ import jakarta.transaction.Transactional;
 
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.SystemMessage;
+import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.ai.model.Media;
 import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MimeType;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -67,10 +71,30 @@ public class ReportService implements CreateFeedbackUseCase {
 
         PromptTemplate promptTemplate = new PromptTemplate(userText);
 
-        Map<String, Object> variables = Map.of("symbol", symbol, "market", market, "order", order, "content", content);
+        //        Map<String, Object> variables =
+        //                Map.of("symbol", symbol, "market", market, "order", order, "content",
+        // content);
 
-        // 플레이스 홀더 넣은 유저 메시지 구성
-        Message userMessage = promptTemplate.createMessage(variables);
+        Map<String, Object> variables =
+                Map.of(
+                        "symbol", symbol != null ? symbol : "",
+                        "market", market != null ? market : "",
+                        "order", order != null ? order : "",
+                        "content", content != null ? content : "");
+
+        // 이미지를 Media 객체로
+        Resource resource = command.imageFile().getResource();
+        Media media =
+                Media.builder()
+                        .mimeType(MimeType.valueOf(command.imageFile().getContentType()))
+                        .data(resource)
+                        .build();
+
+        // 플레이스 홀더 렌더링한 텍스트
+        String renderText = promptTemplate.render(variables);
+
+        // 유저 메시지
+        Message userMessage = new UserMessage(renderText, List.of(media));
 
         String modelName = "gpt-4.1-nano";
 

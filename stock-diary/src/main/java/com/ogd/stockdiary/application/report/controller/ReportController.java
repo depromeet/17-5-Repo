@@ -3,6 +3,7 @@ package com.ogd.stockdiary.application.report.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ogd.stockdiary.application.report.dto.Mapper.ReportMapper;
@@ -25,12 +26,13 @@ public class ReportController {
 
     @PostMapping("/{retrospectionId}/feedback")
     public ResponseEntity<HttpApiResponse<CreateFeedbackResponse>> CreateFeedback(
-            @RequestBody(required = false) CreateFeedbackRequest request,
-            @PathVariable Long retrospectionId)
+            @RequestPart(required = false) CreateFeedbackRequest request,
+            @PathVariable Long retrospectionId,
+            @RequestPart(value = "image", required = false) MultipartFile imageFile)
             throws JsonProcessingException {
 
         // 요청을 command 객체로 변환
-        CreateFeedbackCommand command = ReportMapper.toCommand(request, retrospectionId);
+        CreateFeedbackCommand command = ReportMapper.toCommand(request, retrospectionId, imageFile);
         // 서비스에 전달 후 피드백 엔티티 반환
         Feedback feedback = createFeedbackUseCase.createFeedbackUseCase(command);
         // 응답용 DTO

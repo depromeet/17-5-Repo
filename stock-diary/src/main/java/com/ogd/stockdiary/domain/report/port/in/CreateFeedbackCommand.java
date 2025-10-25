@@ -1,3 +1,5 @@
 package com.ogd.stockdiary.domain.report.port.in;
 
-public record CreateFeedbackCommand(Long retrospectionId) {}
+import org.springframework.web.multipart.MultipartFile;
+
+public record CreateFeedbackCommand(Long retrospectionId, MultipartFile imageFile) {}

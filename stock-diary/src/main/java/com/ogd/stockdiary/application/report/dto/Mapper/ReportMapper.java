@@ -3,6 +3,9 @@ package com.ogd.stockdiary.application.report.dto.Mapper;
 import java.util.List;
 import java.util.Map;
 
+import com.ogd.stockdiary.domain.report.entity.RetrospectionForReport;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,8 +17,8 @@ import com.ogd.stockdiary.domain.report.port.in.CreateFeedbackCommand;
 public class ReportMapper {
 
     public static CreateFeedbackCommand toCommand(
-            CreateFeedbackRequest request, Long retrospectionId) {
-        return new CreateFeedbackCommand(retrospectionId);
+            CreateFeedbackRequest request, Long retrospectionId, MultipartFile imageFile) {
+        return new CreateFeedbackCommand(retrospectionId, imageFile);
     }
 
     public static CreateFeedbackResponse toResponse(Feedback feedback)
