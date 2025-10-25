@@ -137,7 +137,7 @@ public class AppleOAuthClient implements OAuthClient {
                 .setIssuer(appleProperties.getTeamId())
                 .setIssuedAt(issuedAt)
                 .setExpiration(expiration)
-                .setAudience(appleProperties.getAud())
+                .setAudience(AppleProperties.APPLE_AUD)
                 .setSubject(appleProperties.getClientId())
                 .signWith(getPrivateKey(), SignatureAlgorithm.ES256)
                 .compact();
