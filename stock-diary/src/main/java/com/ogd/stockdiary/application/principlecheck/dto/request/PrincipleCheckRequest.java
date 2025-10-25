@@ -2,6 +2,8 @@ package com.ogd.stockdiary.application.principlecheck.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 
+import com.ogd.stockdiary.domain.principlecheck.entity.PrincipleCheckStatus;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,7 +19,7 @@ public class PrincipleCheckRequest {
     @NotNull(message = "투자원칙 ID는 필수입니다")
     private Long principleId;
 
-    @Schema(description = "원칙 준수 여부", example = "true", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "원칙 준수 여부는 필수입니다")
-    private Boolean isFollowed;
+    @Schema(description = "투자원칙 준수 상태", example = "KEPT", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "투자원칙 준수 상태는 필수입니다")
+    private PrincipleCheckStatus status;
 }

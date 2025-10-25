@@ -1,5 +1,7 @@
 package com.ogd.stockdiary.domain.principlecheck.dto;
 
+import com.ogd.stockdiary.domain.principlecheck.entity.PrincipleCheckStatus;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -8,5 +10,5 @@ import lombok.RequiredArgsConstructor;
 public class PrincipleCheckCommand {
 
     private final Long principleId;
-    private final Boolean isFollowed;
+    private final PrincipleCheckStatus status;
 }

@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -38,8 +40,9 @@ public class PrincipleCheck {
     @JoinColumn(name = "principle_id", nullable = false)
     private InvestmentPrinciple principle;
 
-    @Column(name = "is_followed", nullable = false)
-    private Boolean isFollowed;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private PrincipleCheckStatus status;
 
     @Column(updatable = false)
     private LocalDateTime createdAt;
@@ -58,11 +61,11 @@ public class PrincipleCheck {
     }
 
     public static PrincipleCheck create(
-        Retrospection retrospection, InvestmentPrinciple principle, Boolean isFollowed) {
+        Retrospection retrospection, InvestmentPrinciple principle, PrincipleCheckStatus status) {
         PrincipleCheck principleCheck = new PrincipleCheck();
         principleCheck.retrospection = retrospection;
         principleCheck.principle = principle;
-        principleCheck.isFollowed = isFollowed;
+        principleCheck.status = status;
         return principleCheck;
     }
 }
