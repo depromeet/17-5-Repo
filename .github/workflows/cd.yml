@@ -50,7 +50,11 @@ jobs:
           echo "APPLE_REDIRECT_URI=${{ vars.APPLE_REDIRECT_URI }}" >> $GITHUB_ENV
           echo "APPLE_TEAM_ID=${{ vars.APPLE_TEAM_ID }}" >> $GITHUB_ENV
           echo "APPLE_KEY_ID=${{ vars.APPLE_KEY_ID }}" >> $GITHUB_ENV
-          echo "APPLE_PRIVATE_KEY=${{ vars.APPLE_PRIVATE_KEY }}" >> $GITHUB_ENV
+          {
+            echo "APPLE_PRIVATE_KEY<<EOF"
+            echo "${{ vars.APPLE_PRIVATE_KEY }}"
+            echo "EOF"
+          } >> $GITHUB_ENV
 
       - name: Verify deployment
         run: |
