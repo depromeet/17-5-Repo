@@ -77,6 +77,9 @@ jobs:
             -e STORAGE_ENDPOINT="$STORAGE_ENDPOINT" \
             -e STORAGE_ACCESS_KEY="$STORAGE_ACCESS_KEY" \
             -e STORAGE_SECRET_KEY="$STORAGE_SECRET_KEY" \
+            -e KAKAO_ADMIN_KEY="$KAKAO_ADMIN_KEY" \
+            -e KAKAO_CLIENT_ID="$KAKAO_CLIENT_ID" \
+            -e KAKAO_REDIRECT_URI="$KAKAO_REDIRECT_URI" \
             "$TARGET_IMAGE"
 
           echo "✅ Development container started successfully"
