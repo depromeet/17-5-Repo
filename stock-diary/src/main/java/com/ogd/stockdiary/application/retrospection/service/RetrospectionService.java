@@ -64,21 +64,14 @@ public class RetrospectionService implements CreateRetrospectionUseCase, GetRetr
         List<PrincipleCheckCommand> principleCheckCommands,
         Long userId) {
         List<PrincipleCheck> principleChecks = principleCheckCommands.stream()
-            .map(
-                command -> {
-                    InvestmentPrinciple principle = investmentPrincipleRepository
-                        .findByIdAndUserId(
-                            command.getPrincipleId(), userId)
-                        .orElseThrow(
-                            () -> new ApplicationException(
-                                CodeEnum.FRS_003,
-                                "투자원칙을 찾을 수 없습니다: "
-                                    + command
-                                        .getPrincipleId()));
+            .map(command -> {
+                InvestmentPrinciple principle = investmentPrincipleRepository
+                    .findByIdAndUserId(command.getPrincipleId(), userId)
+                    .orElseThrow(() -> new ApplicationException(CodeEnum.FRS_003,
+                        "투자원칙을 찾을 수 없습니다: " + command.getPrincipleId()));
 
-                    return PrincipleCheck.create(
-                        retrospection, principle, command.getIsFollowed());
-                })
+                return PrincipleCheck.create(retrospection, principle, command.getStatus());
+            })
             .toList();
 
         principleCheckRepository.saveAll(principleChecks);
@@ -88,9 +81,7 @@ public class RetrospectionService implements CreateRetrospectionUseCase, GetRetr
     @Transactional(readOnly = true)
     public GetRetrospectionResponse getRetrospection(Long retrospectionId, Long userId) {
         Retrospection retrospection = retrospectionRepository.findByIdAndUserId(retrospectionId, userId);
-        List<PrincipleCheck> principleChecks = principleCheckRepository.findByRetrospectionId(retrospectionId).stream()
-            .filter(pc -> Boolean.TRUE.equals(pc.getIsFollowed()))
-            .toList();
+        List<PrincipleCheck> principleChecks = principleCheckRepository.findByRetrospectionId(retrospectionId);
 
         return RetrospectionMapper.toGetResponse(retrospection, principleChecks);
     }

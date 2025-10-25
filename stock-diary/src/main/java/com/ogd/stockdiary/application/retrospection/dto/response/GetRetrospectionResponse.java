@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.ogd.stockdiary.domain.principlecheck.entity.PrincipleCheckStatus;
 import com.ogd.stockdiary.domain.retrospection.entity.Currency;
 import com.ogd.stockdiary.domain.retrospection.entity.InvestmentEmotion;
 import com.ogd.stockdiary.domain.retrospection.entity.OrderType;
@@ -74,7 +75,7 @@ public class GetRetrospectionResponse {
         @Schema(description = "투자 원칙 내용", example = "손절 라인을 미리 정하고 지킨다")
         private String principle;
 
-        @Schema(description = "투자 원칙 체크 여부", example = "true")
-        private Boolean isChecked;
+        @Schema(description = "투자 원칙 준수 상태", example = "KEPT")
+        private PrincipleCheckStatus status;
     }
 }

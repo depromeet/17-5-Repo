@@ -40,7 +40,7 @@ public class RetrospectionMapper {
     }
 
     private static PrincipleCheckCommand toPrincipleCheckCommand(PrincipleCheckRequest request) {
-        return new PrincipleCheckCommand(request.getPrincipleId(), request.getIsFollowed());
+        return new PrincipleCheckCommand(request.getPrincipleId(), request.getStatus());
     }
 
     public static CreateRetrospectionResponse toResponse(Retrospection retrospection) {
@@ -86,7 +86,7 @@ public class RetrospectionMapper {
                 pc -> new GetRetrospectionResponse.PrincipleCheckResponse(
                     pc.getPrinciple().getId(),
                     pc.getPrinciple().getPrinciple(),
-                    pc.getIsFollowed()))
+                    pc.getStatus()))
             .toList();
 
         return new GetRetrospectionResponse(
