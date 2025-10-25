@@ -68,9 +68,9 @@ public class FileClientTestController {
 
     @Operation(summary = "[TEST] 다운로드 URL 생성", description = "파일 다운로드를 위한 Pre-Signed URL을 생성합니다. "
         + "⚠️ 테스트 전용 - 추후 삭제 예정")
-    @GetMapping("/download-url/{objectKey}")
+    @GetMapping("/download-url")
     public ResponseEntity<HttpApiResponse<PreSignedUrlResponse>> createDownloadUrl(
-        @PathVariable String objectKey, @RequestParam(defaultValue = "3600") int ttl) {
+        @RequestParam String objectKey, @RequestParam(defaultValue = "3600") int ttl) {
 
         String url = fileClientTestUseCase.createDownloadUrl(objectKey, ttl);
 
