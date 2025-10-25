@@ -46,6 +46,11 @@ jobs:
           echo "KAKAO_ADMIN_KEY=${{ vars.KAKAO_ADMIN_KEY }}" >> $GITHUB_ENV
           echo "KAKAO_CLIENT_ID=${{ vars.KAKAO_CLIENT_ID }}" >> $GITHUB_ENV
           echo "KAKAO_REDIRECT_URI=${{ vars.KAKAO_REDIRECT_URI }}" >> $GITHUB_ENV
+          echo "APPLE_CLIENT_ID=${{ vars.APPLE_CLIENT_ID }}" >> $GITHUB_ENV
+          echo "APPLE_REDIRECT_URI=${{ vars.APPLE_REDIRECT_URI }}" >> $GITHUB_ENV
+          echo "APPLE_TEAM_ID=${{ vars.APPLE_TEAM_ID }}" >> $GITHUB_ENV
+          echo "APPLE_KEY_ID=${{ vars.APPLE_KEY_ID }}" >> $GITHUB_ENV
+          echo "APPLE_PRIVATE_KEY=${{ vars.APPLE_PRIVATE_KEY }}" >> $GITHUB_ENV
 
       - name: Verify deployment
         run: |
@@ -80,6 +85,11 @@ jobs:
             -e KAKAO_ADMIN_KEY="$KAKAO_ADMIN_KEY" \
             -e KAKAO_CLIENT_ID="$KAKAO_CLIENT_ID" \
             -e KAKAO_REDIRECT_URI="$KAKAO_REDIRECT_URI" \
+            -e APPLE_CLIENT_ID="$APPLE_CLIENT_ID" \
+            -e APPLE_REDIRECT_URI="$APPLE_REDIRECT_URI" \
+            -e APPLE_TEAM_ID="$APPLE_TEAM_ID" \
+            -e APPLE_KEY_ID="$APPLE_KEY_ID" \
+            -e APPLE_PRIVATE_KEY="$APPLE_PRIVATE_KEY" \
             "$TARGET_IMAGE"
 
           echo "✅ Development container started successfully"
