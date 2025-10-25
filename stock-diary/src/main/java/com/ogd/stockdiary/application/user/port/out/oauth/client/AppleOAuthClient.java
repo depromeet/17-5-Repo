@@ -7,6 +7,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Base64;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.openssl.PEMParser;
@@ -16,11 +18,15 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ogd.stockdiary.common.httpresponse.CodeEnum;
 import com.ogd.stockdiary.domain.user.port.out.oauth.OAuthTokenResponse;
 import com.ogd.stockdiary.domain.user.port.out.oauth.OIDCPublicKeyList;
 import com.ogd.stockdiary.domain.user.port.out.oauth.client.OAuthClient;
+import com.ogd.stockdiary.exception.ApplicationException;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -41,7 +47,10 @@ public class AppleOAuthClient implements OAuthClient {
     private static final String KEYS_ENDPOINT = "/auth/keys";
 
     @Override
-    public OAuthTokenResponse getToken(String authCode) {
+    public OAuthTokenResponse getToken(String authCode, String redirectUri) {
+        // redirectUri가 null이면 application.yml의 설정 사용
+        String effectiveRedirectUri = redirectUri != null ? redirectUri : appleProperties.getRedirectUri();
+
         String clientSecret = generateClientSecret();
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
@@ -49,15 +58,42 @@ public class AppleOAuthClient implements OAuthClient {
         params.add("client_secret", clientSecret);
         params.add("code", authCode);
         params.add("grant_type", "authorization_code");
-        params.add("redirect_uri", appleProperties.getRedirectUri());
+        params.add("redirect_uri", effectiveRedirectUri);
 
-        return restClient
-            .post()
-            .uri(APPLE_AUTH_URL + TOKEN_ENDPOINT)
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-            .body(params)
-            .retrieve()
-            .body(OAuthTokenResponse.class);
+        try {
+            return restClient
+                .post()
+                .uri(APPLE_AUTH_URL + TOKEN_ENDPOINT)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(params)
+                .retrieve()
+                .body(OAuthTokenResponse.class);
+        } catch (HttpClientErrorException e) {
+            log.error("Apple OAuth token exchange failed: {}", e.getResponseBodyAsString());
+            Map<String, Object> errorData = parseOAuthError(e, "APPLE");
+            throw new ApplicationException(
+                CodeEnum.AUTH_001,
+                "Apple OAuth 토큰 교환 실패",
+                errorData);
+        }
+    }
+
+    private Map<String, Object> parseOAuthError(HttpClientErrorException e, String provider) {
+        Map<String, Object> errorData = new HashMap<>();
+        errorData.put("provider", provider);
+        errorData.put("httpStatus", e.getStatusCode().value());
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, Object> errorResponse = objectMapper.readValue(
+                e.getResponseBodyAsString(),
+                Map.class);
+            errorData.putAll(errorResponse);
+        } catch (Exception parseException) {
+            errorData.put("rawError", e.getResponseBodyAsString());
+        }
+
+        return errorData;
     }
 
     @Override
