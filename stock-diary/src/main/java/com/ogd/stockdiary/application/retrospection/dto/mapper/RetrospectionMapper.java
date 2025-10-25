@@ -40,7 +40,12 @@ public class RetrospectionMapper {
     }
 
     private static PrincipleCheckCommand toPrincipleCheckCommand(PrincipleCheckRequest request) {
-        return new PrincipleCheckCommand(request.getPrincipleId(), request.getStatus());
+        return new PrincipleCheckCommand(
+            request.getPrincipleId(),
+            request.getStatus(),
+            request.getReason(),
+            request.getImageIds(),
+            request.getLinks());
     }
 
     public static CreateRetrospectionResponse toResponse(Retrospection retrospection) {

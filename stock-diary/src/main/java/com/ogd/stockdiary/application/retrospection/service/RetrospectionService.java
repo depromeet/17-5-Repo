@@ -6,14 +6,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import com.ogd.stockdiary.application.image.repository.JpaImageMetadataRepository;
+import com.ogd.stockdiary.application.image.repository.JpaPrincipleCheckImageRepository;
+import com.ogd.stockdiary.application.principlecheck.repository.JpaPrincipleCheckLinkRepository;
 import com.ogd.stockdiary.application.retrospection.dto.mapper.RetrospectionMapper;
 import com.ogd.stockdiary.application.retrospection.dto.response.GetRetrospectionResponse;
 import com.ogd.stockdiary.application.user.repository.UserRepository;
 import com.ogd.stockdiary.common.httpresponse.CodeEnum;
+import com.ogd.stockdiary.domain.image.entity.ImageMetadata;
+import com.ogd.stockdiary.domain.image.entity.ImageStatus;
+import com.ogd.stockdiary.domain.image.entity.PrincipleCheckImage;
 import com.ogd.stockdiary.domain.investmentprinciple.entity.InvestmentPrinciple;
 import com.ogd.stockdiary.domain.investmentprinciple.port.out.InvestmentPrincipleRepository;
 import com.ogd.stockdiary.domain.principlecheck.dto.PrincipleCheckCommand;
 import com.ogd.stockdiary.domain.principlecheck.entity.PrincipleCheck;
+import com.ogd.stockdiary.domain.principlecheck.entity.PrincipleCheckLink;
 import com.ogd.stockdiary.domain.principlecheck.port.out.PrincipleCheckRepository;
 import com.ogd.stockdiary.domain.retrospection.entity.Retrospection;
 import com.ogd.stockdiary.domain.retrospection.port.in.CreateRetrospectionCommand;
@@ -33,6 +40,9 @@ public class RetrospectionService implements CreateRetrospectionUseCase, GetRetr
     private final UserRepository userRepository;
     private final PrincipleCheckRepository principleCheckRepository;
     private final InvestmentPrincipleRepository investmentPrincipleRepository;
+    private final JpaImageMetadataRepository imageMetadataRepository;
+    private final JpaPrincipleCheckImageRepository principleCheckImageRepository;
+    private final JpaPrincipleCheckLinkRepository principleCheckLinkRepository;
 
     @Override
     @Transactional
@@ -63,18 +73,61 @@ public class RetrospectionService implements CreateRetrospectionUseCase, GetRetr
         Retrospection retrospection,
         List<PrincipleCheckCommand> principleCheckCommands,
         Long userId) {
-        List<PrincipleCheck> principleChecks = principleCheckCommands.stream()
-            .map(command -> {
-                InvestmentPrinciple principle = investmentPrincipleRepository
-                    .findByIdAndUserId(command.getPrincipleId(), userId)
-                    .orElseThrow(() -> new ApplicationException(CodeEnum.FRS_003,
-                        "투자원칙을 찾을 수 없습니다: " + command.getPrincipleId()));
+        principleCheckCommands.forEach(command -> {
+            // 투자원칙 조회
+            InvestmentPrinciple principle = investmentPrincipleRepository
+                .findByIdAndUserId(command.getPrincipleId(), userId)
+                .orElseThrow(() -> new ApplicationException(CodeEnum.FRS_003,
+                    "투자원칙을 찾을 수 없습니다: " + command.getPrincipleId()));
 
-                return PrincipleCheck.create(retrospection, principle, command.getStatus());
-            })
+            // PrincipleCheck 생성 및 저장
+            PrincipleCheck principleCheck = PrincipleCheck.create(
+                retrospection, principle, command.getStatus(), command.getReason());
+            PrincipleCheck savedPrincipleCheck = principleCheckRepository.save(principleCheck);
+
+            // 이미지 처리
+            if (!CollectionUtils.isEmpty(command.getImageIds())) {
+                saveImages(savedPrincipleCheck, command.getImageIds(), userId);
+            }
+
+            // 링크 처리
+            if (!CollectionUtils.isEmpty(command.getLinks())) {
+                saveLinks(savedPrincipleCheck, command.getLinks());
+            }
+        });
+    }
+
+    private void saveImages(PrincipleCheck principleCheck, List<Long> imageIds, Long userId) {
+        List<ImageMetadata> images = imageMetadataRepository.findAllById(imageIds);
+
+        // 이미지 존재 여부 및 소유권 검증
+        if (images.size() != imageIds.size()) {
+            throw new ApplicationException(CodeEnum.FRS_003, "일부 이미지를 찾을 수 없습니다");
+        }
+
+        images.forEach(image -> {
+            if (!image.getUser().getId().equals(userId)) {
+                throw new ApplicationException(CodeEnum.FRS_003,
+                    "해당 이미지에 대한 권한이 없습니다: " + image.getId());
+            }
+        });
+
+        // PrincipleCheckImage 매핑 생성
+        List<PrincipleCheckImage> principleCheckImages = images.stream()
+            .map(image -> PrincipleCheckImage.create(principleCheck, image))
             .toList();
+        principleCheckImageRepository.saveAll(principleCheckImages);
 
-        principleCheckRepository.saveAll(principleChecks);
+        // 이미지 상태를 C(저장완료)로 변경
+        images.forEach(image -> image.updateStatus(ImageStatus.C));
+        imageMetadataRepository.saveAll(images);
+    }
+
+    private void saveLinks(PrincipleCheck principleCheck, List<String> links) {
+        List<PrincipleCheckLink> principleCheckLinks = links.stream()
+            .map(link -> PrincipleCheckLink.create(principleCheck, link))
+            .toList();
+        principleCheckLinkRepository.saveAll(principleCheckLinks);
     }
 
     @Override
