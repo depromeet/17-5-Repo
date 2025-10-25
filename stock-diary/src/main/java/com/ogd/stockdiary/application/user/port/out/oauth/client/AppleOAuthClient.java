@@ -5,7 +5,6 @@ import java.io.StringReader;
 import java.security.PrivateKey;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -148,7 +147,8 @@ public class AppleOAuthClient implements OAuthClient {
     }
 
     private PrivateKey getPrivateKey() throws IOException {
-        String privateKeyPEM = new String(Base64.getDecoder().decode(appleProperties.getPrivateKey()));
+        // Replace \n with actual newlines for PEM parsing
+        String privateKeyPEM = appleProperties.getPrivateKey().replace("\\n", "\n");
 
         try (PEMParser pemParser = new PEMParser(new StringReader(privateKeyPEM))) {
             PrivateKeyInfo privateKeyInfo = (PrivateKeyInfo) pemParser.readObject();
