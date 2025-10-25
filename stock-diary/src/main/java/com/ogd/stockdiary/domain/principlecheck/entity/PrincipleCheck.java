@@ -44,6 +44,9 @@ public class PrincipleCheck {
     @Column(name = "status", nullable = false)
     private PrincipleCheckStatus status;
 
+    @Column(name = "reason", columnDefinition = "TEXT")
+    private String reason;
+
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
@@ -61,11 +64,12 @@ public class PrincipleCheck {
     }
 
     public static PrincipleCheck create(
-        Retrospection retrospection, InvestmentPrinciple principle, PrincipleCheckStatus status) {
+        Retrospection retrospection, InvestmentPrinciple principle, PrincipleCheckStatus status, String reason) {
         PrincipleCheck principleCheck = new PrincipleCheck();
         principleCheck.retrospection = retrospection;
         principleCheck.principle = principle;
         principleCheck.status = status;
+        principleCheck.reason = reason;
         return principleCheck;
     }
 }
