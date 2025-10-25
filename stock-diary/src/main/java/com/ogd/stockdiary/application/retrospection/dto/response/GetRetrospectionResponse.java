@@ -77,5 +77,14 @@ public class GetRetrospectionResponse {
 
         @Schema(description = "투자 원칙 준수 상태", example = "KEPT")
         private PrincipleCheckStatus status;
+
+        @Schema(description = "투자 이유", example = "기술적 분석 결과 상승 추세가 확인되어 매수했습니다.")
+        private String reason;
+
+        @Schema(description = "이미지 다운로드 URL 목록", example = "[\"https://example.com/image1.png\", \"https://example.com/image2.png\"]")
+        private List<String> imageUrls;
+
+        @Schema(description = "링크 목록", example = "[\"https://example.com/article1\", \"https://example.com/article2\"]")
+        private List<String> links;
     }
 }

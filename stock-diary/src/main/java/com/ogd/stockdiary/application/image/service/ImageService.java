@@ -45,10 +45,10 @@ public class ImageService implements ImageUseCase {
         // UUID 생성 및 짧게 자르기
         String shortUuid = generateShortUuid();
 
-        // objectKey 생성: /{domain}/{yyyy-MM-dd}/{shortUuid}.{extension}
+        // objectKey 생성: {domain}/{yyyy-MM-dd}/{shortUuid}.{extension}
         String currentDate = LocalDate.now().format(DATE_FORMATTER);
         String objectKey = String.format(
-            "/%s/%s/%s.%s", command.getDomain(), currentDate, shortUuid, extension);
+            "%s/%s/%s.%s", command.getDomain(), currentDate, shortUuid, extension);
 
         // MinIO에 파일 업로드
         fileClientPort.uploadFile(command.getInputStream(), objectKey, command.getFileSize());
@@ -83,5 +83,10 @@ public class ImageService implements ImageUseCase {
     private String generateShortUuid() {
         String uuid = UUID.randomUUID().toString().replace("-", "");
         return uuid.substring(0, UUID_SUBSTRING_LENGTH);
+    }
+
+    @Override
+    public String getDownloadUrl(String objectKey) {
+        return fileClientPort.getDownloadPreSignedUrl(objectKey, 3600);
     }
 }

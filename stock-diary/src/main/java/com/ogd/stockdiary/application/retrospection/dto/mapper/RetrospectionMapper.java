@@ -2,6 +2,7 @@ package com.ogd.stockdiary.application.retrospection.dto.mapper;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import com.ogd.stockdiary.application.principlecheck.dto.request.PrincipleCheckRequest;
 import com.ogd.stockdiary.application.retrospection.dto.request.CreateRetrospectionRequest;
@@ -40,7 +41,12 @@ public class RetrospectionMapper {
     }
 
     private static PrincipleCheckCommand toPrincipleCheckCommand(PrincipleCheckRequest request) {
-        return new PrincipleCheckCommand(request.getPrincipleId(), request.getStatus());
+        return new PrincipleCheckCommand(
+            request.getPrincipleId(),
+            request.getStatus(),
+            request.getReason(),
+            request.getImageIds(),
+            request.getLinks());
     }
 
     public static CreateRetrospectionResponse toResponse(Retrospection retrospection) {
@@ -80,13 +86,18 @@ public class RetrospectionMapper {
     }
 
     public static GetRetrospectionResponse toGetResponse(
-        Retrospection retrospection, List<PrincipleCheck> principleChecks) {
+        Retrospection retrospection,
+        List<PrincipleCheck> principleChecks,
+        Map<Long, List<String>> imageUrlsMap,
+        Map<Long, List<String>> linksMap) {
         List<GetRetrospectionResponse.PrincipleCheckResponse> principleCheckResponses = principleChecks.stream()
-            .map(
-                pc -> new GetRetrospectionResponse.PrincipleCheckResponse(
-                    pc.getPrinciple().getId(),
-                    pc.getPrinciple().getPrinciple(),
-                    pc.getStatus()))
+            .map(pc -> new GetRetrospectionResponse.PrincipleCheckResponse(
+                pc.getPrinciple().getId(),
+                pc.getPrinciple().getPrinciple(),
+                pc.getStatus(),
+                pc.getReason(),
+                imageUrlsMap.getOrDefault(pc.getId(), Collections.emptyList()),
+                linksMap.getOrDefault(pc.getId(), Collections.emptyList())))
             .toList();
 
         return new GetRetrospectionResponse(
