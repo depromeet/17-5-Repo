@@ -10,4 +10,6 @@ import lombok.Getter;
 public class AuthResult {
     private final User user;
     private final boolean isNewUser;
+    private final String accessToken;
+    private final String refreshToken;
 }

@@ -43,6 +43,9 @@ jobs:
           echo "STORAGE_ENDPOINT=${{ vars.STORAGE_ENDPOINT }}" >> $GITHUB_ENV
           echo "STORAGE_ACCESS_KEY=${{ vars.STORAGE_ACCESS_KEY }}" >> $GITHUB_ENV
           echo "STORAGE_SECRET_KEY=${{ vars.STORAGE_SECRET_KEY }}" >> $GITHUB_ENV
+          echo "KAKAO_ADMIN_KEY=${{ vars.KAKAO_ADMIN_KEY }}" >> $GITHUB_ENV
+          echo "KAKAO_CLIENT_ID=${{ vars.KAKAO_CLIENT_ID }}" >> $GITHUB_ENV
+          echo "KAKAO_REDIRECT_URI=${{ vars.KAKAO_REDIRECT_URI }}" >> $GITHUB_ENV
 
       - name: Verify deployment
         run: |
@@ -74,6 +77,9 @@ jobs:
             -e STORAGE_ENDPOINT="$STORAGE_ENDPOINT" \
             -e STORAGE_ACCESS_KEY="$STORAGE_ACCESS_KEY" \
             -e STORAGE_SECRET_KEY="$STORAGE_SECRET_KEY" \
+            -e KAKAO_ADMIN_KEY="$KAKAO_ADMIN_KEY" \
+            -e KAKAO_CLIENT_ID="$KAKAO_CLIENT_ID" \
+            -e KAKAO_REDIRECT_URI="$KAKAO_REDIRECT_URI" \
             "$TARGET_IMAGE"
 
           echo "✅ Development container started successfully"

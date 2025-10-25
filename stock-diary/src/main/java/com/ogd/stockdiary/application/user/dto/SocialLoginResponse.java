@@ -1,6 +1,7 @@
 package com.ogd.stockdiary.application.user.dto;
 
 import com.ogd.stockdiary.domain.user.entity.User;
+import com.ogd.stockdiary.domain.user.service.AuthResult;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,13 +16,18 @@ public class SocialLoginResponse {
     private String email;
     private String profileImageUrl;
     private boolean isNewUser;
+    private String accessToken;
+    private String refreshToken;
 
-    public static SocialLoginResponse from(User user, boolean isNewUser) {
+    public static SocialLoginResponse from(AuthResult authResult) {
+        User user = authResult.getUser();
         return new SocialLoginResponse(
             user.getId(),
             user.getNickname(),
             user.getEmail(),
             user.getProfileImageUrl(),
-            isNewUser);
+            authResult.isNewUser(),
+            authResult.getAccessToken(),
+            authResult.getRefreshToken());
     }
 }
