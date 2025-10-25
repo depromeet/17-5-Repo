@@ -1,6 +1,8 @@
 package com.ogd.stockdiary.application.retrospection.service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +18,7 @@ import com.ogd.stockdiary.common.httpresponse.CodeEnum;
 import com.ogd.stockdiary.domain.image.entity.ImageMetadata;
 import com.ogd.stockdiary.domain.image.entity.ImageStatus;
 import com.ogd.stockdiary.domain.image.entity.PrincipleCheckImage;
+import com.ogd.stockdiary.domain.image.port.in.ImageUseCase;
 import com.ogd.stockdiary.domain.investmentprinciple.entity.InvestmentPrinciple;
 import com.ogd.stockdiary.domain.investmentprinciple.port.out.InvestmentPrincipleRepository;
 import com.ogd.stockdiary.domain.principlecheck.dto.PrincipleCheckCommand;
@@ -43,6 +46,7 @@ public class RetrospectionService implements CreateRetrospectionUseCase, GetRetr
     private final JpaImageMetadataRepository imageMetadataRepository;
     private final JpaPrincipleCheckImageRepository principleCheckImageRepository;
     private final JpaPrincipleCheckLinkRepository principleCheckLinkRepository;
+    private final ImageUseCase imageUseCase;
 
     @Override
     @Transactional
@@ -136,6 +140,36 @@ public class RetrospectionService implements CreateRetrospectionUseCase, GetRetr
         Retrospection retrospection = retrospectionRepository.findByIdAndUserId(retrospectionId, userId);
         List<PrincipleCheck> principleChecks = principleCheckRepository.findByRetrospectionId(retrospectionId);
 
-        return RetrospectionMapper.toGetResponse(retrospection, principleChecks);
+        // PrincipleCheck ID별로 이미지 URL 목록 생성
+        Map<Long, List<String>> imageUrlsMap = principleChecks.stream()
+            .collect(Collectors.toMap(
+                PrincipleCheck::getId,
+                pc -> getImageUrls(pc.getId())));
+
+        // PrincipleCheck ID별로 링크 목록 생성
+        Map<Long, List<String>> linksMap = principleChecks.stream()
+            .collect(Collectors.toMap(
+                PrincipleCheck::getId,
+                pc -> getLinks(pc.getId())));
+
+        return RetrospectionMapper.toGetResponse(retrospection, principleChecks, imageUrlsMap, linksMap);
+    }
+
+    private List<String> getImageUrls(Long principleCheckId) {
+        List<PrincipleCheckImage> principleCheckImages = principleCheckImageRepository
+            .findByPrincipleCheckId(principleCheckId);
+
+        return principleCheckImages.stream()
+            .map(pci -> imageUseCase.getDownloadUrl(pci.getImage().getObjectKey()))
+            .toList();
+    }
+
+    private List<String> getLinks(Long principleCheckId) {
+        List<PrincipleCheckLink> principleCheckLinks = principleCheckLinkRepository
+            .findByPrincipleCheckId(principleCheckId);
+
+        return principleCheckLinks.stream()
+            .map(PrincipleCheckLink::getLinkUrl)
+            .toList();
     }
 }
