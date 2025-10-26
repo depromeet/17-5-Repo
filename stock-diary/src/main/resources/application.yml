@@ -4,6 +4,7 @@ apple:
   team-id: ${APPLE_TEAM_ID:YOUR_TEAM_ID}
   key-id: ${APPLE_KEY_ID:YOUR_KEY_ID}
   private-key: ${APPLE_PRIVATE_KEY:BASE64_ENCODED_PRIVATE_KEY}
+  key-file-path: ${APPLE_KEY_FILE_PATH:AuthKey_WCY87M37P6.p8}
 
 kakao:
   client-id: ${KAKAO_CLIENT_ID}

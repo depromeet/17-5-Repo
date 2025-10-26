@@ -147,11 +147,37 @@ public class AppleOAuthClient implements OAuthClient {
     }
 
     private PrivateKey getPrivateKey() throws IOException {
-        // Replace \n with actual newlines for PEM parsing
-        String privateKeyPEM = appleProperties.getPrivateKey().replace("\\n", "\n");
+        try {
+            // 우선순위 1: .p8 파일이 있으면 직접 읽기 (로컬 테스트용)
+            if (appleProperties.getKeyFilePath() != null && !appleProperties.getKeyFilePath().isEmpty()) {
+                return readPrivateKeyFromFile(appleProperties.getKeyFilePath());
+            }
 
-        try (PEMParser pemParser = new PEMParser(new StringReader(privateKeyPEM))) {
+            // 우선순위 2: 환경변수에서 읽기 (배포 환경용)
+            String privateKeyPEM = appleProperties.getPrivateKey().replace("\\n", "\n");
+            try (PEMParser pemParser = new PEMParser(new StringReader(privateKeyPEM))) {
+                PrivateKeyInfo privateKeyInfo = (PrivateKeyInfo) pemParser.readObject();
+                JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
+                return converter.getPrivateKey(privateKeyInfo);
+            }
+        } catch (Exception e) {
+            log.error("Failed to load Apple private key", e);
+            throw new IOException("Failed to load Apple private key", e);
+        }
+    }
+
+    private PrivateKey readPrivateKeyFromFile(String keyFilePath) throws IOException {
+        org.springframework.core.io.Resource resource = new org.springframework.core.io.ClassPathResource(keyFilePath);
+
+        try (java.io.InputStream is = resource.getInputStream();
+            java.io.InputStreamReader isr = new java.io.InputStreamReader(is);
+            PEMParser pemParser = new PEMParser(isr)) {
+
             PrivateKeyInfo privateKeyInfo = (PrivateKeyInfo) pemParser.readObject();
+            if (privateKeyInfo == null) {
+                throw new IOException("Failed to parse private key from file: " + keyFilePath);
+            }
+
             JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
             return converter.getPrivateKey(privateKeyInfo);
         }

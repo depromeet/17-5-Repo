@@ -115,7 +115,7 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/apple/callback")
+    @RequestMapping(value = "/apple/callback", method = {RequestMethod.GET, RequestMethod.POST})
     public ResponseEntity<SocialLoginResponse> appleCallback(@RequestParam("code") String code) {
         log.info("Apple OAuth callback received with code: {}", code);
 

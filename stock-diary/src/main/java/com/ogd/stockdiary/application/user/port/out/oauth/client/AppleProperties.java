@@ -20,4 +20,5 @@ public class AppleProperties {
     private String teamId;
     private String keyId;
     private String privateKey;
+    private String keyFilePath; // .p8 파일 경로 (로컬 테스트용)
 }
