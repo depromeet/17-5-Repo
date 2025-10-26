@@ -1,5 +1,6 @@
 apple:
-  client-id: ${APPLE_CLIENT_ID:your.app.bundle.id}
+  client-id: ${APPLE_CLIENT_ID:your.service.id.web}  # Service ID (웹용)
+  app-id: ${APPLE_APP_ID:your.app.bundle.id}  # App Bundle ID (iOS용)
   redirect-uri: ${APPLE_REDIRECT_URI:http://localhost:8080/api/v1/auth/apple/callback}
   team-id: ${APPLE_TEAM_ID:YOUR_TEAM_ID}
   key-id: ${APPLE_KEY_ID:YOUR_KEY_ID}

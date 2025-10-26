@@ -15,7 +15,8 @@ public class AppleProperties {
     // Apple ID 서비스의 고정된 Audience URL(변경되지 않는 다는것을 파악)
     public static final String APPLE_AUD = "https://appleid.apple.com";
 
-    private String clientId;
+    private String clientId; // Service ID (웹용): com.og.hedge.web
+    private String appId; // App Bundle ID (iOS용): com.og.hedge
     private String redirectUri;
     private String teamId;
     private String keyId;

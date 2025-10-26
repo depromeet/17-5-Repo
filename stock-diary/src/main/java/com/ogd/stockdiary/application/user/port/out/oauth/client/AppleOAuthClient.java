@@ -50,14 +50,19 @@ public class AppleOAuthClient implements OAuthClient {
         // redirectUri가 null이면 application.yml의 설정 사용
         String effectiveRedirectUri = redirectUri != null ? redirectUri : appleProperties.getRedirectUri();
 
-        String clientSecret = generateClientSecret();
+        // redirectUri를 보고 iOS인지 웹인지 판단
+        String effectiveClientId = determineClientId(effectiveRedirectUri);
+
+        String clientSecret = generateClientSecret(effectiveClientId);
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("client_id", appleProperties.getClientId());
+        params.add("client_id", effectiveClientId);
         params.add("client_secret", clientSecret);
         params.add("code", authCode);
         params.add("grant_type", "authorization_code");
         params.add("redirect_uri", effectiveRedirectUri);
+
+        log.info("Apple OAuth token request - clientId: {}, redirectUri: {}", effectiveClientId, effectiveRedirectUri);
 
         try {
             return restClient
@@ -74,6 +79,21 @@ public class AppleOAuthClient implements OAuthClient {
                 CodeEnum.AUTH_001,
                 "Apple OAuth 토큰 교환 실패",
                 errorData);
+        }
+    }
+
+    /**
+     * redirectUri를 보고 어떤 client_id를 사용할지 결정
+     * - HTTPS URL이면 웹 → Service ID (clientId)
+     * - Bundle ID 형태이면 iOS → App Bundle ID (appId)
+     */
+    private String determineClientId(String redirectUri) {
+        if (redirectUri != null && redirectUri.startsWith("http")) {
+            // 웹: Service ID 사용
+            return appleProperties.getClientId();
+        } else {
+            // iOS SDK: App Bundle ID 사용
+            return appleProperties.getAppId();
         }
     }
 
@@ -107,10 +127,12 @@ public class AppleOAuthClient implements OAuthClient {
 
     @Override
     public void unlink(String identifier) {
-        String clientSecret = generateClientSecret();
+        // unlink는 일반적으로 iOS에서 사용되므로 app-id 사용
+        String clientId = appleProperties.getAppId();
+        String clientSecret = generateClientSecret(clientId);
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("client_id", appleProperties.getClientId());
+        params.add("client_id", clientId);
         params.add("client_secret", clientSecret);
         params.add("token", identifier);
         params.add("token_type_hint", "refresh_token");
@@ -124,7 +146,7 @@ public class AppleOAuthClient implements OAuthClient {
             .toBodilessEntity();
     }
 
-    private String generateClientSecret() {
+    private String generateClientSecret(String clientId) {
         try {
             LocalDateTime now = LocalDateTime.now();
             Date issuedAt = Date.from(now.atZone(ZoneId.systemDefault()).toInstant());
@@ -137,7 +159,7 @@ public class AppleOAuthClient implements OAuthClient {
                 .setIssuedAt(issuedAt)
                 .setExpiration(expiration)
                 .setAudience(AppleProperties.APPLE_AUD)
-                .setSubject(appleProperties.getClientId())
+                .setSubject(clientId)
                 .signWith(getPrivateKey(), SignatureAlgorithm.ES256)
                 .compact();
         } catch (Exception e) {
