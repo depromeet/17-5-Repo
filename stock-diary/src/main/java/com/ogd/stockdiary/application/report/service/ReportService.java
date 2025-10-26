@@ -22,8 +22,10 @@ import com.ogd.stockdiary.domain.report.entity.RetrospectionForReport;
 import com.ogd.stockdiary.domain.report.port.in.CreateFeedbackCommand;
 import com.ogd.stockdiary.domain.report.port.in.CreateFeedbackUseCase;
 import com.ogd.stockdiary.domain.report.port.out.FeedbackRepository;
+import com.ogd.stockdiary.domain.report.port.out.PrincipleCheckPort;
 import com.ogd.stockdiary.domain.report.port.out.ReportPromptLoader;
 import com.ogd.stockdiary.domain.report.port.out.RetrospectionForReportRepository;
+import com.ogd.stockdiary.domain.report.vo.PrincipleCheckData;
 import com.ogd.stockdiary.domain.retrospection.entity.Order;
 import com.ogd.stockdiary.domain.retrospection.entity.Retrospection;
 import com.ogd.stockdiary.domain.retrospection.port.out.RetrospectionRepository;
@@ -37,6 +39,7 @@ public class ReportService implements CreateFeedbackUseCase {
     private final RetrospectionForReportRepository retrospectionForReportRepository;
     private final RetrospectionRepository retrospectionRepository;
     private final FeedbackRepository feedbackRepository;
+    private final PrincipleCheckPort principleCheckPort;
     private final ReportPromptLoader reportPromptLoader;
     private final ChatModel chatModel;
     private final ObjectMapper objectMapper;
@@ -56,9 +59,19 @@ public class ReportService implements CreateFeedbackUseCase {
         Order order = retrospectionForReport.getOrder();
         String content = retrospectionForReport.getContent();
 
+        // 투자원칙 체크 데이터 조회
+        List<PrincipleCheckData> principleChecks = principleCheckPort
+            .findByRetrospectionId(command.retrospectionId());
+
+        // 투자원칙 체크 데이터를 프롬프트 형식으로 변환
+        String principleChecksText = PrincipleCheckData.toPromptFormat(principleChecks);
+
         String userText = """
             Please analyze the symbol {symbol} in the {market} market based on the order: {order}.
             This is user message : {content}.
+
+            Investment Principles Checked:
+            {principleChecks}
             """;
 
         // 시스템 메시지를 로더에서 불러오기
@@ -66,7 +79,12 @@ public class ReportService implements CreateFeedbackUseCase {
 
         PromptTemplate promptTemplate = new PromptTemplate(userText);
 
-        Map<String, Object> variables = Map.of("symbol", symbol, "market", market, "order", order, "content", content);
+        Map<String, Object> variables = Map.of(
+            "symbol", symbol,
+            "market", market,
+            "order", order,
+            "content", content,
+            "principleChecks", principleChecksText);
 
         // 플레이스 홀더 넣은 유저 메시지 구성
         Message userMessage = promptTemplate.createMessage(variables);
