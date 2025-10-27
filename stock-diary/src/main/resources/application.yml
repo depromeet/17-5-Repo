@@ -15,8 +15,8 @@ kakao:
 
 jwt:
   secret-key: ${JWT_SECRET_KEY:wq8B+vdeTI+E7e2LE3Y2Cuo8taVY9Gf9hGs74lBz4RxKqHsqcyqt4kFRI/rHiWhaxPWfZgmPAkR6Pxy7ptNkWQ==}
-  access-token-expiration: 120000      # 2분 (밀리초)
-  refresh-token-expiration: 900000     # 15분 (밀리초)
+  access-token-expiration: 10000       # 10초 (밀리초)
+  refresh-token-expiration: 60000      # 1분 (밀리초)
 
 # Cloud Storage 설정 (MinIO / AWS S3)
 cloud:
