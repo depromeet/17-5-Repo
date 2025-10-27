@@ -60,22 +60,18 @@ public class AuthService {
             .findByOAuthProviderAndSubject(provider, payload.getSubject())
             .orElseGet(() -> createNewUser(provider, payload, email, nickname));
 
-        // 6. Apple의 경우 refresh token 저장
+        // 6. Apple OAuth Refresh Token 저장 (연결 해제 시 사용)
+        // Apple이 발급한 refresh token을 저장 (unlink API 호출 시 필요)
         if (provider == OAuthProvider.APPLE && tokenResponse.getRefreshToken() != null) {
-            saveAppleRefreshToken(user.getId(), tokenResponse.getRefreshToken());
+            saveOrUpdateAppleRefreshToken(user.getId(), tokenResponse.getRefreshToken());
         }
 
-        // 7. JWT 토큰 생성
+        // 7. 우리 서비스 JWT 토큰 생성
         String accessToken = jwtTokenProvider.generateAccessToken(user.getId());
         String refreshToken = jwtTokenProvider.generateRefreshToken(user.getId());
 
-        // 8. Refresh Token 저장 또는 업데이트
-        LocalDateTime expiresAt = LocalDateTime.now()
-            .plusSeconds(jwtProperties.getRefreshTokenExpiration() / 1000);
-        refreshTokenRepository.findById(user.getId())
-            .ifPresentOrElse(
-                existingToken -> existingToken.updateToken(refreshToken, expiresAt),
-                () -> refreshTokenRepository.save(new RefreshToken(user.getId(), refreshToken, expiresAt)));
+        // 8. 우리 서비스 JWT Refresh Token 저장 (토큰 갱신 시 사용)
+        saveOrUpdateRefreshToken(user.getId(), refreshToken);
 
         return new AuthResult(user, isNewUser, accessToken, refreshToken);
     }
@@ -104,13 +100,29 @@ public class AuthService {
         return userRepository.save(newUser);
     }
 
-    private void saveAppleRefreshToken(Long userId, String refreshToken) {
-        AppleAuthToken appleAuthToken = new AppleAuthToken(userId, refreshToken);
-        appleAuthTokenRepository.save(appleAuthToken);
+    private AppleAuthToken saveOrUpdateAppleRefreshToken(Long userId, String refreshToken) {
+        return appleAuthTokenRepository.findById(userId)
+            .map(existingToken -> {
+                existingToken.updateRefreshToken(refreshToken);
+                return existingToken;
+            })
+            .orElseGet(() -> appleAuthTokenRepository.save(new AppleAuthToken(userId, refreshToken)));
+    }
+
+    private RefreshToken saveOrUpdateRefreshToken(Long userId, String refreshToken) {
+        LocalDateTime expiresAt = LocalDateTime.now()
+            .plusSeconds(jwtProperties.getRefreshTokenExpiration() / 1000);
+
+        return refreshTokenRepository.findById(userId)
+            .map(existingToken -> {
+                existingToken.updateToken(refreshToken, expiresAt);
+                return existingToken;
+            })
+            .orElseGet(() -> refreshTokenRepository.save(new RefreshToken(userId, refreshToken, expiresAt)));
     }
 
     @Transactional
-    public String refreshAccessToken(String refreshToken) {
+    public TokenRefreshResult refreshAccessToken(String refreshToken) {
         // 1. Refresh Token 검증
         if (!jwtTokenProvider.validateToken(refreshToken)) {
             throw new IllegalArgumentException("Invalid refresh token");
@@ -135,7 +147,17 @@ public class AuthService {
         }
 
         // 6. 새로운 Access Token 생성
-        return jwtTokenProvider.generateAccessToken(userId);
+        String newAccessToken = jwtTokenProvider.generateAccessToken(userId);
+
+        // 7. 새로운 Refresh Token 생성 (Refresh Token Rotation)
+        String newRefreshToken = jwtTokenProvider.generateRefreshToken(userId);
+
+        // 8. DB의 Refresh Token 업데이트
+        saveOrUpdateRefreshToken(userId, newRefreshToken);
+
+        log.info("Token refreshed for userId: {}", userId);
+
+        return new TokenRefreshResult(newAccessToken, newRefreshToken);
     }
 
     @Transactional

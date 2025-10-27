@@ -11,10 +11,15 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AppleProperties {
-    private String clientId;
+
+    // Apple ID 서비스의 고정된 Audience URL(변경되지 않는 다는것을 파악)
+    public static final String APPLE_AUD = "https://appleid.apple.com";
+
+    private String clientId; // Service ID (웹용): com.og.hedge.web
+    private String appId; // App Bundle ID (iOS용): com.og.hedge
     private String redirectUri;
-    private String aud;
     private String teamId;
     private String keyId;
     private String privateKey;
+    private String keyFilePath; // .p8 파일 경로 (로컬 테스트용)
 }

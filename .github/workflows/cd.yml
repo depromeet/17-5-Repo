@@ -46,6 +46,16 @@ jobs:
           echo "KAKAO_ADMIN_KEY=${{ vars.KAKAO_ADMIN_KEY }}" >> $GITHUB_ENV
           echo "KAKAO_CLIENT_ID=${{ vars.KAKAO_CLIENT_ID }}" >> $GITHUB_ENV
           echo "KAKAO_REDIRECT_URI=${{ vars.KAKAO_REDIRECT_URI }}" >> $GITHUB_ENV
+          echo "APPLE_CLIENT_ID=${{ vars.APPLE_CLIENT_ID }}" >> $GITHUB_ENV
+          echo "APPLE_APP_ID=${{ vars.APPLE_APP_ID }}" >> $GITHUB_ENV
+          echo "APPLE_REDIRECT_URI=${{ vars.APPLE_REDIRECT_URI }}" >> $GITHUB_ENV
+          echo "APPLE_TEAM_ID=${{ vars.APPLE_TEAM_ID }}" >> $GITHUB_ENV
+          echo "APPLE_KEY_ID=${{ vars.APPLE_KEY_ID }}" >> $GITHUB_ENV
+          {
+            echo "APPLE_PRIVATE_KEY<<EOF"
+            echo "${{ vars.APPLE_PRIVATE_KEY }}"
+            echo "EOF"
+          } >> $GITHUB_ENV
 
       - name: Verify deployment
         run: |
@@ -80,6 +90,12 @@ jobs:
             -e KAKAO_ADMIN_KEY="$KAKAO_ADMIN_KEY" \
             -e KAKAO_CLIENT_ID="$KAKAO_CLIENT_ID" \
             -e KAKAO_REDIRECT_URI="$KAKAO_REDIRECT_URI" \
+            -e APPLE_CLIENT_ID="$APPLE_CLIENT_ID" \
+            -e APPLE_APP_ID="$APPLE_APP_ID" \
+            -e APPLE_REDIRECT_URI="$APPLE_REDIRECT_URI" \
+            -e APPLE_TEAM_ID="$APPLE_TEAM_ID" \
+            -e APPLE_KEY_ID="$APPLE_KEY_ID" \
+            -e APPLE_PRIVATE_KEY="$APPLE_PRIVATE_KEY" \
             "$TARGET_IMAGE"
 
           echo "✅ Development container started successfully"
@@ -174,7 +190,16 @@ jobs:
             openai.api.key = OPENAI_API_KEY,
             storage.endpoint = STORAGE_ENDPOINT,
             storage.access.key = STORAGE_ACCESS_KEY,
-            storage.secret.key = STORAGE_SECRET_KEY
+            storage.secret.key = STORAGE_SECRET_KEY,
+            kakao.admin.key = KAKAO_ADMIN_KEY,
+            kakao.client.id = KAKAO_CLIENT_ID,
+            kakao.redirect.uri = KAKAO_REDIRECT_URI,
+            apple.client.id = APPLE_CLIENT_ID,
+            apple.app.id = APPLE_APP_ID,
+            apple.redirect.uri = APPLE_REDIRECT_URI,
+            apple.team.id = APPLE_TEAM_ID,
+            apple.key.id = APPLE_KEY_ID,
+            apple.private.key = APPLE_PRIVATE_KEY
           withDecryption: "true"
 
       - name: Deploy to production environment
@@ -184,7 +209,7 @@ jobs:
           username: ${{ env.EC2_USER }}
           key: ${{ env.EC2_PRIVATE_KEY }}
           port: ${{ env.EC2_SSH_PORT }}
-          envs: DOCKER_USERNAME,DOCKER_PASSWORD,CONTAINER_NAME,DEPLOY_PORT,TARGET_IMAGE,DB_URL,DB_USERNAME,DB_PASSWORD,OPENAI_API_KEY,STORAGE_ENDPOINT,STORAGE_ACCESS_KEY,STORAGE_SECRET_KEY
+          envs: DOCKER_USERNAME,DOCKER_PASSWORD,CONTAINER_NAME,DEPLOY_PORT,TARGET_IMAGE,DB_URL,DB_USERNAME,DB_PASSWORD,OPENAI_API_KEY,STORAGE_ENDPOINT,STORAGE_ACCESS_KEY,STORAGE_SECRET_KEY,KAKAO_ADMIN_KEY,KAKAO_CLIENT_ID,KAKAO_REDIRECT_URI,APPLE_CLIENT_ID,APPLE_APP_ID,APPLE_REDIRECT_URI,APPLE_TEAM_ID,APPLE_KEY_ID,APPLE_PRIVATE_KEY
           script: |
             echo "🚀 Starting container deployment to production..."
 
@@ -214,6 +239,15 @@ jobs:
               -e STORAGE_ENDPOINT="$STORAGE_ENDPOINT" \
               -e STORAGE_ACCESS_KEY="$STORAGE_ACCESS_KEY" \
               -e STORAGE_SECRET_KEY="$STORAGE_SECRET_KEY" \
+              -e KAKAO_ADMIN_KEY="$KAKAO_ADMIN_KEY" \
+              -e KAKAO_CLIENT_ID="$KAKAO_CLIENT_ID" \
+              -e KAKAO_REDIRECT_URI="$KAKAO_REDIRECT_URI" \
+              -e APPLE_CLIENT_ID="$APPLE_CLIENT_ID" \
+              -e APPLE_APP_ID="$APPLE_APP_ID" \
+              -e APPLE_REDIRECT_URI="$APPLE_REDIRECT_URI" \
+              -e APPLE_TEAM_ID="$APPLE_TEAM_ID" \
+              -e APPLE_KEY_ID="$APPLE_KEY_ID" \
+              -e APPLE_PRIVATE_KEY="$APPLE_PRIVATE_KEY" \
               "$TARGET_IMAGE"
 
             echo "✅ Production container started successfully"
