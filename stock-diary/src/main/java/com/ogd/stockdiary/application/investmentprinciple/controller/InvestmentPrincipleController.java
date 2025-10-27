@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ogd.stockdiary.application.investmentprinciple.dto.mapper.InvestmentPrincipleMapper;
@@ -30,6 +31,7 @@ import com.ogd.stockdiary.domain.investmentprinciple.dto.CreatePrincipleCommand;
 import com.ogd.stockdiary.domain.investmentprinciple.dto.ReorderPrinciplesCommand;
 import com.ogd.stockdiary.domain.investmentprinciple.dto.UpdatePrincipleCommand;
 import com.ogd.stockdiary.domain.investmentprinciple.entity.InvestmentPrinciple;
+import com.ogd.stockdiary.domain.investmentprinciple.entity.PrincipleType;
 import com.ogd.stockdiary.domain.investmentprinciple.usecase.InvestmentPrincipleUseCase;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,13 +47,14 @@ public class InvestmentPrincipleController {
     private final InvestmentPrincipleUseCase investmentPrincipleUseCase;
 
     @GetMapping
-    @Operation(summary = "투자원칙 목록 조회", description = "사용자의 모든 투자원칙을 조회합니다.")
-    public HttpApiResponse<List<InvestmentPrincipleResponse>> getUserPrinciples() {
+    @Operation(summary = "투자원칙 목록 조회", description = "사용자의 투자원칙을 조회합니다. type 파라미터로 BUY(매수) 또는 SELL(매도)를 지정할 수 있으며, 지정하지 않으면 전체 조회합니다.")
+    public HttpApiResponse<List<InvestmentPrincipleResponse>> getUserPrinciples(
+        @RequestParam(required = false) PrincipleType type) {
 
         // TODO: Spring Security에서 User 정보 가져오기
         Long userId = 1L; // 임시로 하드코딩
 
-        List<InvestmentPrinciple> principles = investmentPrincipleUseCase.getUserPrinciples(userId);
+        List<InvestmentPrinciple> principles = investmentPrincipleUseCase.getUserPrinciples(userId, type);
         List<InvestmentPrincipleResponse> responses = InvestmentPrincipleMapper.toResponseList(principles);
 
         return HttpApiResponse.of(responses);
