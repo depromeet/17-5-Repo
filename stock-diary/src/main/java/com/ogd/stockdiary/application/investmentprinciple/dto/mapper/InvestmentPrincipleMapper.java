@@ -22,12 +22,13 @@ public class InvestmentPrincipleMapper {
 
     public static CreatePrincipleCommand toCommand(CreatePrincipleRequest request, Long userId) {
         return new CreatePrincipleCommand(
-            userId, request.getGroupId(), request.getPrinciple(), request.getDisplayOrder());
+            userId, request.getGroupId(), request.getPrincipleType(), request.getPrinciple(),
+            request.getDisplayOrder());
     }
 
     public static CreateMultiplePrinciplesCommand toCommand(
         CreateMultiplePrinciplesRequest request, Long userId) {
-        return new CreateMultiplePrinciplesCommand(userId, request.getPrinciples());
+        return new CreateMultiplePrinciplesCommand(userId, request.getPrincipleType(), request.getPrinciples());
     }
 
     public static UpdatePrincipleCommand toCommand(
@@ -49,6 +50,7 @@ public class InvestmentPrincipleMapper {
 
         return new BatchProcessCommand(
             userId,
+            request.getPrincipleType(),
             request.getCreatePrinciples(),
             updateCommands,
             request.getDeletePrincipleIds());
@@ -62,7 +64,8 @@ public class InvestmentPrincipleMapper {
             ? principle.getPrincipleGroup().getGroupName()
             : null;
         return new InvestmentPrincipleResponse(
-            principle.getId(), groupId, groupName, principle.getPrinciple(), principle.getDisplayOrder());
+            principle.getId(), groupId, groupName, principle.getPrincipleType(), principle.getPrinciple(),
+            principle.getDisplayOrder());
     }
 
     public static List<InvestmentPrincipleResponse> toResponseList(

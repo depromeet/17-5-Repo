@@ -9,10 +9,11 @@ import com.ogd.stockdiary.domain.investmentprinciple.dto.CreatePrincipleCommand;
 import com.ogd.stockdiary.domain.investmentprinciple.dto.ReorderPrinciplesCommand;
 import com.ogd.stockdiary.domain.investmentprinciple.dto.UpdatePrincipleCommand;
 import com.ogd.stockdiary.domain.investmentprinciple.entity.InvestmentPrinciple;
+import com.ogd.stockdiary.domain.investmentprinciple.entity.PrincipleType;
 
 public interface InvestmentPrincipleUseCase {
 
-    List<InvestmentPrinciple> getUserPrinciples(Long userId);
+    List<InvestmentPrinciple> getUserPrinciples(Long userId, PrincipleType type);
 
     InvestmentPrinciple createPrinciple(CreatePrincipleCommand command);
 

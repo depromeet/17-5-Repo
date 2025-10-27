@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Repository;
 
 import com.ogd.stockdiary.domain.investmentprinciple.entity.InvestmentPrinciple;
+import com.ogd.stockdiary.domain.investmentprinciple.entity.PrincipleType;
 import com.ogd.stockdiary.domain.investmentprinciple.port.out.InvestmentPrincipleRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,11 @@ public class InvestmentPrincipleRepositoryImpl implements InvestmentPrincipleRep
     @Override
     public List<InvestmentPrinciple> findByUserId(Long userId) {
         return jpaInvestmentPrincipleRepository.findByUserId(userId);
+    }
+
+    @Override
+    public List<InvestmentPrinciple> findByUserIdAndPrincipleType(Long userId, PrincipleType principleType) {
+        return jpaInvestmentPrincipleRepository.findByUserIdAndPrincipleType(userId, principleType);
     }
 
     @Override

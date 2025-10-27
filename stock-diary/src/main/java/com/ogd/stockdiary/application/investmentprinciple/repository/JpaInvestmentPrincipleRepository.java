@@ -10,12 +10,17 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.ogd.stockdiary.domain.investmentprinciple.entity.InvestmentPrinciple;
+import com.ogd.stockdiary.domain.investmentprinciple.entity.PrincipleType;
 
 @Repository
 public interface JpaInvestmentPrincipleRepository extends JpaRepository<InvestmentPrinciple, Long> {
 
     @Query("SELECT ip FROM InvestmentPrinciple ip LEFT JOIN FETCH ip.principleGroup WHERE ip.user.id = :userId")
     List<InvestmentPrinciple> findByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT ip FROM InvestmentPrinciple ip LEFT JOIN FETCH ip.principleGroup WHERE ip.user.id = :userId AND ip.principleType = :principleType")
+    List<InvestmentPrinciple> findByUserIdAndPrincipleType(@Param("userId") Long userId,
+        @Param("principleType") PrincipleType principleType);
 
     Optional<InvestmentPrinciple> findByIdAndUserId(Long id, Long userId);
 

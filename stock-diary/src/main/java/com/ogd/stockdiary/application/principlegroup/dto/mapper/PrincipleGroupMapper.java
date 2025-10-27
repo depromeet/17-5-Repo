@@ -22,7 +22,8 @@ public class PrincipleGroupMapper {
 
     public CreatePrincipleGroupCommand toCommand(CreatePrincipleGroupRequest request, Long userId) {
         return new CreatePrincipleGroupCommand(
-            userId, request.getGroupName(), request.getDisplayOrder(), request.getPrinciples());
+            userId, request.getGroupName(), request.getDisplayOrder(), request.getPrincipleType(),
+            request.getPrinciples());
     }
 
     public UpdatePrincipleGroupCommand toCommand(
