@@ -58,8 +58,11 @@ public class InvestmentPrincipleMapper {
         Long groupId = principle.getPrincipleGroup() != null
             ? principle.getPrincipleGroup().getId()
             : null;
+        String groupName = principle.getPrincipleGroup() != null
+            ? principle.getPrincipleGroup().getGroupName()
+            : null;
         return new InvestmentPrincipleResponse(
-            principle.getId(), groupId, principle.getPrinciple(), principle.getDisplayOrder());
+            principle.getId(), groupId, groupName, principle.getPrinciple(), principle.getDisplayOrder());
     }
 
     public static List<InvestmentPrincipleResponse> toResponseList(

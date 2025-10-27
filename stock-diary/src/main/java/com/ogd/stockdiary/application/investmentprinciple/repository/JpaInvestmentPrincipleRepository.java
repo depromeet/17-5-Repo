@@ -14,7 +14,8 @@ import com.ogd.stockdiary.domain.investmentprinciple.entity.InvestmentPrinciple;
 @Repository
 public interface JpaInvestmentPrincipleRepository extends JpaRepository<InvestmentPrinciple, Long> {
 
-    List<InvestmentPrinciple> findByUserId(Long userId);
+    @Query("SELECT ip FROM InvestmentPrinciple ip LEFT JOIN FETCH ip.principleGroup WHERE ip.user.id = :userId")
+    List<InvestmentPrinciple> findByUserId(@Param("userId") Long userId);
 
     Optional<InvestmentPrinciple> findByIdAndUserId(Long id, Long userId);
 
