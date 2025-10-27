@@ -145,12 +145,50 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "토큰 갱신 (Refresh Token Rotation)", description = """
+        ## 토큰 갱신 API (Refresh Token Rotation)
+
+        Access Token이 만료되었을 때 Refresh Token을 사용하여 새로운 Access Token과 Refresh Token을 발급받습니다.
+
+        ### 보안 기능: Refresh Token Rotation
+        - 기존 Refresh Token은 즉시 무효화되며 새로운 Refresh Token이 발급됩니다
+        - 탈취된 Refresh Token의 재사용을 방지합니다
+        - 클라이언트는 응답으로 받은 새로운 Refresh Token을 저장해야 합니다
+
+        ### 요청 예시
+        ```json
+        {
+          "refreshToken": "eyJhbGc..."
+        }
+        ```
+
+        ### 응답 예시
+        ```json
+        {
+          "accessToken": "eyJhbGc...",
+          "refreshToken": "eyJhbGc..."  // 새로운 Refresh Token
+        }
+        ```
+
+        ### 주의사항
+        - 응답으로 받은 새로운 refreshToken을 반드시 저장해야 합니다
+        - 이전 refreshToken은 더 이상 사용할 수 없습니다
+        """)
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "토큰 갱신 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = RefreshTokenResponse.class), examples = @ExampleObject(value = """
+            {
+              "accessToken": "eyJhbGc...",
+              "refreshToken": "eyJhbGc..."
+            }
+            """))),
+        @ApiResponse(responseCode = "400", description = "유효하지 않은 Refresh Token", content = @Content(mediaType = "application/json"))
+    })
     @PostMapping("/refresh")
     public ResponseEntity<RefreshTokenResponse> refreshToken(@RequestBody RefreshTokenRequest request) {
         try {
             log.info("Token refresh requested");
-            String newAccessToken = authService.refreshAccessToken(request.getRefreshToken());
-            return ResponseEntity.ok(new RefreshTokenResponse(newAccessToken));
+            var result = authService.refreshAccessToken(request.getRefreshToken());
+            return ResponseEntity.ok(RefreshTokenResponse.from(result));
         } catch (Exception e) {
             log.error("Token refresh failed", e);
             return ResponseEntity.badRequest().build();

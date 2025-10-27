@@ -8,7 +8,6 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Table(name = "apple_auth_tokens")
@@ -21,7 +20,10 @@ public class AppleAuthToken {
     @Column(name = "user_id")
     private Long userId;
 
-    @Setter
     @Column(name = "refresh_token", nullable = false, length = 1000)
     private String refreshToken;
+
+    public void updateRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
 }
