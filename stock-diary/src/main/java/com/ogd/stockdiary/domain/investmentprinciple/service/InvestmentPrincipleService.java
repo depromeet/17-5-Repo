@@ -16,6 +16,7 @@ import com.ogd.stockdiary.domain.investmentprinciple.dto.CreatePrincipleCommand;
 import com.ogd.stockdiary.domain.investmentprinciple.dto.ReorderPrinciplesCommand;
 import com.ogd.stockdiary.domain.investmentprinciple.dto.UpdatePrincipleCommand;
 import com.ogd.stockdiary.domain.investmentprinciple.entity.InvestmentPrinciple;
+import com.ogd.stockdiary.domain.investmentprinciple.entity.PrincipleType;
 import com.ogd.stockdiary.domain.investmentprinciple.port.out.InvestmentPrincipleRepository;
 import com.ogd.stockdiary.domain.investmentprinciple.usecase.InvestmentPrincipleUseCase;
 import com.ogd.stockdiary.domain.principlegroup.entity.PrincipleGroup;
@@ -36,7 +37,10 @@ public class InvestmentPrincipleService implements InvestmentPrincipleUseCase {
 
     @Override
     @Transactional(readOnly = true)
-    public List<InvestmentPrinciple> getUserPrinciples(Long userId) {
+    public List<InvestmentPrinciple> getUserPrinciples(Long userId, PrincipleType type) {
+        if (type != null) {
+            return investmentPrincipleRepository.findByUserIdAndPrincipleType(userId, type);
+        }
         return investmentPrincipleRepository.findByUserId(userId);
     }
 
@@ -71,11 +75,12 @@ public class InvestmentPrincipleService implements InvestmentPrincipleUseCase {
             principle = InvestmentPrinciple.create(
                 user,
                 principleGroup,
+                command.getPrincipleType(),
                 command.getPrinciple(),
                 command.getDisplayOrder());
         } else {
             // 그룹이 없는 경우
-            principle = InvestmentPrinciple.create(user, command.getPrinciple());
+            principle = InvestmentPrinciple.create(user, command.getPrincipleType(), command.getPrinciple());
         }
 
         return investmentPrincipleRepository.save(principle);
@@ -92,7 +97,7 @@ public class InvestmentPrincipleService implements InvestmentPrincipleUseCase {
                     "사용자를 찾을 수 없습니다: " + command.getUserId()));
 
         List<InvestmentPrinciple> principles = command.getPrinciples().stream()
-            .map(principleText -> InvestmentPrinciple.create(user, principleText))
+            .map(principleText -> InvestmentPrinciple.create(user, command.getPrincipleType(), principleText))
             .collect(Collectors.toList());
 
         return investmentPrincipleRepository.saveAll(principles);
@@ -137,7 +142,7 @@ public class InvestmentPrincipleService implements InvestmentPrincipleUseCase {
                         "사용자를 찾을 수 없습니다: " + command.getUserId()));
 
             List<InvestmentPrinciple> principles = command.getCreatePrinciples().stream()
-                .map(principleText -> InvestmentPrinciple.create(user, principleText))
+                .map(principleText -> InvestmentPrinciple.create(user, command.getPrincipleType(), principleText))
                 .collect(Collectors.toList());
             createdPrinciples = investmentPrincipleRepository.saveAll(principles);
         }

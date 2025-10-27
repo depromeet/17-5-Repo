@@ -4,10 +4,13 @@ import java.util.List;
 import java.util.Optional;
 
 import com.ogd.stockdiary.domain.investmentprinciple.entity.InvestmentPrinciple;
+import com.ogd.stockdiary.domain.investmentprinciple.entity.PrincipleType;
 
 public interface InvestmentPrincipleRepository {
 
     List<InvestmentPrinciple> findByUserId(Long userId);
+
+    List<InvestmentPrinciple> findByUserIdAndPrincipleType(Long userId, PrincipleType principleType);
 
     InvestmentPrinciple save(InvestmentPrinciple investmentPrinciple);
 
