@@ -9,6 +9,7 @@ public class InvestmentPrincipleResponse {
 
     private final Long id;
     private final Long groupId;
+    private final String groupName;
     private final String principle;
     private final Integer displayOrder;
 }

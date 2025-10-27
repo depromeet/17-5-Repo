@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
+import com.ogd.stockdiary.application.investmentprinciple.dto.mapper.InvestmentPrincipleMapper;
 import com.ogd.stockdiary.application.investmentprinciple.dto.response.InvestmentPrincipleResponse;
 import com.ogd.stockdiary.application.principlegroup.dto.request.CreatePrincipleGroupRequest;
 import com.ogd.stockdiary.application.principlegroup.dto.request.ReorderPrincipleGroupsRequest;
@@ -43,17 +44,7 @@ public class PrincipleGroupMapper {
     public PrincipleGroupResponse toResponse(
         PrincipleGroup principleGroup, List<InvestmentPrinciple> principles) {
         List<InvestmentPrincipleResponse> principleResponses = principles.stream()
-            .map(
-                p -> {
-                    Long groupId = p.getPrincipleGroup() != null
-                        ? p.getPrincipleGroup().getId()
-                        : null;
-                    return new InvestmentPrincipleResponse(
-                        p.getId(),
-                        groupId,
-                        p.getPrinciple(),
-                        p.getDisplayOrder());
-                })
+            .map(InvestmentPrincipleMapper::toResponse)
             .collect(Collectors.toList());
 
         return new PrincipleGroupResponse(
