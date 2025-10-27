@@ -75,6 +75,7 @@ public class PrincipleGroupService implements PrincipleGroupUseCase {
                     index -> InvestmentPrinciple.create(
                         user,
                         savedGroup,
+                        command.getPrincipleType(),
                         command.getPrinciples().get(index),
                         index))
                 .collect(Collectors.toList());
