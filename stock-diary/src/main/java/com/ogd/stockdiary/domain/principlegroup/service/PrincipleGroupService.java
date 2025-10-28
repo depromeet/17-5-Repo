@@ -64,8 +64,12 @@ public class PrincipleGroupService implements PrincipleGroupUseCase {
                 "그룹당 최대 " + InvestmentPrinciple.MAX_PRINCIPLES_PER_GROUP + "개의 투자원칙만 추가할 수 있습니다");
         }
 
-        // 그룹 생성
-        PrincipleGroup principleGroup = PrincipleGroup.create(user, command.getGroupName(), command.getDisplayOrder());
+        // 그룹 생성 (principleType 포함)
+        PrincipleGroup principleGroup = PrincipleGroup.create(
+            user,
+            command.getGroupName(),
+            command.getPrincipleType(),
+            command.getDisplayOrder());
         PrincipleGroup savedGroup = principleGroupRepository.save(principleGroup);
 
         // 원칙들이 있으면 함께 생성
@@ -75,7 +79,6 @@ public class PrincipleGroupService implements PrincipleGroupUseCase {
                     index -> InvestmentPrinciple.create(
                         user,
                         savedGroup,
-                        command.getPrincipleType(),
                         command.getPrinciples().get(index),
                         index))
                 .collect(Collectors.toList());
@@ -96,6 +99,9 @@ public class PrincipleGroupService implements PrincipleGroupUseCase {
                     "투자원칙 그룹을 찾을 수 없습니다: " + command.getGroupId()));
 
         principleGroup.updateGroupName(command.getGroupName());
+        if (command.getPrincipleType() != null) {
+            principleGroup.updatePrincipleType(command.getPrincipleType());
+        }
         return principleGroup;
     }
 
