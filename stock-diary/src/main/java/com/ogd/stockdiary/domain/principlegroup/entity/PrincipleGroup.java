@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,6 +16,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
+import com.ogd.stockdiary.domain.investmentprinciple.entity.PrincipleType;
 import com.ogd.stockdiary.domain.user.entity.User;
 
 import lombok.Getter;
@@ -36,6 +39,10 @@ public class PrincipleGroup {
     @Column(nullable = false)
     private String groupName;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "principle_type", nullable = false)
+    private PrincipleType principleType;
+
     @Column(nullable = false)
     private Integer displayOrder;
 
@@ -55,16 +62,22 @@ public class PrincipleGroup {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public static PrincipleGroup create(User user, String groupName, Integer displayOrder) {
+    public static PrincipleGroup create(User user, String groupName, PrincipleType principleType,
+        Integer displayOrder) {
         PrincipleGroup principleGroup = new PrincipleGroup();
         principleGroup.user = user;
         principleGroup.groupName = groupName;
+        principleGroup.principleType = principleType;
         principleGroup.displayOrder = displayOrder;
         return principleGroup;
     }
 
     public void updateGroupName(String groupName) {
         this.groupName = groupName;
+    }
+
+    public void updatePrincipleType(PrincipleType principleType) {
+        this.principleType = principleType;
     }
 
     public void updateDisplayOrder(Integer displayOrder) {

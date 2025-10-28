@@ -4,8 +4,6 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -39,12 +37,8 @@ public class InvestmentPrinciple {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "group_id")
+    @JoinColumn(name = "group_id", nullable = false)
     private PrincipleGroup principleGroup;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "principle_type", nullable = false)
-    private PrincipleType principleType;
 
     private String principle;
 
@@ -67,20 +61,11 @@ public class InvestmentPrinciple {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public static InvestmentPrinciple create(User user, PrincipleType principleType, String principle) {
-        InvestmentPrinciple investmentPrinciple = new InvestmentPrinciple();
-        investmentPrinciple.user = user;
-        investmentPrinciple.principleType = principleType;
-        investmentPrinciple.principle = principle;
-        return investmentPrinciple;
-    }
-
     public static InvestmentPrinciple create(
-        User user, PrincipleGroup principleGroup, PrincipleType principleType, String principle, Integer displayOrder) {
+        User user, PrincipleGroup principleGroup, String principle, Integer displayOrder) {
         InvestmentPrinciple investmentPrinciple = new InvestmentPrinciple();
         investmentPrinciple.user = user;
         investmentPrinciple.principleGroup = principleGroup;
-        investmentPrinciple.principleType = principleType;
         investmentPrinciple.principle = principle;
         investmentPrinciple.displayOrder = displayOrder;
         return investmentPrinciple;
