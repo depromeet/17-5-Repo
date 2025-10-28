@@ -18,7 +18,7 @@ public interface JpaInvestmentPrincipleRepository extends JpaRepository<Investme
     @Query("SELECT ip FROM InvestmentPrinciple ip LEFT JOIN FETCH ip.principleGroup WHERE ip.user.id = :userId")
     List<InvestmentPrinciple> findByUserId(@Param("userId") Long userId);
 
-    @Query("SELECT ip FROM InvestmentPrinciple ip LEFT JOIN FETCH ip.principleGroup WHERE ip.user.id = :userId AND ip.principleType = :principleType")
+    @Query("SELECT ip FROM InvestmentPrinciple ip LEFT JOIN FETCH ip.principleGroup pg WHERE ip.user.id = :userId AND pg.principleType = :principleType")
     List<InvestmentPrinciple> findByUserIdAndPrincipleType(@Param("userId") Long userId,
         @Param("principleType") PrincipleType principleType);
 
