@@ -3,6 +3,7 @@ package com.ogd.stockdiary.application.principlegroup.dto.response;
 import java.util.List;
 
 import com.ogd.stockdiary.application.investmentprinciple.dto.response.InvestmentPrincipleResponse;
+import com.ogd.stockdiary.domain.investmentprinciple.entity.PrincipleType;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -18,6 +19,9 @@ public class PrincipleGroupResponse {
 
     @Schema(description = "그룹명", example = "🔥 이건 좀 지키자 제발")
     private final String groupName;
+
+    @Schema(description = "투자원칙 타입 (BUY: 매수, SELL: 매도)", example = "BUY")
+    private final PrincipleType principleType;
 
     @Schema(description = "그룹 표시 순서", example = "1")
     private final Integer displayOrder;
