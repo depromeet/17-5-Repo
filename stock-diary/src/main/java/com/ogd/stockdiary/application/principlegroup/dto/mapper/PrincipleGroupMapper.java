@@ -28,7 +28,7 @@ public class PrincipleGroupMapper {
 
     public UpdatePrincipleGroupCommand toCommand(
         UpdatePrincipleGroupRequest request, Long groupId, Long userId) {
-        return new UpdatePrincipleGroupCommand(groupId, userId, request.getGroupName());
+        return new UpdatePrincipleGroupCommand(groupId, userId, request.getGroupName(), request.getPrincipleType());
     }
 
     public ReorderPrincipleGroupsCommand toReorderCommand(
@@ -51,6 +51,7 @@ public class PrincipleGroupMapper {
         return new PrincipleGroupResponse(
             principleGroup.getId(),
             principleGroup.getGroupName(),
+            principleGroup.getPrincipleType(),
             principleGroup.getDisplayOrder(),
             principleResponses);
     }
