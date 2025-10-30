@@ -1,7 +1,6 @@
 package com.ogd.stockdiary.application.report.dto.Mapper;
 
 import java.util.List;
-import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -21,18 +20,30 @@ public class ReportMapper {
     public static CreateFeedbackResponse toResponse(Feedback feedback)
         throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
-        List<Map<String, String>> principlesList = null;
+        List<String> keepList = null; // value만
+        List<String> improveList = null;
+        List<String> nextTiimeList = null;
 
         // 디비에 JSON 으로 저장되었었음.
-        String principleJson = feedback.getPrinciples();
+        String keepJson = feedback.getKeep();
+        String improveJson = feedback.getImprove();
+        String nextTimeJson = feedback.getNextTime();
 
         // JSON 을 자바 객체로 파싱
-        principlesList = objectMapper.readValue(
-            principleJson, new TypeReference<List<Map<String, String>>>() {
+        keepList = objectMapper.readValue(
+            keepJson, new TypeReference<List<String>>() {
+            });
+        improveList = objectMapper.readValue(
+            improveJson, new TypeReference<List<String>>() {
+            });
+        nextTiimeList = objectMapper.readValue(
+            nextTimeJson, new TypeReference<List<String>>() {
             });
 
         return new CreateFeedbackResponse(
             // 나머지 필드는 디비에 String 으로 저장되었었음
-            feedback.getSummerizedFeedback(), feedback.getMarket(), principlesList);
+            feedback.getSymbol(), feedback.getPrice(), feedback.getVolume(),
+            feedback.getOrderType(), feedback.getKeptCount(), feedback.getNeutralCount(), feedback.getNotKeptCount(),
+            feedback.getTitle(), keepList, improveList, nextTiimeList);
     }
 }
