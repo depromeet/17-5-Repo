@@ -1,21 +1,10 @@
 package com.ogd.stockdiary.application.report.dto.Response;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.ogd.stockdiary.domain.retrospection.entity.OrderType;
 
-public record CreateFeedbackResponse(
-    String symbol,
-    BigDecimal price,
-    Integer volume,
-    OrderType orderType,
-
-    long keptCount,
-    long neutralCount,
-    long notKeptCount,
-
+public record LlmResponse(
     @JsonProperty("뱃지") String title,
     @JsonProperty("앞으로도 유지해보세요") List<String> keep,
     @JsonProperty("고쳐보면 좋아요") List<String> improve,
