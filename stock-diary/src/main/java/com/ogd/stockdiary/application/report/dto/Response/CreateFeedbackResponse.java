@@ -1,12 +1,23 @@
 package com.ogd.stockdiary.application.report.dto.Response;
 
+import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.ogd.stockdiary.domain.retrospection.entity.OrderType;
 
 public record CreateFeedbackResponse(
-    @JsonProperty("요약 한 마디") String summerizedFeedback,
-    @JsonProperty("당시 시장 현황") String market,
-    @JsonProperty("AI 추천 원칙") List<Map<String, String>> principles) {
+    String symbol,
+    BigDecimal price,
+    Integer volume,
+    OrderType orderType,
+
+    long keptCount,
+    long neutralCount,
+    long notKeptCount,
+
+    @JsonProperty("뱃지") String title,
+    @JsonProperty("앞으로도 유지해보세요") List<String> keep,
+    @JsonProperty("고쳐보면 좋아요") List<String> improve,
+    @JsonProperty("다음 투자엔 이렇게 해보세요") List<String> nextTime) {
 }
