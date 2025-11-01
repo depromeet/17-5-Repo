@@ -197,9 +197,9 @@ public class RetrospectionService
         // 회고 디비에서 조회
         List<Retrospection> retrospection = retrospectionRepository.findAllByUserId(command.userId());
 
-        // market 기준 그룹화
+        // symbol 기준 그룹화
         Map<String, List<Retrospection>> retrospectionsByMarket = retrospection.stream()
-            .collect(Collectors.groupingBy(Retrospection::getMarket));
+            .collect(Collectors.groupingBy(Retrospection::getSymbol));
 
         // 응답 DTO 로 변환
         return retrospectionsByMarket.entrySet().stream()
