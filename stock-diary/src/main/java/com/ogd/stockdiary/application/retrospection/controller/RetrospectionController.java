@@ -1,5 +1,7 @@
 package com.ogd.stockdiary.application.retrospection.controller;
 
+import java.util.List;
+
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,10 +15,12 @@ import com.ogd.stockdiary.application.retrospection.dto.mapper.RetrospectionMapp
 import com.ogd.stockdiary.application.retrospection.dto.request.CreateRetrospectionRequest;
 import com.ogd.stockdiary.application.retrospection.dto.response.CreateRetrospectionResponse;
 import com.ogd.stockdiary.application.retrospection.dto.response.GetRetrospectionResponse;
+import com.ogd.stockdiary.application.retrospection.dto.response.MarketGroupResponse;
 import com.ogd.stockdiary.common.httpresponse.HttpApiResponse;
 import com.ogd.stockdiary.domain.retrospection.entity.Retrospection;
 import com.ogd.stockdiary.domain.retrospection.port.in.CreateRetrospectionCommand;
 import com.ogd.stockdiary.domain.retrospection.port.in.CreateRetrospectionUseCase;
+import com.ogd.stockdiary.domain.retrospection.port.in.GetRetrospectionCommand;
 import com.ogd.stockdiary.domain.retrospection.port.in.GetRetrospectionUseCase;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -58,5 +62,18 @@ public class RetrospectionController {
         GetRetrospectionResponse response = getRetrospectionUseCase.getRetrospection(retrospectionId, userId);
 
         return HttpApiResponse.of(response);
+    }
+
+    @GetMapping()
+    public HttpApiResponse<List<MarketGroupResponse>> getAllRetrospcetion() {
+        // TODO: Spring Security에서 User 정보 가져오기
+        Long userId = 1L;
+
+        GetRetrospectionCommand command = RetrospectionMapper.toCommand(userId);
+
+        List<MarketGroupResponse> response = getRetrospectionUseCase.getAllRetrospections(command);
+
+        return HttpApiResponse.of(response);
+
     }
 }

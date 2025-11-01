@@ -13,6 +13,7 @@ import com.ogd.stockdiary.domain.principlecheck.entity.PrincipleCheck;
 import com.ogd.stockdiary.domain.retrospection.entity.Order;
 import com.ogd.stockdiary.domain.retrospection.entity.Retrospection;
 import com.ogd.stockdiary.domain.retrospection.port.in.CreateRetrospectionCommand;
+import com.ogd.stockdiary.domain.retrospection.port.in.GetRetrospectionCommand;
 import com.ogd.stockdiary.domain.user.entity.User;
 
 public class RetrospectionMapper {
@@ -117,4 +118,10 @@ public class RetrospectionMapper {
             retrospection.getCreatedAt(),
             retrospection.getUpdatedAt());
     }
+
+    public static GetRetrospectionCommand toCommand(Long userId) {
+        return new GetRetrospectionCommand(
+            userId);
+    }
+
 }

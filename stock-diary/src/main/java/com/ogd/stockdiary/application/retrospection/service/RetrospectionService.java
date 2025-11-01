@@ -1,5 +1,6 @@
 package com.ogd.stockdiary.application.retrospection.service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -13,6 +14,8 @@ import com.ogd.stockdiary.application.image.repository.JpaPrincipleCheckImageRep
 import com.ogd.stockdiary.application.principlecheck.repository.JpaPrincipleCheckLinkRepository;
 import com.ogd.stockdiary.application.retrospection.dto.mapper.RetrospectionMapper;
 import com.ogd.stockdiary.application.retrospection.dto.response.GetRetrospectionResponse;
+import com.ogd.stockdiary.application.retrospection.dto.response.MarketGroupResponse;
+import com.ogd.stockdiary.application.retrospection.dto.response.RetrospectionDetailResponse;
 import com.ogd.stockdiary.application.user.repository.UserRepository;
 import com.ogd.stockdiary.common.httpresponse.CodeEnum;
 import com.ogd.stockdiary.domain.image.entity.ImageMetadata;
@@ -28,6 +31,7 @@ import com.ogd.stockdiary.domain.principlecheck.port.out.PrincipleCheckRepositor
 import com.ogd.stockdiary.domain.retrospection.entity.Retrospection;
 import com.ogd.stockdiary.domain.retrospection.port.in.CreateRetrospectionCommand;
 import com.ogd.stockdiary.domain.retrospection.port.in.CreateRetrospectionUseCase;
+import com.ogd.stockdiary.domain.retrospection.port.in.GetRetrospectionCommand;
 import com.ogd.stockdiary.domain.retrospection.port.in.GetRetrospectionUseCase;
 import com.ogd.stockdiary.domain.retrospection.port.out.RetrospectionRepository;
 import com.ogd.stockdiary.domain.user.entity.User;
@@ -171,5 +175,34 @@ public class RetrospectionService implements CreateRetrospectionUseCase, GetRetr
         return principleCheckLinks.stream()
             .map(PrincipleCheckLink::getLinkUrl)
             .toList();
+    }
+
+    @Override
+    public List<MarketGroupResponse> getAllRetrospections(GetRetrospectionCommand command) {
+
+        // 회고 디비에서 조회
+        List<Retrospection> retrospection = retrospectionRepository.findAllByUserId(command.userId());
+
+        // market 기준 그룹화
+        Map<String, List<Retrospection>> retrospectionsByMarket = retrospection.stream()
+            .collect(Collectors.groupingBy(Retrospection::getMarket));
+
+        // 응답 DTO 로 변환
+        return retrospectionsByMarket.entrySet().stream()
+            .map(entry -> {
+                List<RetrospectionDetailResponse> detailResponses = entry.getValue().stream()
+                    .map(RetrospectionDetailResponse::fromEntity)
+                    .sorted(Comparator.comparingLong(RetrospectionDetailResponse::id).reversed())
+                    .toList();
+
+                return new MarketGroupResponse(
+                    entry.getKey(),
+                    detailResponses);
+
+            })
+            .sorted(
+                Comparator.comparingLong((MarketGroupResponse group) -> group.retrospections().get(0).id()).reversed())
+            .toList();
+
     }
 }
