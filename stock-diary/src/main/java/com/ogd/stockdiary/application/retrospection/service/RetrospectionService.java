@@ -27,12 +27,7 @@ import com.ogd.stockdiary.domain.principlecheck.entity.PrincipleCheckLink;
 import com.ogd.stockdiary.domain.principlecheck.port.out.PrincipleCheckRepository;
 import com.ogd.stockdiary.domain.retrospection.entity.Memo;
 import com.ogd.stockdiary.domain.retrospection.entity.Retrospection;
-import com.ogd.stockdiary.domain.retrospection.port.in.CreateMemoUseCase;
-import com.ogd.stockdiary.domain.retrospection.port.in.CreateRetrospectionCommand;
-import com.ogd.stockdiary.domain.retrospection.port.in.CreateRetrospectionUseCase;
-import com.ogd.stockdiary.domain.retrospection.port.in.DeleteMemoUseCase;
-import com.ogd.stockdiary.domain.retrospection.port.in.GetRetrospectionUseCase;
-import com.ogd.stockdiary.domain.retrospection.port.in.UpdateMemoUseCase;
+import com.ogd.stockdiary.domain.retrospection.port.in.*;
 import com.ogd.stockdiary.domain.retrospection.port.out.MemoRepository;
 import com.ogd.stockdiary.domain.retrospection.port.out.RetrospectionRepository;
 import com.ogd.stockdiary.domain.user.entity.User;
@@ -46,6 +41,7 @@ public class RetrospectionService
     implements
         CreateRetrospectionUseCase,
         GetRetrospectionUseCase,
+        DeleteRetrospectionUseCase,
         CreateMemoUseCase,
         UpdateMemoUseCase,
         DeleteMemoUseCase {
@@ -253,5 +249,11 @@ public class RetrospectionService
 
         // 메모 삭제
         memoRepository.delete(memo);
+    }
+
+    @Override
+    @Transactional
+    public void deleteRetrospection(Long retrospectionId) {
+        retrospectionRepository.deleteById(retrospectionId);
     }
 }

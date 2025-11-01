@@ -3,10 +3,12 @@ package com.ogd.stockdiary.domain.principlecheck.entity;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -33,11 +35,11 @@ public class PrincipleCheck {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "retrospection_id", nullable = false)
+    @JoinColumn(name = "retrospection_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private Retrospection retrospection;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "principle_id", nullable = false)
+    @JoinColumn(name = "principle_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private InvestmentPrinciple principle;
 
     @Enumerated(EnumType.STRING)

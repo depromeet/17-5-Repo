@@ -37,4 +37,9 @@ public class RetrospectionRepositoryImpl implements RetrospectionRepository {
                     CodeEnum.FRS_003,
                     "유저(" + userId + ")에 해당하는 회고(" + id + ")를 찾을 수 없습니다: "));
     }
+
+    @Override
+    public void deleteById(Long id) {
+        jpaRetrospectionRepository.deleteById(id);
+    }
 }
