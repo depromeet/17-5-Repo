@@ -42,6 +42,8 @@ public class InvestmentPrinciple {
 
     private String principle;
 
+    private String description;
+
     @Column(name = "display_order")
     private Integer displayOrder;
 
@@ -62,11 +64,12 @@ public class InvestmentPrinciple {
     }
 
     public static InvestmentPrinciple create(
-        User user, PrincipleGroup principleGroup, String principle, Integer displayOrder) {
+        User user, PrincipleGroup principleGroup, String principle, String description, Integer displayOrder) {
         InvestmentPrinciple investmentPrinciple = new InvestmentPrinciple();
         investmentPrinciple.user = user;
         investmentPrinciple.principleGroup = principleGroup;
         investmentPrinciple.principle = principle;
+        investmentPrinciple.description = description;
         investmentPrinciple.displayOrder = displayOrder;
         return investmentPrinciple;
     }
