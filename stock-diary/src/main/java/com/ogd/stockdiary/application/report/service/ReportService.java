@@ -135,12 +135,12 @@ public class ReportService implements CreateFeedbackUseCase {
 
         // 디비에서 JSON으로 저장되는 건 다시 JSON 문자열로 변환
         String keepJson = objectMapper.writeValueAsString(dto.keep());
-        String improveJson = objectMapper.writeValueAsString(dto.improve());
-        String nextTimeJson = objectMapper.writeValueAsString(dto.nextTime());
+        String improveJson = objectMapper.writeValueAsString(dto.fix());
+        String nextTimeJson = objectMapper.writeValueAsString(dto.next());
 
         // 피드백 객체 생성
         Feedback feedback = Feedback.builder()
-            .title(dto.title())
+            .title(dto.badge())
             .keep(keepJson)
             .improve(improveJson)
             .nextTime(nextTimeJson)
