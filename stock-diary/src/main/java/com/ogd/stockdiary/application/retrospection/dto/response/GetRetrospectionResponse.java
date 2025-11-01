@@ -58,6 +58,9 @@ public class GetRetrospectionResponse {
     @Schema(description = "투자 원칙 목록")
     private List<PrincipleCheckResponse> principleChecks;
 
+    @Schema(description = "메모 목록")
+    private List<MemoResponse> memos;
+
     @Schema(description = "생성일시", example = "2025-09-14T10:00:00")
     private LocalDateTime createdAt;
 

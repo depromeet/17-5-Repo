@@ -8,8 +8,10 @@ import com.ogd.stockdiary.application.principlecheck.dto.request.PrincipleCheckR
 import com.ogd.stockdiary.application.retrospection.dto.request.CreateRetrospectionRequest;
 import com.ogd.stockdiary.application.retrospection.dto.response.CreateRetrospectionResponse;
 import com.ogd.stockdiary.application.retrospection.dto.response.GetRetrospectionResponse;
+import com.ogd.stockdiary.application.retrospection.dto.response.MemoResponse;
 import com.ogd.stockdiary.domain.principlecheck.dto.PrincipleCheckCommand;
 import com.ogd.stockdiary.domain.principlecheck.entity.PrincipleCheck;
+import com.ogd.stockdiary.domain.retrospection.entity.Memo;
 import com.ogd.stockdiary.domain.retrospection.entity.Order;
 import com.ogd.stockdiary.domain.retrospection.entity.Retrospection;
 import com.ogd.stockdiary.domain.retrospection.port.in.CreateRetrospectionCommand;
@@ -89,7 +91,8 @@ public class RetrospectionMapper {
         Retrospection retrospection,
         List<PrincipleCheck> principleChecks,
         Map<Long, List<String>> imageUrlsMap,
-        Map<Long, List<String>> linksMap) {
+        Map<Long, List<String>> linksMap,
+        List<Memo> memos) {
         List<GetRetrospectionResponse.PrincipleCheckResponse> principleCheckResponses = principleChecks.stream()
             .map(pc -> new GetRetrospectionResponse.PrincipleCheckResponse(
                 pc.getPrinciple().getId(),
@@ -98,6 +101,10 @@ public class RetrospectionMapper {
                 pc.getReason(),
                 imageUrlsMap.getOrDefault(pc.getId(), Collections.emptyList()),
                 linksMap.getOrDefault(pc.getId(), Collections.emptyList())))
+            .toList();
+
+        List<MemoResponse> memoResponses = memos.stream()
+            .map(MemoMapper::toResponse)
             .toList();
 
         return new GetRetrospectionResponse(
@@ -114,6 +121,7 @@ public class RetrospectionMapper {
             retrospection.getContent(),
             retrospection.getEmotion(),
             principleCheckResponses,
+            memoResponses,
             retrospection.getCreatedAt(),
             retrospection.getUpdatedAt());
     }

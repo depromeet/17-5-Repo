@@ -25,10 +25,15 @@ import com.ogd.stockdiary.domain.principlecheck.dto.PrincipleCheckCommand;
 import com.ogd.stockdiary.domain.principlecheck.entity.PrincipleCheck;
 import com.ogd.stockdiary.domain.principlecheck.entity.PrincipleCheckLink;
 import com.ogd.stockdiary.domain.principlecheck.port.out.PrincipleCheckRepository;
+import com.ogd.stockdiary.domain.retrospection.entity.Memo;
 import com.ogd.stockdiary.domain.retrospection.entity.Retrospection;
+import com.ogd.stockdiary.domain.retrospection.port.in.CreateMemoUseCase;
 import com.ogd.stockdiary.domain.retrospection.port.in.CreateRetrospectionCommand;
 import com.ogd.stockdiary.domain.retrospection.port.in.CreateRetrospectionUseCase;
+import com.ogd.stockdiary.domain.retrospection.port.in.DeleteMemoUseCase;
 import com.ogd.stockdiary.domain.retrospection.port.in.GetRetrospectionUseCase;
+import com.ogd.stockdiary.domain.retrospection.port.in.UpdateMemoUseCase;
+import com.ogd.stockdiary.domain.retrospection.port.out.MemoRepository;
 import com.ogd.stockdiary.domain.retrospection.port.out.RetrospectionRepository;
 import com.ogd.stockdiary.domain.user.entity.User;
 import com.ogd.stockdiary.exception.ApplicationException;
@@ -37,7 +42,13 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class RetrospectionService implements CreateRetrospectionUseCase, GetRetrospectionUseCase {
+public class RetrospectionService
+    implements
+        CreateRetrospectionUseCase,
+        GetRetrospectionUseCase,
+        CreateMemoUseCase,
+        UpdateMemoUseCase,
+        DeleteMemoUseCase {
 
     private final RetrospectionRepository retrospectionRepository;
     private final UserRepository userRepository;
@@ -47,6 +58,7 @@ public class RetrospectionService implements CreateRetrospectionUseCase, GetRetr
     private final JpaPrincipleCheckImageRepository principleCheckImageRepository;
     private final JpaPrincipleCheckLinkRepository principleCheckLinkRepository;
     private final ImageUseCase imageUseCase;
+    private final MemoRepository memoRepository;
 
     @Override
     @Transactional
@@ -152,7 +164,10 @@ public class RetrospectionService implements CreateRetrospectionUseCase, GetRetr
                 PrincipleCheck::getId,
                 pc -> getLinks(pc.getId())));
 
-        return RetrospectionMapper.toGetResponse(retrospection, principleChecks, imageUrlsMap, linksMap);
+        // 메모 목록 조회 (최신순 정렬)
+        List<Memo> memos = memoRepository.findByRetrospectionIdOrderByIdDesc(retrospectionId);
+
+        return RetrospectionMapper.toGetResponse(retrospection, principleChecks, imageUrlsMap, linksMap, memos);
     }
 
     private List<String> getImageUrls(Long principleCheckId) {
@@ -171,5 +186,72 @@ public class RetrospectionService implements CreateRetrospectionUseCase, GetRetr
         return principleCheckLinks.stream()
             .map(PrincipleCheckLink::getLinkUrl)
             .toList();
+    }
+
+    // Memo CRUD operations
+
+    @Override
+    @Transactional
+    public Memo createMemo(Long retrospectionId, String content, Long userId) {
+        // 회고 존재 및 권한 확인
+        Retrospection retrospection = retrospectionRepository.findByIdAndUserId(retrospectionId, userId);
+
+        // 메모 생성 및 저장
+        Memo memo = Memo.create(retrospection, content, userId);
+        return memoRepository.save(memo);
+    }
+
+    @Override
+    @Transactional
+    public void updateMemo(Long retrospectionId, Long memoId, String content, Long userId) {
+        // 회고 권한 확인
+        retrospectionRepository.findByIdAndUserId(retrospectionId, userId);
+
+        // 메모 조회
+        Memo memo = memoRepository.getById(memoId);
+
+        // 메모 작성자 확인
+        if (!memo.getUserId().equals(userId)) {
+            throw new ApplicationException(
+                CodeEnum.FRS_003,
+                "해당 메모에 대한 권한이 없습니다: " + memoId);
+        }
+
+        // 메모가 해당 회고에 속하는지 확인
+        if (!memo.getRetrospection().getId().equals(retrospectionId)) {
+            throw new ApplicationException(
+                CodeEnum.FRS_003,
+                "해당 메모는 이 회고에 속하지 않습니다: " + memoId);
+        }
+
+        // 메모 수정
+        memo.updateContent(content);
+    }
+
+    @Override
+    @Transactional
+    public void deleteMemo(Long retrospectionId, Long memoId, Long userId) {
+        // 회고 권한 확인
+        retrospectionRepository.findByIdAndUserId(retrospectionId, userId);
+
+        // 메모 조회
+        Memo memo = memoRepository.getById(memoId);
+
+        // 메모 작성자 확인
+        if (!memo.getUserId().equals(userId)) {
+            throw new ApplicationException(
+                CodeEnum.FRS_003,
+                "해당 메모에 대한 권한이 없습니다: " + memoId);
+        }
+
+        // 메모가 해당 회고에 속하는지 확인
+        if (!memo.getRetrospection().getId().equals(retrospectionId)) {
+            throw new ApplicationException(
+                CodeEnum.FRS_003,
+                "해당 메모는 이 회고에 속하지 않습니다: " + memoId);
+        }
+
+        // 메모 삭제
+        memoRepository.delete(memo);
     }
 }
