@@ -30,12 +30,13 @@ public class PrincipleGroupMapper {
         }
         return new CreatePrincipleGroupCommand(
             userId, request.getGroupName(), request.getDisplayOrder(), request.getPrincipleType(),
-            commandItems);
+            request.getThumbnail(), commandItems);
     }
 
     public UpdatePrincipleGroupCommand toCommand(
         UpdatePrincipleGroupRequest request, Long groupId, Long userId) {
-        return new UpdatePrincipleGroupCommand(groupId, userId, request.getGroupName(), request.getPrincipleType());
+        return new UpdatePrincipleGroupCommand(groupId, userId, request.getGroupName(),
+            request.getPrincipleType(), request.getThumbnail());
     }
 
     public ReorderPrincipleGroupsCommand toReorderCommand(
@@ -59,6 +60,7 @@ public class PrincipleGroupMapper {
             principleGroup.getId(),
             principleGroup.getGroupName(),
             principleGroup.getPrincipleType(),
+            principleGroup.getThumbnail(),
             principleGroup.getDisplayOrder(),
             principleResponses);
     }

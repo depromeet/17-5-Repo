@@ -43,6 +43,9 @@ public class PrincipleGroup {
     @Column(name = "principle_type", nullable = false)
     private PrincipleType principleType;
 
+    @Column(nullable = false)
+    private String thumbnail;
+
     private Integer displayOrder;
 
     @Column(updatable = false)
@@ -62,11 +65,12 @@ public class PrincipleGroup {
     }
 
     public static PrincipleGroup create(User user, String groupName, PrincipleType principleType,
-        Integer displayOrder) {
+        String thumbnail, Integer displayOrder) {
         PrincipleGroup principleGroup = new PrincipleGroup();
         principleGroup.user = user;
         principleGroup.groupName = groupName;
         principleGroup.principleType = principleType;
+        principleGroup.thumbnail = thumbnail;
         principleGroup.displayOrder = displayOrder;
         return principleGroup;
     }
@@ -77,6 +81,10 @@ public class PrincipleGroup {
 
     public void updatePrincipleType(PrincipleType principleType) {
         this.principleType = principleType;
+    }
+
+    public void updateThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
     }
 
     public void updateDisplayOrder(Integer displayOrder) {

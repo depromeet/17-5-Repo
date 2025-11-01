@@ -31,6 +31,10 @@ public class CreatePrincipleGroupRequest {
     @NotNull(message = "투자원칙 타입은 필수입니다.")
     private PrincipleType principleType;
 
+    @Schema(description = "썸네일 (이모지 또는 이미지 URL)", example = "📈", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "썸네일은 필수입니다")
+    private String thumbnail;
+
     @Schema(description = "그룹에 포함할 투자원칙 목록 (선택사항, 최대 5개)")
     @Size(max = 5, message = "그룹당 최대 5개의 투자원칙만 추가할 수 있습니다")
     @Valid

@@ -69,6 +69,7 @@ public class PrincipleGroupService implements PrincipleGroupUseCase {
             user,
             command.getGroupName(),
             command.getPrincipleType(),
+            command.getThumbnail(),
             command.getDisplayOrder());
         PrincipleGroup savedGroup = principleGroupRepository.save(principleGroup);
 
@@ -105,6 +106,9 @@ public class PrincipleGroupService implements PrincipleGroupUseCase {
         principleGroup.updateGroupName(command.getGroupName());
         if (command.getPrincipleType() != null) {
             principleGroup.updatePrincipleType(command.getPrincipleType());
+        }
+        if (command.getThumbnail() != null) {
+            principleGroup.updateThumbnail(command.getThumbnail());
         }
         return principleGroup;
     }

@@ -13,4 +13,5 @@ public class UpdatePrincipleGroupCommand {
     private Long userId;
     private String groupName;
     private PrincipleType principleType;
+    private String thumbnail;
 }
