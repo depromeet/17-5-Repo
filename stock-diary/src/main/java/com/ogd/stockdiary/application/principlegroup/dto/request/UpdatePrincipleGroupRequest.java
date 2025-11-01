@@ -21,4 +21,8 @@ public class UpdatePrincipleGroupRequest {
 
     @Schema(description = "투자원칙 타입 (BUY: 매수, SELL: 매도) - 선택사항", example = "SELL")
     private PrincipleType principleType;
+
+    @Schema(description = "썸네일 (이모지 또는 이미지 URL)", example = "💪", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "썸네일은 필수입니다")
+    private String thumbnail;
 }

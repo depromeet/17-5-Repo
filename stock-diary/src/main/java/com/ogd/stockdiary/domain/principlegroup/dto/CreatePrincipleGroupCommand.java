@@ -15,6 +15,7 @@ public class CreatePrincipleGroupCommand {
     private String groupName;
     private Integer displayOrder;
     private PrincipleType principleType;
+    private String thumbnail;
     private List<PrincipleItem> principles; // optional
 
     @Getter
