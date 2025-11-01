@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ogd.stockdiary.application.user.repository.UserRepository;
 import com.ogd.stockdiary.common.httpresponse.CodeEnum;
 import com.ogd.stockdiary.domain.investmentprinciple.entity.InvestmentPrinciple;
+import com.ogd.stockdiary.domain.investmentprinciple.entity.PrincipleType;
 import com.ogd.stockdiary.domain.investmentprinciple.port.out.InvestmentPrincipleRepository;
 import com.ogd.stockdiary.domain.principlegroup.dto.CreatePrincipleGroupCommand;
 import com.ogd.stockdiary.domain.principlegroup.dto.ReorderPrincipleGroupsCommand;
@@ -33,8 +34,9 @@ public class PrincipleGroupService implements PrincipleGroupUseCase {
 
     @Override
     @Transactional(readOnly = true)
-    public List<PrincipleGroup> getUserPrincipleGroups(Long userId) {
-        return principleGroupRepository.findByUserId(userId);
+    public List<PrincipleGroup> getUserPrincipleGroups(Long userId, PrincipleType type) {
+        return principleGroupRepository.findByUserId(userId).stream()
+            .filter(pg -> type == null || pg.getPrincipleType().equals(type)).toList();
     }
 
     @Override
