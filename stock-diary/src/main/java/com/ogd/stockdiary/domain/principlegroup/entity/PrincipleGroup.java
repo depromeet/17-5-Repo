@@ -43,7 +43,6 @@ public class PrincipleGroup {
     @Column(name = "principle_type", nullable = false)
     private PrincipleType principleType;
 
-    @Column(nullable = false)
     private Integer displayOrder;
 
     @Column(updatable = false)

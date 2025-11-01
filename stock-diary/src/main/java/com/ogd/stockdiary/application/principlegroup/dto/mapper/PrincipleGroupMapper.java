@@ -21,9 +21,16 @@ import com.ogd.stockdiary.domain.principlegroup.entity.PrincipleGroup;
 public class PrincipleGroupMapper {
 
     public CreatePrincipleGroupCommand toCommand(CreatePrincipleGroupRequest request, Long userId) {
+        List<CreatePrincipleGroupCommand.PrincipleItem> commandItems = null;
+        if (request.getPrinciples() != null) {
+            commandItems = request.getPrinciples().stream()
+                .map(item -> new CreatePrincipleGroupCommand.PrincipleItem(
+                    item.getPrinciple(), item.getDescription()))
+                .collect(Collectors.toList());
+        }
         return new CreatePrincipleGroupCommand(
             userId, request.getGroupName(), request.getDisplayOrder(), request.getPrincipleType(),
-            request.getPrinciples());
+            commandItems);
     }
 
     public UpdatePrincipleGroupCommand toCommand(

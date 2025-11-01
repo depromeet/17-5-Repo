@@ -74,8 +74,9 @@ public class InvestmentPrinciple {
         return investmentPrinciple;
     }
 
-    public void updatePrinciple(String principle) {
+    public void updatePrinciple(String principle, String description) {
         this.principle = principle;
+        this.description = description;
     }
 
     public void updateDisplayOrder(Integer displayOrder) {

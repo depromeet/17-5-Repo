@@ -76,11 +76,15 @@ public class PrincipleGroupService implements PrincipleGroupUseCase {
         if (command.getPrinciples() != null && !command.getPrinciples().isEmpty()) {
             List<InvestmentPrinciple> principles = IntStream.range(0, command.getPrinciples().size())
                 .mapToObj(
-                    index -> InvestmentPrinciple.create(
-                        user,
-                        savedGroup,
-                        command.getPrinciples().get(index),
-                        index))
+                    index -> {
+                        CreatePrincipleGroupCommand.PrincipleItem item = command.getPrinciples().get(index);
+                        return InvestmentPrinciple.create(
+                            user,
+                            savedGroup,
+                            item.getPrinciple(),
+                            item.getDescription(),
+                            index);
+                    })
                 .collect(Collectors.toList());
 
             investmentPrincipleRepository.saveAll(principles);
