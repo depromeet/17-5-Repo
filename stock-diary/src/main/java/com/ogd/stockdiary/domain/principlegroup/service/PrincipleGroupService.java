@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ogd.stockdiary.application.user.repository.UserRepository;
 import com.ogd.stockdiary.common.httpresponse.CodeEnum;
 import com.ogd.stockdiary.domain.investmentprinciple.entity.InvestmentPrinciple;
+import com.ogd.stockdiary.domain.investmentprinciple.entity.PrincipleType;
 import com.ogd.stockdiary.domain.investmentprinciple.port.out.InvestmentPrincipleRepository;
 import com.ogd.stockdiary.domain.principlegroup.dto.CreatePrincipleGroupCommand;
 import com.ogd.stockdiary.domain.principlegroup.dto.ReorderPrincipleGroupsCommand;
@@ -33,8 +34,9 @@ public class PrincipleGroupService implements PrincipleGroupUseCase {
 
     @Override
     @Transactional(readOnly = true)
-    public List<PrincipleGroup> getUserPrincipleGroups(Long userId) {
-        return principleGroupRepository.findByUserId(userId);
+    public List<PrincipleGroup> getUserPrincipleGroups(Long userId, PrincipleType type) {
+        return principleGroupRepository.findByUserId(userId).stream()
+            .filter(pg -> type == null || pg.getPrincipleType().equals(type)).toList();
     }
 
     @Override
@@ -69,6 +71,7 @@ public class PrincipleGroupService implements PrincipleGroupUseCase {
             user,
             command.getGroupName(),
             command.getPrincipleType(),
+            command.getThumbnail(),
             command.getDisplayOrder());
         PrincipleGroup savedGroup = principleGroupRepository.save(principleGroup);
 
@@ -76,11 +79,15 @@ public class PrincipleGroupService implements PrincipleGroupUseCase {
         if (command.getPrinciples() != null && !command.getPrinciples().isEmpty()) {
             List<InvestmentPrinciple> principles = IntStream.range(0, command.getPrinciples().size())
                 .mapToObj(
-                    index -> InvestmentPrinciple.create(
-                        user,
-                        savedGroup,
-                        command.getPrinciples().get(index),
-                        index))
+                    index -> {
+                        CreatePrincipleGroupCommand.PrincipleItem item = command.getPrinciples().get(index);
+                        return InvestmentPrinciple.create(
+                            user,
+                            savedGroup,
+                            item.getPrinciple(),
+                            item.getDescription(),
+                            index);
+                    })
                 .collect(Collectors.toList());
 
             investmentPrincipleRepository.saveAll(principles);
@@ -101,6 +108,9 @@ public class PrincipleGroupService implements PrincipleGroupUseCase {
         principleGroup.updateGroupName(command.getGroupName());
         if (command.getPrincipleType() != null) {
             principleGroup.updatePrincipleType(command.getPrincipleType());
+        }
+        if (command.getThumbnail() != null) {
+            principleGroup.updateThumbnail(command.getThumbnail());
         }
         return principleGroup;
     }

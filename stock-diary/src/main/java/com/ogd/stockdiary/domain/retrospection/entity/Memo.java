@@ -1,12 +1,10 @@
-package com.ogd.stockdiary.domain.principlecheck.entity;
+package com.ogd.stockdiary.domain.retrospection.entity;
 
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
@@ -18,17 +16,14 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
-import com.ogd.stockdiary.domain.investmentprinciple.entity.InvestmentPrinciple;
-import com.ogd.stockdiary.domain.retrospection.entity.Retrospection;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "principle_checks")
+@Table(name = "memos")
 @Getter
 @NoArgsConstructor
-public class PrincipleCheck {
+public class Memo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,16 +33,11 @@ public class PrincipleCheck {
     @JoinColumn(name = "retrospection_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private Retrospection retrospection;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "principle_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
-    private InvestmentPrinciple principle;
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String content;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private PrincipleCheckStatus status;
-
-    @Column(name = "reason", columnDefinition = "TEXT")
-    private String reason;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     @Column(updatable = false)
     private LocalDateTime createdAt;
@@ -65,13 +55,15 @@ public class PrincipleCheck {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public static PrincipleCheck create(
-        Retrospection retrospection, InvestmentPrinciple principle, PrincipleCheckStatus status, String reason) {
-        PrincipleCheck principleCheck = new PrincipleCheck();
-        principleCheck.retrospection = retrospection;
-        principleCheck.principle = principle;
-        principleCheck.status = status;
-        principleCheck.reason = reason;
-        return principleCheck;
+    public static Memo create(Retrospection retrospection, String content, Long userId) {
+        Memo memo = new Memo();
+        memo.retrospection = retrospection;
+        memo.content = content;
+        memo.userId = userId;
+        return memo;
+    }
+
+    public void updateContent(String content) {
+        this.content = content;
     }
 }

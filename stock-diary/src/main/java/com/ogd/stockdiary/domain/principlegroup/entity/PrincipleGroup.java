@@ -2,19 +2,7 @@ package com.ogd.stockdiary.domain.principlegroup.entity;
 
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import com.ogd.stockdiary.domain.investmentprinciple.entity.PrincipleType;
 import com.ogd.stockdiary.domain.user.entity.User;
@@ -33,7 +21,7 @@ public class PrincipleGroup {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private User user;
 
     @Column(nullable = false)
@@ -44,6 +32,8 @@ public class PrincipleGroup {
     private PrincipleType principleType;
 
     @Column(nullable = false)
+    private String thumbnail;
+
     private Integer displayOrder;
 
     @Column(updatable = false)
@@ -63,11 +53,12 @@ public class PrincipleGroup {
     }
 
     public static PrincipleGroup create(User user, String groupName, PrincipleType principleType,
-        Integer displayOrder) {
+        String thumbnail, Integer displayOrder) {
         PrincipleGroup principleGroup = new PrincipleGroup();
         principleGroup.user = user;
         principleGroup.groupName = groupName;
         principleGroup.principleType = principleType;
+        principleGroup.thumbnail = thumbnail;
         principleGroup.displayOrder = displayOrder;
         return principleGroup;
     }
@@ -78,6 +69,10 @@ public class PrincipleGroup {
 
     public void updatePrincipleType(PrincipleType principleType) {
         this.principleType = principleType;
+    }
+
+    public void updateThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
     }
 
     public void updateDisplayOrder(Integer displayOrder) {

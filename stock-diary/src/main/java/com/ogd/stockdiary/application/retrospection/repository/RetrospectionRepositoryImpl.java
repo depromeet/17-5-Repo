@@ -44,4 +44,9 @@ public class RetrospectionRepositoryImpl implements RetrospectionRepository {
     public List<Retrospection> findAllByUserId(Long userId) {
         return jpaRetrospectionRepository.findAllByUserId(userId);
     }
+
+    @Override
+    public void deleteById(Long id) {
+        jpaRetrospectionRepository.deleteById(id);
+    }
 }

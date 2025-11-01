@@ -6,14 +6,7 @@ import java.util.stream.Collectors;
 
 import jakarta.validation.Valid;
 
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.ogd.stockdiary.application.principlegroup.dto.mapper.PrincipleGroupMapper;
 import com.ogd.stockdiary.application.principlegroup.dto.request.CreatePrincipleGroupRequest;
@@ -22,6 +15,7 @@ import com.ogd.stockdiary.application.principlegroup.dto.request.UpdatePrinciple
 import com.ogd.stockdiary.application.principlegroup.dto.response.PrincipleGroupResponse;
 import com.ogd.stockdiary.common.httpresponse.HttpApiResponse;
 import com.ogd.stockdiary.domain.investmentprinciple.entity.InvestmentPrinciple;
+import com.ogd.stockdiary.domain.investmentprinciple.entity.PrincipleType;
 import com.ogd.stockdiary.domain.investmentprinciple.port.out.InvestmentPrincipleRepository;
 import com.ogd.stockdiary.domain.principlegroup.dto.CreatePrincipleGroupCommand;
 import com.ogd.stockdiary.domain.principlegroup.dto.ReorderPrincipleGroupsCommand;
@@ -45,15 +39,37 @@ public class PrincipleGroupController {
 
     @GetMapping
     @Operation(summary = "투자원칙 그룹 목록 조회", description = "사용자의 모든 투자원칙 그룹과 속한 원칙들을 조회합니다.")
-    public HttpApiResponse<List<PrincipleGroupResponse>> getUserPrincipleGroups() {
+    public HttpApiResponse<List<PrincipleGroupResponse>> getUserPrincipleGroups(
+        @RequestParam(required = false) PrincipleType type) {
 
         // TODO: Spring Security에서 User 정보 가져오기
         Long userId = 1L; // 임시로 하드코딩
 
-        List<PrincipleGroup> principleGroups = principleGroupUseCase.getUserPrincipleGroups(userId);
+        List<PrincipleGroup> principleGroups = principleGroupUseCase.getUserPrincipleGroups(userId, type);
 
         List<PrincipleGroupResponse> responses = principleGroups.stream()
-            .sorted(Comparator.comparing(PrincipleGroup::getDisplayOrder))
+            .sorted(Comparator.comparing(PrincipleGroup::getId).reversed())
+            .map(
+                group -> {
+                    List<InvestmentPrinciple> principles = investmentPrincipleRepository.findByPrincipleGroupId(
+                        group.getId());
+                    return principleGroupMapper.toResponse(group, principles);
+                })
+            .collect(Collectors.toList());
+
+        return HttpApiResponse.of(responses);
+    }
+
+    @GetMapping("/recommendations")
+    @Operation(summary = "추천 투자원칙 그룹 목록 조회", description = "시스템의 추천 투자원칙 그룹 목록을 조회합니다.")
+    public HttpApiResponse<List<PrincipleGroupResponse>> getRecommendationPrincipleGroups() {
+        // userId가 0인 투자원칙 그룹들은 시스템 디폴트 투자원칙 그룹이다.
+        Long userId = 0L;
+
+        List<PrincipleGroup> principleGroups = principleGroupUseCase.getUserPrincipleGroups(userId, null);
+
+        List<PrincipleGroupResponse> responses = principleGroups.stream()
+            .sorted(Comparator.comparing(PrincipleGroup::getId).reversed())
             .map(
                 group -> {
                     List<InvestmentPrinciple> principles = investmentPrincipleRepository.findByPrincipleGroupId(

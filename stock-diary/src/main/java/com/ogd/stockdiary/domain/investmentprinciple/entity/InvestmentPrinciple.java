@@ -3,8 +3,10 @@ package com.ogd.stockdiary.domain.investmentprinciple.entity;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -33,14 +35,16 @@ public class InvestmentPrinciple {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "group_id", nullable = false)
+    @JoinColumn(name = "group_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private PrincipleGroup principleGroup;
 
     private String principle;
+
+    private String description;
 
     @Column(name = "display_order")
     private Integer displayOrder;
@@ -62,17 +66,19 @@ public class InvestmentPrinciple {
     }
 
     public static InvestmentPrinciple create(
-        User user, PrincipleGroup principleGroup, String principle, Integer displayOrder) {
+        User user, PrincipleGroup principleGroup, String principle, String description, Integer displayOrder) {
         InvestmentPrinciple investmentPrinciple = new InvestmentPrinciple();
         investmentPrinciple.user = user;
         investmentPrinciple.principleGroup = principleGroup;
         investmentPrinciple.principle = principle;
+        investmentPrinciple.description = description;
         investmentPrinciple.displayOrder = displayOrder;
         return investmentPrinciple;
     }
 
-    public void updatePrinciple(String principle) {
+    public void updatePrinciple(String principle, String description) {
         this.principle = principle;
+        this.description = description;
     }
 
     public void updateDisplayOrder(Integer displayOrder) {

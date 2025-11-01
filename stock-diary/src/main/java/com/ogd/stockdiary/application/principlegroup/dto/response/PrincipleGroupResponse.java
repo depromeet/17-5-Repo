@@ -23,6 +23,9 @@ public class PrincipleGroupResponse {
     @Schema(description = "투자원칙 타입 (BUY: 매수, SELL: 매도)", example = "BUY")
     private final PrincipleType principleType;
 
+    @Schema(description = "썸네일 (이모지 또는 이미지 URL)", example = "📈")
+    private final String thumbnail;
+
     @Schema(description = "그룹 표시 순서", example = "1")
     private final Integer displayOrder;
 

@@ -13,4 +13,6 @@ public interface RetrospectionRepository {
     Retrospection findByIdAndUserId(Long id, Long userId);
 
     List<Retrospection> findAllByUserId(Long userId);
+
+    void deleteById(Long id);
 }

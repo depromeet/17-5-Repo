@@ -15,5 +15,13 @@ public class CreatePrincipleGroupCommand {
     private String groupName;
     private Integer displayOrder;
     private PrincipleType principleType;
-    private List<String> principles; // optional
+    private String thumbnail;
+    private List<PrincipleItem> principles; // optional
+
+    @Getter
+    @AllArgsConstructor
+    public static class PrincipleItem {
+        private String principle;
+        private String description;
+    }
 }

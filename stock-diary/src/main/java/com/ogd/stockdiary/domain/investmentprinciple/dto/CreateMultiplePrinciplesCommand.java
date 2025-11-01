@@ -11,5 +11,12 @@ public class CreateMultiplePrinciplesCommand {
 
     private final Long userId;
     private final Long groupId;
-    private final List<String> principles;
+    private final List<PrincipleItem> principles;
+
+    @Getter
+    @RequiredArgsConstructor
+    public static class PrincipleItem {
+        private final String principle;
+        private final String description;
+    }
 }

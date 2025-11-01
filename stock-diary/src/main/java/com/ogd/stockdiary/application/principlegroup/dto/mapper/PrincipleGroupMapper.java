@@ -21,14 +21,22 @@ import com.ogd.stockdiary.domain.principlegroup.entity.PrincipleGroup;
 public class PrincipleGroupMapper {
 
     public CreatePrincipleGroupCommand toCommand(CreatePrincipleGroupRequest request, Long userId) {
+        List<CreatePrincipleGroupCommand.PrincipleItem> commandItems = null;
+        if (request.getPrinciples() != null) {
+            commandItems = request.getPrinciples().stream()
+                .map(item -> new CreatePrincipleGroupCommand.PrincipleItem(
+                    item.getPrinciple(), item.getDescription()))
+                .collect(Collectors.toList());
+        }
         return new CreatePrincipleGroupCommand(
             userId, request.getGroupName(), request.getDisplayOrder(), request.getPrincipleType(),
-            request.getPrinciples());
+            request.getThumbnail(), commandItems);
     }
 
     public UpdatePrincipleGroupCommand toCommand(
         UpdatePrincipleGroupRequest request, Long groupId, Long userId) {
-        return new UpdatePrincipleGroupCommand(groupId, userId, request.getGroupName(), request.getPrincipleType());
+        return new UpdatePrincipleGroupCommand(groupId, userId, request.getGroupName(),
+            request.getPrincipleType(), request.getThumbnail());
     }
 
     public ReorderPrincipleGroupsCommand toReorderCommand(
@@ -52,6 +60,7 @@ public class PrincipleGroupMapper {
             principleGroup.getId(),
             principleGroup.getGroupName(),
             principleGroup.getPrincipleType(),
+            principleGroup.getThumbnail(),
             principleGroup.getDisplayOrder(),
             principleResponses);
     }
