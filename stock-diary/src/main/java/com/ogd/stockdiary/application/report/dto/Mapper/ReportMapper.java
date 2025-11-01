@@ -9,6 +9,7 @@ import com.ogd.stockdiary.application.report.dto.Request.CreateFeedbackRequest;
 import com.ogd.stockdiary.application.report.dto.Response.CreateFeedbackResponse;
 import com.ogd.stockdiary.domain.report.entity.Feedback;
 import com.ogd.stockdiary.domain.report.port.in.CreateFeedbackCommand;
+import com.ogd.stockdiary.domain.report.port.in.GetFeedbackCommand;
 
 public class ReportMapper {
 
@@ -45,5 +46,9 @@ public class ReportMapper {
             feedback.getSymbol(), feedback.getPrice(), feedback.getVolume(),
             feedback.getOrderType(), feedback.getKeptCount(), feedback.getNeutralCount(), feedback.getNotKeptCount(),
             feedback.getTitle(), keepList, improveList, nextTiimeList);
+    }
+
+    public static GetFeedbackCommand toCommand(Long userId) {
+        return new GetFeedbackCommand(userId);
     }
 }

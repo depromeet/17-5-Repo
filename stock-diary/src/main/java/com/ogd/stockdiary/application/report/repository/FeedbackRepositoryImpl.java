@@ -1,5 +1,7 @@
 package com.ogd.stockdiary.application.report.repository;
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 import com.ogd.stockdiary.domain.report.entity.Feedback;
@@ -19,5 +21,9 @@ public class FeedbackRepositoryImpl implements FeedbackRepository {
 
     public void deleteById(Long id) {
         jpaFeedbackRepository.deleteById(id);
+    }
+
+    public List<Feedback> findAllByUserId(Long userId) {
+        return jpaFeedbackRepository.findAllByUserId(userId);
     }
 }

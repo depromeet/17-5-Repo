@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 
 import com.ogd.stockdiary.domain.retrospection.entity.OrderType;
 import com.ogd.stockdiary.domain.retrospection.entity.Retrospection;
+import com.ogd.stockdiary.domain.user.entity.User;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -57,6 +58,10 @@ public class Feedback {
     @Column(nullable = true)
     private OrderType orderType;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     @Builder
     public Feedback(
         String title,
@@ -70,7 +75,8 @@ public class Feedback {
         String symbol,
         BigDecimal price,
         Integer volume,
-        OrderType orderType) {
+        OrderType orderType,
+        User user) {
         this.title = title;
         this.keep = keep;
         this.improve = improve;
@@ -83,6 +89,7 @@ public class Feedback {
         this.price = price;
         this.volume = volume;
         this.orderType = orderType;
+        this.user = user;
     }
 
 }

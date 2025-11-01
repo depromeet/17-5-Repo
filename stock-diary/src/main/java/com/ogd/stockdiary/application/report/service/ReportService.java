@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import jakarta.transaction.Transactional;
 
@@ -18,16 +19,19 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ogd.stockdiary.application.report.dto.Response.BadgeResponse;
 import com.ogd.stockdiary.application.report.dto.Response.LlmResponse;
 import com.ogd.stockdiary.domain.principlecheck.entity.PrincipleCheckStatus;
 import com.ogd.stockdiary.domain.report.entity.Feedback;
 import com.ogd.stockdiary.domain.report.entity.RetrospectionForReport;
 import com.ogd.stockdiary.domain.report.port.in.CreateFeedbackCommand;
-import com.ogd.stockdiary.domain.report.port.in.CreateFeedbackUseCase;
+import com.ogd.stockdiary.domain.report.port.in.GetFeedbackCommand;
 import com.ogd.stockdiary.domain.report.port.out.FeedbackRepository;
 import com.ogd.stockdiary.domain.report.port.out.ReportDataPort;
 import com.ogd.stockdiary.domain.report.port.out.ReportPromptLoader;
 import com.ogd.stockdiary.domain.report.port.out.RetrospectionForReportRepository;
+import com.ogd.stockdiary.domain.report.usecase.CreateFeedbackUseCase;
+import com.ogd.stockdiary.domain.report.usecase.GetFeedbackUsecase;
 import com.ogd.stockdiary.domain.report.vo.ReportSourceData;
 import com.ogd.stockdiary.domain.retrospection.entity.OrderType;
 import com.ogd.stockdiary.domain.retrospection.entity.Retrospection;
@@ -37,7 +41,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class ReportService implements CreateFeedbackUseCase {
+public class ReportService implements CreateFeedbackUseCase, GetFeedbackUsecase {
 
     private final RetrospectionForReportRepository retrospectionForReportRepository;
     private final RetrospectionRepository retrospectionRepository;
@@ -142,6 +146,7 @@ public class ReportService implements CreateFeedbackUseCase {
         Feedback feedback = Feedback.builder()
             .title(dto.title())
             .keep(keepJson)
+            .user(retrospection.getUser())
             .improve(improveJson)
             .nextTime(nextTimeJson)
             .retrospection(retrospection)
@@ -159,5 +164,34 @@ public class ReportService implements CreateFeedbackUseCase {
 
         // 반환
         return feedback;
+    }
+
+    @Override
+    public BadgeResponse getAllFeedbackUsecase(GetFeedbackCommand command) {
+        List<Feedback> allFeedback = feedbackRepository.findAllByUserId(command.userId());
+
+        Map<String, Long> badgeCounts = allFeedback.stream()
+            .collect(Collectors.groupingBy(Feedback::getTitle, Collectors.counting()));
+
+        int hedge = badgeCounts.getOrDefault("hedge", 0L).intValue();
+        int bronze = badgeCounts.getOrDefault("bronze", 0L).intValue();
+        int silver = badgeCounts.getOrDefault("silver", 0L).intValue();
+        int gold = badgeCounts.getOrDefault("gold", 0L).intValue();
+
+        int all = hedge + bronze + silver + gold;
+        int percentage = 0;
+
+        if (all != 0) {
+            // double로 계산
+            double tempPercentage = (hedge + gold) * 100.0 / all;
+
+            // 반올림하여 int으로 변환
+            percentage = (int) Math.round(tempPercentage);
+        }
+
+        BadgeResponse badgeResponse = new BadgeResponse(hedge, bronze, silver, gold, percentage);
+
+        return badgeResponse;
+
     }
 }
