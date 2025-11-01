@@ -1,5 +1,7 @@
 package com.ogd.stockdiary.application.investmentprinciple.dto.mapper;
 
+import static com.ogd.stockdiary.domain.investmentprinciple.dto.CreateMultiplePrinciplesCommand.*;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,18 +20,21 @@ public class InvestmentPrincipleMapper {
 
     public static CreatePrincipleCommand toCommand(CreatePrincipleRequest request, Long userId) {
         return new CreatePrincipleCommand(
-            userId, request.getGroupId(), request.getPrinciple(),
+            userId, request.getGroupId(), request.getPrinciple(), request.getDescription(),
             request.getDisplayOrder());
     }
 
     public static CreateMultiplePrinciplesCommand toCommand(
         CreateMultiplePrinciplesRequest request, Long userId) {
-        return new CreateMultiplePrinciplesCommand(userId, request.getGroupId(), request.getPrinciples());
+        List<PrincipleItem> commandItems = request.getPrinciples().stream()
+            .map(item -> new PrincipleItem(item.getPrinciple(), item.getDescription()))
+            .collect(Collectors.toList());
+        return new CreateMultiplePrinciplesCommand(userId, request.getGroupId(), commandItems);
     }
 
     public static UpdatePrincipleCommand toCommand(
         UpdatePrincipleRequest request, Long principleId, Long userId) {
-        return new UpdatePrincipleCommand(principleId, userId, request.getPrinciple());
+        return new UpdatePrincipleCommand(principleId, userId, request.getPrinciple(), request.getDescription());
     }
 
     public static InvestmentPrincipleResponse toResponse(InvestmentPrinciple principle) {
@@ -37,7 +42,7 @@ public class InvestmentPrincipleMapper {
         String groupName = principle.getPrincipleGroup().getGroupName();
         return new InvestmentPrincipleResponse(
             principle.getId(), groupId, groupName, principle.getPrincipleGroup().getPrincipleType(),
-            principle.getPrinciple(),
+            principle.getPrinciple(), principle.getDescription(),
             principle.getDisplayOrder());
     }
 

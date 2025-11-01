@@ -71,6 +71,7 @@ public class InvestmentPrincipleService implements InvestmentPrincipleUseCase {
             user,
             principleGroup,
             command.getPrinciple(),
+            command.getDescription(),
             command.getDisplayOrder());
 
         return investmentPrincipleRepository.save(principle);
@@ -105,11 +106,12 @@ public class InvestmentPrincipleService implements InvestmentPrincipleUseCase {
 
         List<InvestmentPrinciple> principles = new ArrayList<>();
         for (int i = 0; i < command.getPrinciples().size(); i++) {
-            String principleText = command.getPrinciples().get(i);
+            CreateMultiplePrinciplesCommand.PrincipleItem item = command.getPrinciples().get(i);
             InvestmentPrinciple principle = InvestmentPrinciple.create(
                 user,
                 principleGroup,
-                principleText,
+                item.getPrinciple(),
+                item.getDescription(),
                 i);
             principles.add(principle);
         }
@@ -126,7 +128,7 @@ public class InvestmentPrincipleService implements InvestmentPrincipleUseCase {
                     CodeEnum.FRS_003,
                     "투자원칙을 찾을 수 없습니다: " + command.getPrincipleId()));
 
-        principle.updatePrinciple(command.getPrinciple());
+        principle.updatePrinciple(command.getPrinciple(), command.getDescription());
         return principle;
     }
 

@@ -10,5 +10,6 @@ public class CreatePrincipleCommand {
     private final Long userId;
     private final Long groupId;
     private final String principle;
+    private final String description;
     private final Integer displayOrder;
 }

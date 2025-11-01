@@ -53,7 +53,7 @@ public class PrincipleGroupController {
         List<PrincipleGroup> principleGroups = principleGroupUseCase.getUserPrincipleGroups(userId);
 
         List<PrincipleGroupResponse> responses = principleGroups.stream()
-            .sorted(Comparator.comparing(PrincipleGroup::getDisplayOrder))
+            .sorted(Comparator.comparing(PrincipleGroup::getId).reversed())
             .map(
                 group -> {
                     List<InvestmentPrinciple> principles = investmentPrincipleRepository.findByPrincipleGroupId(

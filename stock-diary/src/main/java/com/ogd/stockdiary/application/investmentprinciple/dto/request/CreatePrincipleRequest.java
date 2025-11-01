@@ -20,6 +20,9 @@ public class CreatePrincipleRequest {
     @NotBlank(message = "투자원칙 내용은 필수입니다.")
     private String principle;
 
+    @Schema(description = "투자원칙 설명 (선택사항)", example = "손실을 최소화하기 위한 기본 규칙")
+    private String description;
+
     @Schema(description = "그룹 내 표시 순서 (선택사항)", example = "0")
     private Integer displayOrder;
 }
