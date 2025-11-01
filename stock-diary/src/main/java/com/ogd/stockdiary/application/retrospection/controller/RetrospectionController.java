@@ -33,6 +33,7 @@ public class RetrospectionController {
 
     private final CreateRetrospectionUseCase createRetrospectionUseCase;
     private final GetRetrospectionUseCase getRetrospectionUseCase;
+    private final DeleteRetrospectionUseCase deleteRetrospectionUseCase;
     private final CreateMemoUseCase createMemoUseCase;
     private final UpdateMemoUseCase updateMemoUseCase;
     private final DeleteMemoUseCase deleteMemoUseCase;
@@ -63,6 +64,17 @@ public class RetrospectionController {
         GetRetrospectionResponse response = getRetrospectionUseCase.getRetrospection(retrospectionId, userId);
 
         return HttpApiResponse.of(response);
+    }
+
+    @DeleteMapping("/{retrospectionId}")
+    @Operation(summary = "회고 삭제", description = "회고 id로 회고를 삭제합니다.")
+    public HttpApiResponse<String> delete(@PathVariable Long retrospectionId) {
+        // TODO: Spring Security에서 User 정보 가져오기
+        Long userId = 1L;
+
+        deleteRetrospectionUseCase.deleteRetrospection(retrospectionId);
+
+        return HttpApiResponse.of("success");
     }
 
     // Memo CRUD endpoints

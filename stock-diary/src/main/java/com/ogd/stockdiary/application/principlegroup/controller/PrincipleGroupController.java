@@ -60,6 +60,27 @@ public class PrincipleGroupController {
         return HttpApiResponse.of(responses);
     }
 
+    @GetMapping("/recommendations")
+    @Operation(summary = "추천 투자원칙 그룹 목록 조회", description = "시스템의 추천 투자원칙 그룹 목록을 조회합니다.")
+    public HttpApiResponse<List<PrincipleGroupResponse>> getRecommendationPrincipleGroups() {
+        // userId가 0인 투자원칙 그룹들은 시스템 디폴트 투자원칙 그룹이다.
+        Long userId = 0L;
+
+        List<PrincipleGroup> principleGroups = principleGroupUseCase.getUserPrincipleGroups(userId, null);
+
+        List<PrincipleGroupResponse> responses = principleGroups.stream()
+            .sorted(Comparator.comparing(PrincipleGroup::getId).reversed())
+            .map(
+                group -> {
+                    List<InvestmentPrinciple> principles = investmentPrincipleRepository.findByPrincipleGroupId(
+                        group.getId());
+                    return principleGroupMapper.toResponse(group, principles);
+                })
+            .collect(Collectors.toList());
+
+        return HttpApiResponse.of(responses);
+    }
+
     @GetMapping("/{groupId}")
     @Operation(summary = "투자원칙 그룹 조회", description = "특정 투자원칙 그룹과 속한 원칙들을 조회합니다.")
     public HttpApiResponse<PrincipleGroupResponse> getPrincipleGroupById(
