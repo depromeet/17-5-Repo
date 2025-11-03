@@ -33,47 +33,63 @@ public class AuthController {
     @Operation(summary = "소셜 로그인 (Kakao, Apple)", description = """
         ## 소셜 로그인 API
 
-        OAuth 2.0 Authorization Code Flow를 사용한 소셜 로그인 API입니다.
+        OAuth 2.0을 사용한 소셜 로그인 API입니다. 웹, Android, iOS 모두 지원합니다.
 
         ### 사용 방법
 
-        #### 1. Kakao 로그인
+        #### 1. Kakao - iOS SDK
+        ```json
+        {
+          "provider": "KAKAO",
+          "authCode": null,
+          "idToken": "SDK로부터 받은 idToken",  // oauthToken.idToken
+          "redirectUri": null,
+          "email": null,     // idToken에서 자동 추출
+          "nickname": null   // idToken에서 자동 추출
+        }
+        ```
+
+        #### 2. Kakao - 웹/Android
         ```json
         {
           "provider": "KAKAO",
           "authCode": "SDK로부터 받은 authCode",
+          "idToken": null,
           "redirectUri": "kakao{YOUR_APP_KEY}://oauth",  // SDK가 사용한 redirect_uri
-          "email": null,     // null 가능 (idToken에서 자동 추출)
-          "nickname": null   // null 가능 (idToken에서 자동 추출)
+          "email": null,     // idToken에서 자동 추출
+          "nickname": null   // idToken에서 자동 추출
         }
         ```
 
-        #### 2. Apple 첫 로그인
+        #### 3. Apple - iOS SDK 첫 로그인
         ```json
         {
           "provider": "APPLE",
-          "authCode": "SDK로부터 받은 authCode",
-          "redirectUri": "your.app.bundle.id",
+          "authCode": null,
+          "idToken": "SDK로부터 받은 idToken",  // credential.identityToken
+          "redirectUri": null,
           "email": "user@example.com",    // Apple SDK가 제공한 값 (필수)
           "nickname": "홍길동"             // Apple SDK가 제공한 값 (필수)
         }
         ```
 
-        #### 3. Apple 재로그인
+        #### 4. Apple - iOS SDK 재로그인
         ```json
         {
           "provider": "APPLE",
-          "authCode": "SDK로부터 받은 authCode",
-          "redirectUri": "your.app.bundle.id",
+          "authCode": null,
+          "idToken": "SDK로부터 받은 idToken",
+          "redirectUri": null,
           "email": null,     // null 가능 (DB에 저장된 값 사용)
           "nickname": null   // null 가능 (DB에 저장된 값 사용)
         }
         ```
 
         ### 주의사항
-        - **redirectUri**: authCode 획득 시 사용한 redirect_uri와 동일해야 함 (OAuth 2.0 보안 요구사항)
-        - **Apple**: 첫 로그인 시에만 email/nickname 제공, 재로그인 시에는 null
-        - **Kakao**: email/nickname은 idToken payload에서 자동 추출되므로 null 전달 가능
+        - **iOS SDK**: idToken 사용 (authCode는 null)
+        - **웹/Android**: authCode 사용 (idToken은 null)
+        - **redirectUri**: authCode 사용 시에만 필요 (OAuth 2.0 보안 요구사항)
+        - **Apple 첫 로그인**: email/nickname 필수, 재로그인 시에는 null 가능
         """)
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "로그인 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SocialLoginResponse.class), examples = @ExampleObject(value = """
@@ -107,6 +123,7 @@ public class AuthController {
         AuthResult authResult = authService.socialLogin(
             request.getProvider(),
             request.getAuthCode(),
+            request.getIdToken(),
             request.getRedirectUri(),
             request.getEmail(),
             request.getNickname());
@@ -122,6 +139,7 @@ public class AuthController {
         AuthResult authResult = authService.socialLogin(
             com.ogd.stockdiary.domain.user.entity.OAuthProvider.APPLE,
             code,
+            null, // idToken
             null, // redirectUri는 application.yml의 설정 사용
             null,
             null);
@@ -137,6 +155,7 @@ public class AuthController {
         AuthResult authResult = authService.socialLogin(
             OAuthProvider.KAKAO,
             code,
+            null, // idToken
             null, // redirectUri는 application.yml의 설정 사용
             null,
             null);

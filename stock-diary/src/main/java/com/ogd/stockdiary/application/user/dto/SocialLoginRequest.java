@@ -16,8 +16,11 @@ public class SocialLoginRequest {
     @Schema(description = "OAuth Provider", example = "KAKAO", allowableValues = {"KAKAO", "APPLE"})
     private OAuthProvider provider;
 
-    @Schema(description = "OAuth Authorization Code (SDK로부터 받은 인증 코드)", example = "AQBxxx...", required = true)
+    @Schema(description = "OAuth Authorization Code (웹 또는 Android SDK에서 사용)", example = "AQBxxx...", nullable = true)
     private String authCode;
+
+    @Schema(description = "ID Token (iOS SDK에서 직접 받은 경우)", example = "eyJhbGc...", nullable = true)
+    private String idToken;
 
     @Schema(description = """
         OAuth authCode 발급 시 사용한 redirect_uri
