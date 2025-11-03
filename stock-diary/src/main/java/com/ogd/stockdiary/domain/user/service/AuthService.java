@@ -38,11 +38,21 @@ public class AuthService {
 
     @Transactional
     public AuthResult socialLogin(
-        OAuthProvider provider, String authCode, String redirectUri, String email, String nickname) {
+        OAuthProvider provider, String authCode, String idToken, String redirectUri, String email, String nickname) {
         OAuthClient client = oAuthClientFactory.getClient(provider);
 
-        // 1. 토큰 획득 (redirectUri가 null이면 OAuthClient가 기본값 사용)
-        OAuthTokenResponse tokenResponse = client.getToken(authCode, redirectUri);
+        OAuthTokenResponse tokenResponse;
+
+        // 1. authCode 또는 idToken으로 토큰 획득
+        if (idToken != null && !idToken.isEmpty()) {
+            // iOS SDK 방식: idToken 직접 사용
+            tokenResponse = client.getTokenFromIdToken(idToken);
+        } else if (authCode != null && !authCode.isEmpty()) {
+            // 웹/Android 방식: authCode로 토큰 교환
+            tokenResponse = client.getToken(authCode, redirectUri);
+        } else {
+            throw new IllegalArgumentException("authCode 또는 idToken 중 하나는 필수입니다");
+        }
 
         // 2. 공개키 조회
         OIDCPublicKeyList publicKeys = client.getPublicKeys();
