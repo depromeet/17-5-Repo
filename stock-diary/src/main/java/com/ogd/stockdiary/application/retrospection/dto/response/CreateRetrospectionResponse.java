@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import com.ogd.stockdiary.domain.retrospection.entity.Currency;
-import com.ogd.stockdiary.domain.retrospection.entity.InvestmentEmotion;
 import com.ogd.stockdiary.domain.retrospection.entity.OrderType;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -46,12 +45,6 @@ public class CreateRetrospectionResponse {
 
     @Schema(description = "수익률", example = "-15.67")
     private Double returnRate;
-
-    @Schema(description = "회고 내용", example = "이번 매도는 시장 상황을 잘 반영한 결정이었다.")
-    private String content;
-
-    @Schema(description = "투자 감정", example = "CONFIDENCE")
-    private InvestmentEmotion emotion;
 
     @Schema(description = "생성일시", example = "2025-09-14T10:00:00")
     private LocalDateTime createdAt;
