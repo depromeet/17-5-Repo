@@ -66,23 +66,22 @@ public class PrincipleGroupController {
     @GetMapping("/systems")
     @Operation(summary = "추천 및 기본 투자원칙 그룹 목록 조회", description = "시스템 추천 투자원칙 그룹과 기본 투자원칙 그룹 목록을 조회합니다.")
     public HttpApiResponse<RecommendationsResponse> getRecommendationPrincipleGroups() {
-        // RECOMMEND 타입 그룹 조회 (userName 및 원칙 개수 포함)
+        // RECOMMEND 타입 그룹 조회
         List<PrincipleGroup> recommendedGroups = principleGroupUseCase.getRecommendedPrincipleGroups();
         List<RecommendedPrincipleGroupResponse> recommendedResponses = recommendedGroups.stream()
-            .sorted(Comparator.comparing(PrincipleGroup::getId).reversed())
+            .sorted(Comparator.comparing(PrincipleGroup::getId))
             .map(
                 group -> {
                     int principleCount = investmentPrincipleRepository.findByPrincipleGroupId(
                         group.getId()).size();
-                    String userName = group.getUser().getNickname();
-                    return principleGroupMapper.toRecommendedResponse(group, principleCount, userName);
+                    return principleGroupMapper.toRecommendedResponse(group, principleCount);
                 })
             .collect(Collectors.toList());
 
         // DEFAULT 타입 그룹 조회 (간소화된 정보만)
         List<PrincipleGroup> defaultGroups = principleGroupUseCase.getDefaultPrincipleGroups();
         List<DefaultPrincipleGroupResponse> defaultResponses = defaultGroups.stream()
-            .sorted(Comparator.comparing(PrincipleGroup::getId).reversed())
+            .sorted(Comparator.comparing(PrincipleGroup::getId))
             .map(principleGroupMapper::toDefaultResponse)
             .collect(Collectors.toList());
 

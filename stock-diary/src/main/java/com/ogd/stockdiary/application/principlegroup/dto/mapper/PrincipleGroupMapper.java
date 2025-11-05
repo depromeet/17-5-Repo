@@ -68,21 +68,19 @@ public class PrincipleGroupMapper {
     }
 
     public RecommendedPrincipleGroupResponse toRecommendedResponse(
-        PrincipleGroup principleGroup, Integer principleCount, String userName) {
+        PrincipleGroup principleGroup, Integer principleCount) {
         return new RecommendedPrincipleGroupResponse(
             principleGroup.getId(),
             principleGroup.getGroupName(),
-            principleGroup.getPrincipleType(),
             principleGroup.getThumbnail(),
-            principleGroup.getDisplayOrder(),
-            principleCount,
-            userName);
+            principleCount);
     }
 
     public DefaultPrincipleGroupResponse toDefaultResponse(PrincipleGroup principleGroup) {
         return new DefaultPrincipleGroupResponse(
             principleGroup.getId(),
             principleGroup.getGroupName(),
-            principleGroup.getThumbnail());
+            principleGroup.getThumbnail(),
+            principleGroup.getPrincipleType());
     }
 }

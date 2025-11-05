@@ -9,6 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ogd.stockdiary.application.user.repository.UserRepository;
 import com.ogd.stockdiary.common.httpresponse.CodeEnum;
+import com.ogd.stockdiary.domain.image.entity.ImageMetadata;
+import com.ogd.stockdiary.domain.image.port.in.ImageUseCase;
+import com.ogd.stockdiary.domain.image.port.out.ImageRepository;
 import com.ogd.stockdiary.domain.investmentprinciple.entity.InvestmentPrinciple;
 import com.ogd.stockdiary.domain.investmentprinciple.entity.PrincipleType;
 import com.ogd.stockdiary.domain.investmentprinciple.port.out.InvestmentPrincipleRepository;
@@ -32,6 +35,8 @@ public class PrincipleGroupService implements PrincipleGroupUseCase {
     private final PrincipleGroupRepository principleGroupRepository;
     private final InvestmentPrincipleRepository investmentPrincipleRepository;
     private final UserRepository userRepository;
+    private final ImageRepository imageRepository;
+    private final ImageUseCase imageUseCase;
 
     @Override
     @Transactional(readOnly = true)
@@ -43,7 +48,39 @@ public class PrincipleGroupService implements PrincipleGroupUseCase {
     @Override
     @Transactional(readOnly = true)
     public List<PrincipleGroup> getRecommendedPrincipleGroups() {
-        return principleGroupRepository.findByGroupTypeWithUser(PrincipleGroupType.RECOMMEND);
+        List<PrincipleGroup> groups = principleGroupRepository.findByGroupTypeWithUser(PrincipleGroupType.RECOMMEND);
+
+        // thumbnail이 숫자형 문자열(metaId)인 경우 다운로드 URL로 변환
+        groups.forEach(group -> {
+            String thumbnail = group.getThumbnail();
+            if (isNumeric(thumbnail)) {
+                try {
+                    Long metaId = Long.parseLong(thumbnail);
+                    ImageMetadata imageMetadata = imageRepository.findById(metaId)
+                        .orElseThrow(() -> new ApplicationException(
+                            CodeEnum.FRS_003, "이미지 메타데이터를 찾을 수 없습니다: " + metaId));
+
+                    String downloadUrl = imageUseCase.getDownloadUrl(imageMetadata.getObjectKey());
+                    group.updateThumbnail(downloadUrl);
+                } catch (NumberFormatException e) {
+                    // 숫자가 아닌 경우 무시
+                }
+            }
+        });
+
+        return groups;
+    }
+
+    private boolean isNumeric(String str) {
+        if (str == null || str.isEmpty()) {
+            return false;
+        }
+        try {
+            Long.parseLong(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
     @Override
