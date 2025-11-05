@@ -12,6 +12,10 @@ public interface PrincipleGroupUseCase {
 
     List<PrincipleGroup> getUserPrincipleGroups(Long userId, PrincipleType type);
 
+    List<PrincipleGroup> getRecommendedPrincipleGroups();
+
+    List<PrincipleGroup> getDefaultPrincipleGroups();
+
     PrincipleGroup getPrincipleGroupById(Long groupId, Long userId);
 
     PrincipleGroup createPrincipleGroup(CreatePrincipleGroupCommand command);

@@ -31,6 +31,10 @@ public class PrincipleGroup {
     @Column(name = "principle_type", nullable = false)
     private PrincipleType principleType;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "group_type", nullable = false, columnDefinition = "VARCHAR(20) DEFAULT 'USER'")
+    private PrincipleGroupType groupType;
+
     @Column(nullable = false)
     private String thumbnail;
 
@@ -43,6 +47,9 @@ public class PrincipleGroup {
 
     @PrePersist
     protected void onCreate() {
+        if (this.groupType == null) {
+            this.groupType = PrincipleGroupType.USER;
+        }
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
@@ -58,6 +65,7 @@ public class PrincipleGroup {
         principleGroup.user = user;
         principleGroup.groupName = groupName;
         principleGroup.principleType = principleType;
+        principleGroup.groupType = PrincipleGroupType.USER;
         principleGroup.thumbnail = thumbnail;
         principleGroup.displayOrder = displayOrder;
         return principleGroup;
