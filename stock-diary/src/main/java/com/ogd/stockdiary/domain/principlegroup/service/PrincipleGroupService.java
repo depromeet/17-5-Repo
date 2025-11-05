@@ -16,6 +16,7 @@ import com.ogd.stockdiary.domain.principlegroup.dto.CreatePrincipleGroupCommand;
 import com.ogd.stockdiary.domain.principlegroup.dto.ReorderPrincipleGroupsCommand;
 import com.ogd.stockdiary.domain.principlegroup.dto.UpdatePrincipleGroupCommand;
 import com.ogd.stockdiary.domain.principlegroup.entity.PrincipleGroup;
+import com.ogd.stockdiary.domain.principlegroup.entity.PrincipleGroupType;
 import com.ogd.stockdiary.domain.principlegroup.port.out.PrincipleGroupRepository;
 import com.ogd.stockdiary.domain.principlegroup.usecase.PrincipleGroupUseCase;
 import com.ogd.stockdiary.domain.user.entity.User;
@@ -35,8 +36,20 @@ public class PrincipleGroupService implements PrincipleGroupUseCase {
     @Override
     @Transactional(readOnly = true)
     public List<PrincipleGroup> getUserPrincipleGroups(Long userId, PrincipleType type) {
-        return principleGroupRepository.findByUserId(userId).stream()
+        return principleGroupRepository.findByUserIdAndGroupType(userId, PrincipleGroupType.USER).stream()
             .filter(pg -> type == null || pg.getPrincipleType().equals(type)).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PrincipleGroup> getRecommendedPrincipleGroups() {
+        return principleGroupRepository.findByGroupTypeWithUser(PrincipleGroupType.RECOMMEND);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PrincipleGroup> getDefaultPrincipleGroups() {
+        return principleGroupRepository.findByGroupType(PrincipleGroupType.DEFAULT);
     }
 
     @Override
