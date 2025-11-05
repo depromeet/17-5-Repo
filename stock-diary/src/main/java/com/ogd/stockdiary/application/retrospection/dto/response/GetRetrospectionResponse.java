@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.ogd.stockdiary.domain.investmentprinciple.entity.PrincipleType;
 import com.ogd.stockdiary.domain.principlecheck.entity.PrincipleCheckStatus;
 import com.ogd.stockdiary.domain.retrospection.entity.Currency;
 import com.ogd.stockdiary.domain.retrospection.entity.OrderType;
@@ -48,8 +49,8 @@ public class GetRetrospectionResponse {
     @Schema(description = "수익률", example = "-15.67")
     private Double returnRate;
 
-    @Schema(description = "투자 원칙 목록")
-    private List<PrincipleCheckResponse> principleChecks;
+    @Schema(description = "투자 원칙 그룹 목록")
+    private List<PrincipleGroupWithChecksResponse> principleCheckGroups;
 
     @Schema(description = "메모 목록")
     private List<MemoResponse> memos;
@@ -59,6 +60,27 @@ public class GetRetrospectionResponse {
 
     @Schema(description = "수정일시", example = "2025-09-14T10:00:00")
     private LocalDateTime updatedAt;
+
+    @AllArgsConstructor
+    @Getter
+    @Schema(description = "투자 원칙 그룹 정보")
+    public static class PrincipleGroupWithChecksResponse {
+
+        @Schema(description = "투자 원칙 그룹 ID", example = "1")
+        private Long groupId;
+
+        @Schema(description = "그룹명", example = "리스크 관리")
+        private String groupName;
+
+        @Schema(description = "썸네일", example = "🔥")
+        private String thumbnail;
+
+        @Schema(description = "원칙 타입", example = "BUY")
+        private PrincipleType principleType;
+
+        @Schema(description = "투자 원칙 체크 목록")
+        private List<PrincipleCheckResponse> principleChecks;
+    }
 
     @AllArgsConstructor
     @Getter
