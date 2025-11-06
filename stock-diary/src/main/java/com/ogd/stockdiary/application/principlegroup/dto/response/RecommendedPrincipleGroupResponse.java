@@ -20,4 +20,7 @@ public class RecommendedPrincipleGroupResponse {
 
     @Schema(description = "그룹에 속한 투자원칙 개수", example = "5")
     private final Integer principleCount;
+
+    @Schema(description = "투자자 이름", example = "워렌 버핏")
+    private final String investorName;
 }

@@ -73,7 +73,8 @@ public class PrincipleGroupMapper {
             principleGroup.getId(),
             principleGroup.getGroupName(),
             principleGroup.getThumbnail(),
-            principleCount);
+            principleCount,
+            principleGroup.getUser().getNickname());
     }
 
     public DefaultPrincipleGroupResponse toDefaultResponse(PrincipleGroup principleGroup) {
