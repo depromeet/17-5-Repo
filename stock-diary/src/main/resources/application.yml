@@ -29,6 +29,10 @@ cloud:
     # AWS S3로 전환시: endpoint를 제거하고 region만 사용 (예: ap-northeast-2)
 
 spring:
+  servlet:
+    multipart:
+      max-file-size: 30MB
+      max-request-size: 30MB
   jpa:
     hibernate:
       ddl-auto: update
@@ -41,7 +45,7 @@ spring:
   ai:
     openai:
       api-key: ${OPENAI_API_KEY}
-  
+
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${DB_URL}
