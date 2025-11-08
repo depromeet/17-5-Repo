@@ -30,14 +30,15 @@ import com.ogd.stockdiary.domain.stock.repository.StockRepository;
  * Stock 엔티티의 logo 필드에 ObjectKey를 업데이트합니다.
  *
  * <p>
- * 실행 방법: ./gradlew bootRun --args='--spring.profiles.active=batch' -Dbatch.stock-logo-update.days=N
+ * 실행 방법: ./gradlew bootRun --args='--spring.profiles.active=batch'
+ * -Dbatch.stock-logo-update.days=N
  * <p>
  * 증분 동기화 (필수 파라미터: days):
  * <ul>
- *   <li>days=0: 오늘 업로드된 파일만 처리</li>
- *   <li>days=7: 최근 7일 이내 파일 처리 [권장]</li>
- *   <li>days=30: 최근 30일 이내 파일 처리</li>
- *   <li>days=99999: 사실상 전체 스토리지 스캔</li>
+ * <li>days=0: 오늘 업로드된 파일만 처리</li>
+ * <li>days=7: 최근 7일 이내 파일 처리 [권장]</li>
+ * <li>days=30: 최근 30일 이내 파일 처리</li>
+ * <li>days=99999: 사실상 전체 스토리지 스캔</li>
  * </ul>
  *
  * <p>
