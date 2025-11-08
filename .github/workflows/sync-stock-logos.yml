@@ -8,33 +8,39 @@
 #   1. GitHub 리포지토리 → Actions 탭
 #   2. 좌측에서 "주식로고를 스토리지기반 DB 업데이트" 선택
 #   3. 우측 상단 "Run workflow" 버튼 클릭
-#   4. days 값 입력 (필수):
+#   4. 환경 선택:
+#      - dev: 개발 환경 DB 동기화
+#      - prod: 운영 환경 DB 동기화 [주의]
+#   5. days 값 입력:
 #      - 0: 오늘 올린 파일만 동기화
 #      - 7: 최근 7일 이내 파일 동기화 [권장, 기본값]
 #      - 30: 최근 30일 이내 파일 동기화
 #      - 99999: 사실상 전체 스캔 (모든 파일)
-#   5. "Run workflow" 버튼 클릭
+#   6. "Run workflow" 버튼 클릭
 #
 # 주의사항:
-#   - 운영 DB에 직접 업데이트하므로 신중하게 실행
+#   - 운영 환경(prod)은 신중하게 실행하세요
 #   - days 값이 클수록 처리 시간이 오래 걸림
 #   - 배치는 독립적으로 실행되며 운영 서버에 영향 없음 (batch profile 분리)
 #
-# 필요한 GitHub Secrets:
-#   - DB_URL: 데이터베이스 연결 URL
-#   - DB_USERNAME: 데이터베이스 사용자명
-#   - DB_PASSWORD: 데이터베이스 비밀번호
-#   - STORAGE_ENDPOINT: MinIO/S3 엔드포인트
-#   - STORAGE_ACCESS_KEY: 스토리지 액세스 키
-#   - STORAGE_SECRET_KEY: 스토리지 시크릿 키
-#   - STORAGE_REGION: 스토리지 리전 (기본값: us-east-1)
-#   - STORAGE_BUCKET: 스토리지 버킷명 (기본값: depromeet)
+# 환경별 설정:
+#   - dev/prod 환경에 따라 자동으로 해당 환경의 vars 사용
+#   - GitHub Settings → Environments에서 환경별 variables 설정 필요
+#   - cd.yml과 동일한 환경 변수 사용 (Spring Boot 애플리케이션 실행에 필요)
 
 name: 주식로고를 스토리지기반 DB 업데이트
 
 on:
   workflow_dispatch:
     inputs:
+      environment:
+        description: '동기화할 환경 선택'
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+        default: 'dev'
       days:
         description: '최근 며칠 이내 파일을 동기화할지 (0=오늘만, 7=권장, 99999=전체)'
         required: true
@@ -43,8 +49,9 @@ on:
 
 jobs:
   sync-logos:
-    name: Sync Stock Logos
+    name: Sync Stock Logos (${{ github.event.inputs.environment }})
     runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
 
     steps:
       - name: Checkout code
@@ -62,13 +69,33 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Run Stock Logo Sync Batch
+        env:
+          DB_URL: ${{ vars.DB_URL }}
+          DB_USERNAME: ${{ vars.DB_USERNAME }}
+          DB_PASSWORD: ${{ vars.DB_PASSWORD }}
+          OPENAI_API_KEY: ${{ vars.OPENAI_API_KEY }}
+          STORAGE_ENDPOINT: ${{ vars.STORAGE_ENDPOINT }}
+          STORAGE_ACCESS_KEY: ${{ vars.STORAGE_ACCESS_KEY }}
+          STORAGE_SECRET_KEY: ${{ vars.STORAGE_SECRET_KEY }}
+          KAKAO_ADMIN_KEY: ${{ vars.KAKAO_ADMIN_KEY }}
+          KAKAO_CLIENT_ID: ${{ vars.KAKAO_CLIENT_ID }}
+          KAKAO_REDIRECT_URI: ${{ vars.KAKAO_REDIRECT_URI }}
+          APPLE_CLIENT_ID: ${{ vars.APPLE_CLIENT_ID }}
+          APPLE_APP_ID: ${{ vars.APPLE_APP_ID }}
+          APPLE_REDIRECT_URI: ${{ vars.APPLE_REDIRECT_URI }}
+          APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+          APPLE_KEY_ID: ${{ vars.APPLE_KEY_ID }}
+          APPLE_PRIVATE_KEY: ${{ vars.APPLE_PRIVATE_KEY }}
+
         run: |
           cd stock-diary
+          ENV="${{ github.event.inputs.environment }}"
           DAYS="${{ github.event.inputs.days }}"
 
           echo "========================================="
           echo "🚀 Stock Logo 동기화 배치 시작"
           echo "========================================="
+          echo "환경: $ENV"
           echo "Days 파라미터: $DAYS"
           if [ "$DAYS" -eq 0 ]; then
             echo "모드: 오늘 올린 파일만 동기화"
@@ -83,15 +110,6 @@ jobs:
 
           ../gradlew bootRun --args='--spring.profiles.active=batch' \
             -Dbatch.stock-logo-update.days=$DAYS
-        env:
-          DB_URL: ${{ secrets.DB_URL }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          STORAGE_ENDPOINT: ${{ secrets.STORAGE_ENDPOINT }}
-          STORAGE_ACCESS_KEY: ${{ secrets.STORAGE_ACCESS_KEY }}
-          STORAGE_SECRET_KEY: ${{ secrets.STORAGE_SECRET_KEY }}
-          STORAGE_REGION: ${{ secrets.STORAGE_REGION }}
-          STORAGE_BUCKET: ${{ secrets.STORAGE_BUCKET }}
 
       - name: Check batch result
         if: always()
