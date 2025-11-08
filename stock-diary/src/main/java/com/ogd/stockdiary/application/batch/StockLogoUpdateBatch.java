@@ -1,5 +1,7 @@
 package com.ogd.stockdiary.application.batch;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -10,8 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -28,10 +30,21 @@ import com.ogd.stockdiary.domain.stock.repository.StockRepository;
  * Stock 엔티티의 logo 필드에 ObjectKey를 업데이트합니다.
  *
  * <p>
- * 실행 방법: application.yml에서 batch.stock-logo-update.enabled=true 설정
+ * 실행 방법: ./gradlew bootRun --args='--spring.profiles.active=batch' -Dbatch.stock-logo-update.days=N
+ * <p>
+ * 증분 동기화 (필수 파라미터: days):
+ * <ul>
+ *   <li>days=0: 오늘 업로드된 파일만 처리</li>
+ *   <li>days=7: 최근 7일 이내 파일 처리 [권장]</li>
+ *   <li>days=30: 최근 30일 이내 파일 처리</li>
+ *   <li>days=99999: 사실상 전체 스토리지 스캔</li>
+ * </ul>
+ *
+ * <p>
+ * 주의: days 파라미터는 필수입니다. GitHub Actions에서 자동으로 전달됩니다.
  */
 @Component
-@ConditionalOnProperty(name = "batch.stock-logo-update.enabled", havingValue = "true")
+@Profile("batch")
 public class StockLogoUpdateBatch implements CommandLineRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(StockLogoUpdateBatch.class);
@@ -54,6 +67,9 @@ public class StockLogoUpdateBatch implements CommandLineRunner {
     @Value("${cloud.storage.bucket}")
     private String storageBucket;
 
+    @Value("${batch.stock-logo-update.days}")
+    private Integer days;
+
     public StockLogoUpdateBatch(FileClientPort fileClientPort, StockRepository stockRepository,
         ApplicationContext applicationContext, TransactionTemplate transactionTemplate) {
         this.fileClientPort = fileClientPort;
@@ -71,6 +87,15 @@ public class StockLogoUpdateBatch implements CommandLineRunner {
         logger.info("Database Username: {}", dbUsername);
         logger.info("Storage Endpoint: {}", storageEndpoint);
         logger.info("Storage Bucket: {}", storageBucket);
+        logger.info("Days Filter: {} days", days);
+
+        if (days == 0) {
+            logger.info("Sync Mode: TODAY (오늘 업로드된 파일만)");
+        } else if (days >= 99999) {
+            logger.info("Sync Mode: ALL (전체 스캔)");
+        } else {
+            logger.info("Sync Mode: INCREMENTAL (최근 {}일 이내)", days);
+        }
         logger.info("========================================");
 
         try {
@@ -78,11 +103,22 @@ public class StockLogoUpdateBatch implements CommandLineRunner {
             List<ObjectInfo> allFiles = fileClientPort.listObjects(LOGO_PREFIX);
             logger.info("Found {} files in storage with prefix: {}", allFiles.size(), LOGO_PREFIX);
 
+            // 1-1. 날짜 필터링 (증분 동기화)
+            Instant cutoffTime = Instant.now().minus(days, ChronoUnit.DAYS);
+            logger.info("Cutoff time: {} ({} days ago)", cutoffTime, days);
+
+            List<ObjectInfo> filteredFiles = allFiles.stream()
+                .filter(file -> file.lastModified().isAfter(cutoffTime))
+                .collect(Collectors.toList());
+
+            logger.info("Filtered to {} files (modified within last {} days)", filteredFiles.size(), days);
+            logger.info("Skipped {} files (older than {} days)", allFiles.size() - filteredFiles.size(), days);
+
             // 2. stock code별로 그룹핑 (stock/logo/{code}/{filename} 형태에서 code 추출)
             logger.info("Sample file keys (first 5):");
-            allFiles.stream().limit(5).forEach(file -> logger.info("  - {}", file.key()));
+            filteredFiles.stream().limit(5).forEach(file -> logger.info("  - {}", file.key()));
 
-            Map<String, List<ObjectInfo>> filesByCode = allFiles.stream()
+            Map<String, List<ObjectInfo>> filesByCode = filteredFiles.stream()
                 .filter(file -> {
                     String code = extractStockCode(file.key());
                     if (code == null) {
