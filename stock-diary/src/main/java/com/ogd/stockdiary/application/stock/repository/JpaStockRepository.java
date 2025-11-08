@@ -23,4 +23,7 @@ public interface JpaStockRepository extends CrudRepository<Stock, Long> {
 
     @Query("SELECT s FROM Stock s WHERE s.code IN :codes")
     List<Stock> findAllByCodeIn(List<String> codes);
+
+    @Query("SELECT s FROM Stock s WHERE s.code = :code")
+    Stock findByCode(String code);
 }

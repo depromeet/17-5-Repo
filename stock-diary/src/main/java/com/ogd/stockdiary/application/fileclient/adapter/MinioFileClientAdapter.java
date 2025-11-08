@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -23,8 +25,11 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Object;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
@@ -159,5 +164,34 @@ public class MinioFileClientAdapter implements FileClientPort {
             .build();
 
         return s3Presigner.presignGetObject(presignRequest).url().toString();
+    }
+
+    @Override
+    public List<ObjectInfo> listObjects(String prefix) {
+        logger.info("Listing objects with prefix: {} in bucket: {}", prefix, bucketName);
+
+        List<ObjectInfo> objectInfoList = new ArrayList<>();
+        String continuationToken = null;
+
+        do {
+            ListObjectsV2Request.Builder requestBuilder = ListObjectsV2Request.builder()
+                .bucket(bucketName)
+                .prefix(prefix);
+
+            if (continuationToken != null) {
+                requestBuilder.continuationToken(continuationToken);
+            }
+
+            ListObjectsV2Response response = s3Client.listObjectsV2(requestBuilder.build());
+
+            for (S3Object s3Object : response.contents()) {
+                objectInfoList.add(new ObjectInfo(s3Object.key(), s3Object.lastModified()));
+            }
+
+            continuationToken = response.isTruncated() ? response.nextContinuationToken() : null;
+        } while (continuationToken != null);
+
+        logger.info("Found {} objects with prefix: {}", objectInfoList.size(), prefix);
+        return objectInfoList;
     }
 }

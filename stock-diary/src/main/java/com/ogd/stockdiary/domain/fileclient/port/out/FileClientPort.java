@@ -56,4 +56,19 @@ public interface FileClientPort {
      *             파일이 존재하지 않을 경우
      */
     String getDownloadPreSignedUrl(String objectKey, int ttl);
+
+    /**
+     * 특정 prefix로 시작하는 객체들의 정보를 조회합니다.
+     *
+     * @param prefix
+     *            객체 키 prefix (예: "stock/logo/")
+     * @return 객체 정보 리스트
+     */
+    java.util.List<ObjectInfo> listObjects(String prefix);
+
+    /**
+     * 객체 정보를 담는 클래스
+     */
+    record ObjectInfo(String key, java.time.Instant lastModified) {
+    }
 }

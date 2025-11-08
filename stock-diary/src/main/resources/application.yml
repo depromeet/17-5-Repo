@@ -74,3 +74,4 @@ logging:
     com.dpm05.user: DEBUG
     org.springframework.security: DEBUG
     org.springframework.web.reactive.function.client.ExchangeFunctions: DEBUG
+    com.ogd.stockdiary.application.batch: DEBUG

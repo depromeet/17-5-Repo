@@ -38,11 +38,24 @@ public class Stock {
     @Column(nullable = false)
     private String companyName;
 
+    /**
+     * ObjectKey for stock logo image
+     */
+    @Column(nullable = true)
+    private String logo;
+
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+    }
+
+    /**
+     * Update logo ObjectKey
+     */
+    public void updateLogo(String objectKey) {
+        this.logo = objectKey;
     }
 }
