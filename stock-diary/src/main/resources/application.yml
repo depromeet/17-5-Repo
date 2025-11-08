@@ -80,3 +80,5 @@ logging:
 batch:
   stock-logo-update:
     enabled: false
+  stock-logo-upload:
+    enabled: false
