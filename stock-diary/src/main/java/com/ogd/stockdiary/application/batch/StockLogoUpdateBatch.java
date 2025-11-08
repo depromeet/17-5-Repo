@@ -30,8 +30,9 @@ import com.ogd.stockdiary.domain.stock.repository.StockRepository;
  * Stock 엔티티의 logo 필드에 ObjectKey를 업데이트합니다.
  *
  * <p>
- * 실행 방법: ./gradlew bootRun --args='--spring.profiles.active=batch'
- * -Dbatch.stock-logo-update.days=N
+ * 실행 방법:
+ * ./gradlew bootRun --args='--spring.profiles.active=batch
+ * --batch.stock-logo-update.days=7'
  * <p>
  * 증분 동기화 (필수 파라미터: days):
  * <ul>

@@ -108,8 +108,7 @@ jobs:
           fi
           echo "========================================="
 
-          ../gradlew bootRun --args='--spring.profiles.active=batch' \
-            -Dbatch.stock-logo-update.days=$DAYS
+          ../gradlew bootRun --args='--spring.profiles.active=batch --batch.stock-logo-update.days='$DAYS
 
       - name: Check batch result
         if: always()
