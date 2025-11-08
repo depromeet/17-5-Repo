@@ -42,10 +42,10 @@ on:
           - prod
         default: 'dev'
       days:
-        description: '최근 며칠 이내 파일을 동기화할지 (0=오늘만, 7=권장, 99999=전체)'
+        description: '최근 며칠 이내 파일을 동기화할지 (1=1일전부터 현재, 7=일주일, 99999=전체)'
         required: true
         type: number
-        default: 7
+        default: 1
 
 jobs:
   sync-logos:
