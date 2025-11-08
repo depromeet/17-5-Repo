@@ -25,17 +25,6 @@ public class StockSearchController {
         this.stockQueryUseCase = stockQueryUseCase;
     }
 
-    @Operation(summary = "주식 검색(Legacy)", description = "종목명 또는 종목 코드로 주식을 검색합니다.")
-    @Deprecated(since = "2025-09-20", forRemoval = true)
-    @GetMapping("/stock/search")
-    public HttpApiResponse<List<StockSearchResponse>> searchStock(
-        @Parameter(description = "검색 키워드 (종목명 또는 종목 코드)", required = true) @RequestParam String query) {
-
-        List<StockSearchResponse> mockData = Arrays.asList(new StockSearchResponse(Market.NAS, "TSLA", "테슬라"));
-
-        return HttpApiResponse.of(mockData);
-    }
-
     @Operation(summary = "주식 검색 (페이지네이션)", description = "종목명 또는 종목 코드로 주식을 무한스크롤 방식으로 검색합니다.")
     @GetMapping("/stock/slice")
     public HttpApiResponse<SliceContent<StockSearchResponse>> searchStockSlice(

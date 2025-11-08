@@ -38,6 +38,12 @@ public class Stock {
     @Column(nullable = false)
     private String companyName;
 
+    /**
+     * ObjectKey for stock logo image
+     */
+    @Column(nullable = true)
+    private String logo;
+
     @Column(updatable = false)
     private LocalDateTime createdAt;
 

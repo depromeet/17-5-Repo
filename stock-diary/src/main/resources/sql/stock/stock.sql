@@ -5,6 +5,7 @@ create table stock
     market       varchar(10)                         not null comment '시장구분 (KOSPI, KOSDAQ, NAS, NYSE)',
     code         varchar(20)                         not null comment '종목코드',
     company_name varchar(200)                        not null comment '회사명',
+    logo         varchar(500)                        null comment 'ObjectKey for stock logo image',
     created_at   timestamp default CURRENT_TIMESTAMP null,
     constraint uk_market_code
         unique (market, code)
