@@ -74,3 +74,9 @@ logging:
     com.dpm05.user: DEBUG
     org.springframework.security: DEBUG
     org.springframework.web.reactive.function.client.ExchangeFunctions: DEBUG
+    com.ogd.stockdiary.application.batch: DEBUG
+
+# ./gradlew bootrun (스토리지 로고 업데이트용 ; enabled: true)
+batch:
+  stock-logo-update:
+    enabled: false

@@ -51,4 +51,11 @@ public class Stock {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
+
+    /**
+     * Update logo ObjectKey
+     */
+    public void updateLogo(String objectKey) {
+        this.logo = objectKey;
+    }
 }

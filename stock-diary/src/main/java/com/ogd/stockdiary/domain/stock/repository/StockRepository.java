@@ -12,4 +12,8 @@ public interface StockRepository {
 
     List<Stock> findAllByCodeIn(List<String> codes);
 
+    Stock findByCode(String code);
+
+    Stock save(Stock stock);
+
 }

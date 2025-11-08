@@ -44,4 +44,14 @@ public class StockRepositoryImpl implements StockRepository {
     public List<Stock> findAllByCodeIn(List<String> codes) {
         return jpaStockRepository.findAllByCodeIn(codes);
     }
+
+    @Override
+    public Stock findByCode(String code) {
+        return jpaStockRepository.findByCode(code);
+    }
+
+    @Override
+    public Stock save(Stock stock) {
+        return jpaStockRepository.save(stock);
+    }
 }
