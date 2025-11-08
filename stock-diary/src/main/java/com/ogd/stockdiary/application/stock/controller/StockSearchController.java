@@ -1,14 +1,10 @@
 package com.ogd.stockdiary.application.stock.controller;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.springframework.web.bind.annotation.*;
 
 import com.ogd.stockdiary.common.httpresponse.HttpApiResponse;
 import com.ogd.stockdiary.common.httpresponse.SliceContent;
 import com.ogd.stockdiary.domain.stock.dto.response.StockSearchResponse;
-import com.ogd.stockdiary.domain.stock.entity.Market;
 import com.ogd.stockdiary.domain.stock.usecase.StockQueryUseCase;
 
 import io.swagger.v3.oas.annotations.Operation;
