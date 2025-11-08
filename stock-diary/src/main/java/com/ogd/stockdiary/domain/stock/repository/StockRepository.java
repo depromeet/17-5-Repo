@@ -9,4 +9,7 @@ public interface StockRepository {
     List<Stock> findByCompanyName(String companyName);
 
     SliceContent<Stock> findByCompanyNameSlice(String nextCursor, String companyName, int size);
+
+    List<Stock> findAllByCodeIn(List<String> codes);
+
 }

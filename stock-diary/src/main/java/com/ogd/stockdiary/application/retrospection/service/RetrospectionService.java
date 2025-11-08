@@ -37,6 +37,8 @@ import com.ogd.stockdiary.domain.retrospection.port.in.GetRetrospectionCommand;
 import com.ogd.stockdiary.domain.retrospection.port.in.GetRetrospectionUseCase;
 import com.ogd.stockdiary.domain.retrospection.port.out.MemoRepository;
 import com.ogd.stockdiary.domain.retrospection.port.out.RetrospectionRepository;
+import com.ogd.stockdiary.domain.stock.entity.Stock;
+import com.ogd.stockdiary.domain.stock.repository.StockRepository;
 import com.ogd.stockdiary.domain.user.entity.User;
 import com.ogd.stockdiary.exception.ApplicationException;
 
@@ -62,6 +64,7 @@ public class RetrospectionService
     private final JpaPrincipleCheckLinkRepository principleCheckLinkRepository;
     private final ImageUseCase imageUseCase;
     private final MemoRepository memoRepository;
+    private final StockRepository stockRepository;
 
     @Override
     @Transactional
@@ -194,15 +197,27 @@ public class RetrospectionService
     @Override
     public List<MarketGroupResponse> getAllRetrospections(GetRetrospectionCommand command) {
 
-        // 회고 디비에서 조회
-        List<Retrospection> retrospection = retrospectionRepository.findAllByUserId(command.userId());
+        // 사용자의 모든 회고 조회
+        List<Retrospection> retrospections = retrospectionRepository.findAllByUserId(command.userId());
 
-        // symbol 기준 그룹화
-        Map<String, List<Retrospection>> retrospectionsByMarket = retrospection.stream()
-            .collect(Collectors.groupingBy(Retrospection::getSymbol));
+        // 회고에서 symbol 목록 추출해서 stock 정보 조회
+        List<String> symbol = retrospections.stream().map(Retrospection::getSymbol).distinct().toList();
+        List<Stock> stocks = stockRepository.findAllByCodeIn(symbol);
+
+        // stock 정보를 Map 으로 변환
+        Map<String, String> stockByCompanyName = stocks.stream()
+            .collect(Collectors.toMap(
+                stock -> (stock.getCode()), // 키: stock의 code
+                Stock::getCompanyName));
+
+        // companyName 기준 회고 그룹화
+        Map<String, List<Retrospection>> retrospectionsByCompanyName = retrospections.stream()
+            .collect(Collectors.groupingBy(retrospection
+            // 키: retrospection 의 symbol
+            -> stockByCompanyName.getOrDefault(retrospection.getSymbol(), retrospection.getSymbol())));
 
         // 응답 DTO 로 변환
-        return retrospectionsByMarket.entrySet().stream()
+        return retrospectionsByCompanyName.entrySet().stream()
             .map(entry -> {
                 List<RetrospectionDetailResponse> detailResponses = entry.getValue().stream()
                     .map(RetrospectionDetailResponse::fromEntity)

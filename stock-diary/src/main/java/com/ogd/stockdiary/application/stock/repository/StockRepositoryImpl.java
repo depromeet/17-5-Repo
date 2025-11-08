@@ -39,4 +39,9 @@ public class StockRepositoryImpl implements StockRepository {
 
         return new SliceContent<>(content, id);
     }
+
+    @Override
+    public List<Stock> findAllByCodeIn(List<String> codes) {
+        return jpaStockRepository.findAllByCodeIn(codes);
+    }
 }
