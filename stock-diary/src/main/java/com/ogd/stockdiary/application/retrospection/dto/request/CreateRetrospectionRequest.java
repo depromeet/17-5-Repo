@@ -11,7 +11,6 @@ import jakarta.validation.constraints.Positive;
 
 import com.ogd.stockdiary.application.principlecheck.dto.request.PrincipleCheckRequest;
 import com.ogd.stockdiary.domain.retrospection.entity.Currency;
-import com.ogd.stockdiary.domain.retrospection.entity.InvestmentEmotion;
 import com.ogd.stockdiary.domain.retrospection.entity.OrderType;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -57,13 +56,7 @@ public class CreateRetrospectionRequest {
     @Schema(description = "수익률", example = "-15.67", requiredMode = RequiredMode.NOT_REQUIRED)
     private Double returnRate;
 
-    @Schema(description = "회고 내용", example = "이번 매도는 시장 상황을 잘 반영한 결정이었다.", requiredMode = RequiredMode.NOT_REQUIRED)
-    private String content;
-
     @Schema(description = "투자원칙 체크 목록", requiredMode = RequiredMode.NOT_REQUIRED)
     @Valid
     private List<PrincipleCheckRequest> principleChecks;
-
-    @Schema(description = "투자 감정", example = "CONFIDENCE", requiredMode = RequiredMode.NOT_REQUIRED)
-    private InvestmentEmotion emotion;
 }

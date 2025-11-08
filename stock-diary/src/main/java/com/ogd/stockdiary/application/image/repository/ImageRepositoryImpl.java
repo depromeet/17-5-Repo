@@ -1,5 +1,7 @@
 package com.ogd.stockdiary.application.image.repository;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Repository;
 
 import com.ogd.stockdiary.domain.image.entity.ImageMetadata;
@@ -16,5 +18,10 @@ public class ImageRepositoryImpl implements ImageRepository {
     @Override
     public ImageMetadata save(ImageMetadata imageMetadata) {
         return jpaImageMetadataRepository.save(imageMetadata);
+    }
+
+    @Override
+    public Optional<ImageMetadata> findById(Long id) {
+        return jpaImageMetadataRepository.findById(id);
     }
 }

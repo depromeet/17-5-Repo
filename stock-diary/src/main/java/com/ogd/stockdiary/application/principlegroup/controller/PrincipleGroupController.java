@@ -12,7 +12,10 @@ import com.ogd.stockdiary.application.principlegroup.dto.mapper.PrincipleGroupMa
 import com.ogd.stockdiary.application.principlegroup.dto.request.CreatePrincipleGroupRequest;
 import com.ogd.stockdiary.application.principlegroup.dto.request.ReorderPrincipleGroupsRequest;
 import com.ogd.stockdiary.application.principlegroup.dto.request.UpdatePrincipleGroupRequest;
+import com.ogd.stockdiary.application.principlegroup.dto.response.DefaultPrincipleGroupResponse;
 import com.ogd.stockdiary.application.principlegroup.dto.response.PrincipleGroupResponse;
+import com.ogd.stockdiary.application.principlegroup.dto.response.RecommendationsResponse;
+import com.ogd.stockdiary.application.principlegroup.dto.response.RecommendedPrincipleGroupResponse;
 import com.ogd.stockdiary.common.httpresponse.HttpApiResponse;
 import com.ogd.stockdiary.domain.investmentprinciple.entity.InvestmentPrinciple;
 import com.ogd.stockdiary.domain.investmentprinciple.entity.PrincipleType;
@@ -60,25 +63,30 @@ public class PrincipleGroupController {
         return HttpApiResponse.of(responses);
     }
 
-    @GetMapping("/recommendations")
-    @Operation(summary = "추천 투자원칙 그룹 목록 조회", description = "시스템의 추천 투자원칙 그룹 목록을 조회합니다.")
-    public HttpApiResponse<List<PrincipleGroupResponse>> getRecommendationPrincipleGroups() {
-        // userId가 0인 투자원칙 그룹들은 시스템 디폴트 투자원칙 그룹이다.
-        Long userId = 0L;
-
-        List<PrincipleGroup> principleGroups = principleGroupUseCase.getUserPrincipleGroups(userId, null);
-
-        List<PrincipleGroupResponse> responses = principleGroups.stream()
-            .sorted(Comparator.comparing(PrincipleGroup::getId).reversed())
+    @GetMapping("/systems")
+    @Operation(summary = "추천 및 기본 투자원칙 그룹 목록 조회", description = "시스템 추천 투자원칙 그룹과 기본 투자원칙 그룹 목록을 조회합니다.")
+    public HttpApiResponse<RecommendationsResponse> getRecommendationPrincipleGroups() {
+        // RECOMMEND 타입 그룹 조회
+        List<PrincipleGroup> recommendedGroups = principleGroupUseCase.getRecommendedPrincipleGroups();
+        List<RecommendedPrincipleGroupResponse> recommendedResponses = recommendedGroups.stream()
+            .sorted(Comparator.comparing(PrincipleGroup::getId))
             .map(
                 group -> {
-                    List<InvestmentPrinciple> principles = investmentPrincipleRepository.findByPrincipleGroupId(
-                        group.getId());
-                    return principleGroupMapper.toResponse(group, principles);
+                    int principleCount = investmentPrincipleRepository.findByPrincipleGroupId(
+                        group.getId()).size();
+                    return principleGroupMapper.toRecommendedResponse(group, principleCount);
                 })
             .collect(Collectors.toList());
 
-        return HttpApiResponse.of(responses);
+        // DEFAULT 타입 그룹 조회 (간소화된 정보만)
+        List<PrincipleGroup> defaultGroups = principleGroupUseCase.getDefaultPrincipleGroups();
+        List<DefaultPrincipleGroupResponse> defaultResponses = defaultGroups.stream()
+            .sorted(Comparator.comparing(PrincipleGroup::getId))
+            .map(principleGroupMapper::toDefaultResponse)
+            .collect(Collectors.toList());
+
+        RecommendationsResponse response = new RecommendationsResponse(recommendedResponses, defaultResponses);
+        return HttpApiResponse.of(response);
     }
 
     @GetMapping("/{groupId}")

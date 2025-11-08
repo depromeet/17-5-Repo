@@ -74,6 +74,7 @@ public class RetrospectionController {
     }
 
     @GetMapping()
+    @Operation(summary = "종목별 회고목록 조회", description = "유저의 종목별 회고 목록을 최신순으로 조회한다.")
     public HttpApiResponse<List<MarketGroupResponse>> getAllRetrospcetions() {
         // TODO: Spring Security에서 User 정보 가져오기
         Long userId = 1L;

@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Repository;
 
 import com.ogd.stockdiary.domain.principlegroup.entity.PrincipleGroup;
+import com.ogd.stockdiary.domain.principlegroup.entity.PrincipleGroupType;
 import com.ogd.stockdiary.domain.principlegroup.port.out.PrincipleGroupRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,21 @@ public class PrincipleGroupRepositoryImpl implements PrincipleGroupRepository {
     @Override
     public List<PrincipleGroup> findByUserId(Long userId) {
         return jpaPrincipleGroupRepository.findByUserId(userId);
+    }
+
+    @Override
+    public List<PrincipleGroup> findByUserIdAndGroupType(Long userId, PrincipleGroupType groupType) {
+        return jpaPrincipleGroupRepository.findByUserIdAndGroupType(userId, groupType);
+    }
+
+    @Override
+    public List<PrincipleGroup> findByGroupType(PrincipleGroupType groupType) {
+        return jpaPrincipleGroupRepository.findByGroupType(groupType);
+    }
+
+    @Override
+    public List<PrincipleGroup> findByGroupTypeWithUser(PrincipleGroupType groupType) {
+        return jpaPrincipleGroupRepository.findByGroupTypeWithUser(groupType);
     }
 
     @Override

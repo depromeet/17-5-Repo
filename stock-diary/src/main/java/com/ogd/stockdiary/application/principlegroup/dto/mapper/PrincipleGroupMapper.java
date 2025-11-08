@@ -10,7 +10,9 @@ import com.ogd.stockdiary.application.investmentprinciple.dto.response.Investmen
 import com.ogd.stockdiary.application.principlegroup.dto.request.CreatePrincipleGroupRequest;
 import com.ogd.stockdiary.application.principlegroup.dto.request.ReorderPrincipleGroupsRequest;
 import com.ogd.stockdiary.application.principlegroup.dto.request.UpdatePrincipleGroupRequest;
+import com.ogd.stockdiary.application.principlegroup.dto.response.DefaultPrincipleGroupResponse;
 import com.ogd.stockdiary.application.principlegroup.dto.response.PrincipleGroupResponse;
+import com.ogd.stockdiary.application.principlegroup.dto.response.RecommendedPrincipleGroupResponse;
 import com.ogd.stockdiary.domain.investmentprinciple.entity.InvestmentPrinciple;
 import com.ogd.stockdiary.domain.principlegroup.dto.CreatePrincipleGroupCommand;
 import com.ogd.stockdiary.domain.principlegroup.dto.ReorderPrincipleGroupsCommand;
@@ -63,5 +65,23 @@ public class PrincipleGroupMapper {
             principleGroup.getThumbnail(),
             principleGroup.getDisplayOrder(),
             principleResponses);
+    }
+
+    public RecommendedPrincipleGroupResponse toRecommendedResponse(
+        PrincipleGroup principleGroup, Integer principleCount) {
+        return new RecommendedPrincipleGroupResponse(
+            principleGroup.getId(),
+            principleGroup.getGroupName(),
+            principleGroup.getThumbnail(),
+            principleCount,
+            principleGroup.getUser().getNickname());
+    }
+
+    public DefaultPrincipleGroupResponse toDefaultResponse(PrincipleGroup principleGroup) {
+        return new DefaultPrincipleGroupResponse(
+            principleGroup.getId(),
+            principleGroup.getGroupName(),
+            principleGroup.getThumbnail(),
+            principleGroup.getPrincipleType());
     }
 }

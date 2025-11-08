@@ -87,6 +87,13 @@ public class KakaoOAuthClient implements OAuthClient {
     }
 
     @Override
+    public OAuthTokenResponse getTokenFromIdToken(String idToken) {
+        // iOS SDK에서 받은 idToken을 그대로 반환
+        // idToken만 있으면 사용자 정보 추출 가능
+        return new OAuthTokenResponse(null, null, idToken, null, null);
+    }
+
+    @Override
     @Cacheable(value = "oidcPublicKeys", key = "'kakao'")
     public OIDCPublicKeyList getPublicKeys() {
         return restClient
