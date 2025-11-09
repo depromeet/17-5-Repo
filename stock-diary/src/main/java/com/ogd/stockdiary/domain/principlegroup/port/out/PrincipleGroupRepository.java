@@ -18,6 +18,8 @@ public interface PrincipleGroupRepository {
 
     PrincipleGroup save(PrincipleGroup principleGroup);
 
+    Optional<PrincipleGroup> findById(Long groupId);
+
     Optional<PrincipleGroup> findByIdAndUserId(Long groupId, Long userId);
 
     void deleteByIdAndUserId(Long groupId, Long userId);

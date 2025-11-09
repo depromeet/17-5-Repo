@@ -92,11 +92,20 @@ public class PrincipleGroupService implements PrincipleGroupUseCase {
     @Override
     @Transactional(readOnly = true)
     public PrincipleGroup getPrincipleGroupById(Long groupId, Long userId) {
-        return principleGroupRepository
-            .findByIdAndUserId(groupId, userId)
+        PrincipleGroup principleGroup = principleGroupRepository
+            .findById(groupId)
             .orElseThrow(
                 () -> new ApplicationException(
                     CodeEnum.FRS_003, "투자원칙 그룹을 찾을 수 없습니다: " + groupId));
+
+        // 추천 및 기본 투자 그룹은 모든 사용자가 접근 가능
+        if (principleGroup.getGroupType() == PrincipleGroupType.USER
+            && !principleGroup.getUser().getId().equals(userId)) {
+            throw new ApplicationException(
+                CodeEnum.FRS_003, "해당 유저( " + userId + ")의 투자원칙 그룹을 찾을 수 없습니다: " + groupId);
+        }
+
+        return principleGroup;
     }
 
     @Override
