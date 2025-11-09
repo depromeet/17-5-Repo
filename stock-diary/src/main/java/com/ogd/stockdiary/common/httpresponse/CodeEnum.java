@@ -5,6 +5,9 @@ public enum CodeEnum {
 
     // OAuth 관련 에러
     AUTH_001("OAuth 토큰 교환 실패"), AUTH_002("OAuth 토큰 검증 실패"), AUTH_003("Refresh Token 만료"), AUTH_004("잘못된 Refresh Token"),
+
+    // JWT 토큰 관련 에러
+    ACCESS_TOKEN_EXPIRED("Access Token 만료"),
     ;
 
     private final String description;
