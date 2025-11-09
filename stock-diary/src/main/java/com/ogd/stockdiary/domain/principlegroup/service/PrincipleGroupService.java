@@ -105,6 +105,21 @@ public class PrincipleGroupService implements PrincipleGroupUseCase {
                 CodeEnum.FRS_003, "해당 유저( " + userId + ")의 투자원칙 그룹을 찾을 수 없습니다: " + groupId);
         }
 
+        String thumbnail = principleGroup.getThumbnail();
+        if (isNumeric(thumbnail)) {
+            try {
+                Long metaId = Long.parseLong(thumbnail);
+                ImageMetadata imageMetadata = imageRepository.findById(metaId)
+                    .orElseThrow(() -> new ApplicationException(
+                        CodeEnum.FRS_003, "이미지 메타데이터를 찾을 수 없습니다: " + metaId));
+
+                String downloadUrl = imageUseCase.getDownloadUrl(imageMetadata.getObjectKey());
+                principleGroup.updateThumbnail(downloadUrl);
+            } catch (NumberFormatException e) {
+                // 숫자가 아닌 경우 무시
+            }
+        }
+
         return principleGroup;
     }
 
