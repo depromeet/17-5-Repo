@@ -43,6 +43,11 @@ public class PrincipleGroupRepositoryImpl implements PrincipleGroupRepository {
     }
 
     @Override
+    public Optional<PrincipleGroup> findById(Long groupId) {
+        return jpaPrincipleGroupRepository.findById(groupId);
+    }
+
+    @Override
     public Optional<PrincipleGroup> findByIdAndUserId(Long groupId, Long userId) {
         return jpaPrincipleGroupRepository.findByIdAndUserId(groupId, userId);
     }
