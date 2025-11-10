@@ -205,7 +205,7 @@ public class AuthService {
     public void withdrawUser(Long userId, String authCode) {
         User user = userRepository
             .findById(userId)
-                .orElseThrow(() -> new ApplicationException(CodeEnum.FRS_003, "User not found"));
+            .orElseThrow(() -> new ApplicationException(CodeEnum.FRS_003, "User not found"));
 
         OAuthProvider provider = user.getOAuthProviderInfo().getOauthProvider();
 
