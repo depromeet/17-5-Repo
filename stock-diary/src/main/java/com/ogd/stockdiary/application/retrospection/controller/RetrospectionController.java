@@ -145,6 +145,6 @@ public class RetrospectionController {
 
         deleteMemoUseCase.deleteMemo(retrospectionId, memoId, userId);
 
-        return HttpApiResponse.of(null);
+        return HttpApiResponse.of("success");
     }
 }
