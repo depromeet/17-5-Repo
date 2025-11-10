@@ -14,6 +14,14 @@ public class HttpApiResponse<T> {
     private String message;
     T data;
 
+    public static <T> HttpApiResponse<T> ok() {
+        return HttpApiResponse.<T>builder()
+            .code(CodeEnum.RS_001)
+            .message(CodeEnum.RS_001.getDescription())
+            .data(null)
+            .build();
+    }
+
     public static <T> HttpApiResponse of(T data) {
         return HttpApiResponse.builder().code(CodeEnum.RS_001).data(data).message("").build();
     }

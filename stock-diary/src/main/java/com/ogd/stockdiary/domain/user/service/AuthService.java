@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ogd.stockdiary.application.user.repository.AppleAuthTokenRepository;
 import com.ogd.stockdiary.application.user.repository.RefreshTokenRepository;
 import com.ogd.stockdiary.application.user.repository.UserRepository;
+import com.ogd.stockdiary.common.httpresponse.CodeEnum;
 import com.ogd.stockdiary.domain.user.config.JwtProperties;
 import com.ogd.stockdiary.domain.user.entity.AppleAuthToken;
 import com.ogd.stockdiary.domain.user.entity.OAuthProvider;
@@ -19,6 +20,7 @@ import com.ogd.stockdiary.domain.user.port.out.oauth.OIDCPayload;
 import com.ogd.stockdiary.domain.user.port.out.oauth.OIDCPublicKeyList;
 import com.ogd.stockdiary.domain.user.port.out.oauth.client.OAuthClient;
 import com.ogd.stockdiary.domain.user.port.out.oauth.client.OAuthClientFactory;
+import com.ogd.stockdiary.exception.ApplicationException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -197,5 +199,47 @@ public class AuthService {
         // 사용자 삭제 또는 비활성화
         user.setIsDeleted(true);
         userRepository.save(user);
+    }
+
+    @Transactional
+    public void withdrawUser(Long userId, String authCode) {
+        User user = userRepository
+            .findById(userId)
+            .orElseThrow(() -> new ApplicationException(CodeEnum.FRS_003, "User not found"));
+
+        OAuthProvider provider = user.getOAuthProviderInfo().getOauthProvider();
+
+        // Provider별 소셜 연결 해제
+        if (provider == OAuthProvider.APPLE) {
+            // Apple: authCode 필수
+            if (authCode == null || authCode.isEmpty()) {
+                throw new ApplicationException(
+                    CodeEnum.FRS_005,
+                    "Apple 회원탈퇴 시 authCode는 필수입니다",
+                    null);
+            }
+
+            OAuthClient client = oAuthClientFactory.getClient(OAuthProvider.APPLE);
+            client.unlink(authCode);
+
+            // AppleAuthToken이 있으면 삭제
+            appleAuthTokenRepository.findById(userId)
+                .ifPresent(appleAuthTokenRepository::delete);
+
+        } else if (provider == OAuthProvider.KAKAO) {
+            // Kakao: subject로 연결 해제
+            OAuthClient client = oAuthClientFactory.getClient(OAuthProvider.KAKAO);
+            client.unlink(user.getOAuthProviderInfo().getSubject());
+        }
+        // GOOGLE 등 기타 provider는 소셜 API 호출 없이 DB만 처리
+
+        // JWT Refresh Token 삭제
+        refreshTokenRepository.deleteById(userId);
+
+        // Soft Delete
+        user.setIsDeleted(true);
+        userRepository.save(user);
+
+        log.info("User withdrawn successfully - userId: {}, provider: {}", userId, provider);
     }
 }
