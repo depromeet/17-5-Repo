@@ -4,8 +4,10 @@ import java.util.List;
 
 import jakarta.validation.Valid;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import com.ogd.stockdiary.application.config.security.AuthenticatedUser;
 import com.ogd.stockdiary.application.investmentprinciple.dto.mapper.InvestmentPrincipleMapper;
 import com.ogd.stockdiary.application.investmentprinciple.dto.request.CreateMultiplePrinciplesRequest;
 import com.ogd.stockdiary.application.investmentprinciple.dto.request.CreatePrincipleRequest;
@@ -36,10 +38,10 @@ public class InvestmentPrincipleController {
     @GetMapping
     @Operation(summary = "투자원칙 목록 조회", description = "사용자의 투자원칙을 조회합니다. type 파라미터로 BUY(매수) 또는 SELL(매도)를 지정할 수 있으며, 지정하지 않으면 전체 조회합니다.")
     public HttpApiResponse<List<InvestmentPrincipleResponse>> getUserPrinciples(
+        @AuthenticationPrincipal AuthenticatedUser user,
         @RequestParam(required = false) PrincipleType type) {
 
-        // TODO: Spring Security에서 User 정보 가져오기
-        Long userId = 1L; // 임시로 하드코딩
+        Long userId = user.getUserId();
 
         List<InvestmentPrinciple> principles = investmentPrincipleUseCase.getUserPrinciples(userId, type);
         List<InvestmentPrincipleResponse> responses = InvestmentPrincipleMapper.toResponseList(principles);
@@ -50,10 +52,10 @@ public class InvestmentPrincipleController {
     @PostMapping
     @Operation(summary = "투자원칙 생성", description = "새로운 투자원칙을 생성합니다. 그룹에 속한 원칙은 최대 5개까지만 가능합니다.")
     public HttpApiResponse<InvestmentPrincipleResponse> createPrinciple(
+        @AuthenticationPrincipal AuthenticatedUser user,
         @Valid @RequestBody CreatePrincipleRequest request) {
 
-        // TODO: Spring Security에서 User 정보 가져오기
-        Long userId = 1L; // 임시로 하드코딩
+        Long userId = user.getUserId();
 
         CreatePrincipleCommand command = InvestmentPrincipleMapper.toCommand(request, userId);
         InvestmentPrinciple principle = investmentPrincipleUseCase.createPrinciple(command);
@@ -65,10 +67,10 @@ public class InvestmentPrincipleController {
     @PostMapping("/multiple")
     @Operation(summary = "다중 투자원칙 생성", description = "투자원칙 그룹에 대해서 여러 개의 투자원칙을 한번에 생성합니다.")
     public HttpApiResponse<List<InvestmentPrincipleResponse>> createMultiplePrinciples(
+        @AuthenticationPrincipal AuthenticatedUser user,
         @Valid @RequestBody CreateMultiplePrinciplesRequest request) {
 
-        // TODO: Spring Security에서 User 정보 가져오기
-        Long userId = 1L; // 임시로 하드코딩
+        Long userId = user.getUserId();
 
         CreateMultiplePrinciplesCommand command = InvestmentPrincipleMapper.toCommand(request, userId);
         List<InvestmentPrinciple> principles = investmentPrincipleUseCase.createMultiplePrinciples(command);
@@ -80,10 +82,11 @@ public class InvestmentPrincipleController {
     @PatchMapping("/{principleId}")
     @Operation(summary = "투자원칙 수정", description = "투자원칙의 내용을 수정합니다.")
     public HttpApiResponse<InvestmentPrincipleResponse> updatePrinciple(
-        @PathVariable Long principleId, @Valid @RequestBody UpdatePrincipleRequest request) {
+        @AuthenticationPrincipal AuthenticatedUser user,
+        @PathVariable Long principleId,
+        @Valid @RequestBody UpdatePrincipleRequest request) {
 
-        // TODO: Spring Security에서 User 정보 가져오기
-        Long userId = 1L; // 임시로 하드코딩
+        Long userId = user.getUserId();
 
         UpdatePrincipleCommand command = InvestmentPrincipleMapper.toCommand(request, principleId, userId);
         InvestmentPrinciple principle = investmentPrincipleUseCase.updatePrinciple(command);
@@ -94,10 +97,11 @@ public class InvestmentPrincipleController {
 
     @DeleteMapping("/{principleId}")
     @Operation(summary = "투자원칙 삭제", description = "투자원칙을 삭제합니다.")
-    public HttpApiResponse<Void> deletePrinciple(@PathVariable Long principleId) {
+    public HttpApiResponse<Void> deletePrinciple(
+        @AuthenticationPrincipal AuthenticatedUser user,
+        @PathVariable Long principleId) {
 
-        // TODO: Spring Security에서 User 정보 가져오기
-        Long userId = 1L; // 임시로 하드코딩
+        Long userId = user.getUserId();
 
         investmentPrincipleUseCase.deletePrinciple(principleId, userId);
 
@@ -107,10 +111,10 @@ public class InvestmentPrincipleController {
     @PatchMapping("/reorder")
     @Operation(summary = "투자원칙 순서 변경", description = "여러 투자원칙의 표시 순서를 한번에 변경합니다.")
     public HttpApiResponse<Void> reorderPrinciples(
+        @AuthenticationPrincipal AuthenticatedUser user,
         @Valid @RequestBody ReorderPrinciplesRequest request) {
 
-        // TODO: Spring Security에서 User 정보 가져오기
-        Long userId = 1L; // 임시로 하드코딩
+        Long userId = user.getUserId();
 
         ReorderPrinciplesCommand command = InvestmentPrincipleMapper.toReorderCommand(request, userId);
         investmentPrincipleUseCase.reorderPrinciples(command);
