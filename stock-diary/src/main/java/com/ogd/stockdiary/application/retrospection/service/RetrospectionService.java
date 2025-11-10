@@ -250,7 +250,7 @@ public class RetrospectionService
 
     @Override
     @Transactional
-    public void updateMemo(Long retrospectionId, Long memoId, String content, Long userId) {
+    public Memo updateMemo(Long retrospectionId, Long memoId, String content, Long userId) {
         // 회고 권한 확인
         retrospectionRepository.findByIdAndUserId(retrospectionId, userId);
 
@@ -273,6 +273,8 @@ public class RetrospectionService
 
         // 메모 수정
         memo.updateContent(content);
+
+        return memo;
     }
 
     @Override
