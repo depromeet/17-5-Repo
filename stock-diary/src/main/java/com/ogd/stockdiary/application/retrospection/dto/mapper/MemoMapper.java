@@ -18,6 +18,7 @@ public class MemoMapper {
     public static MemoResponse toResponse(Memo memo) {
         return new MemoResponse(
             memo.getId(),
-            memo.getContent());
+            memo.getContent(),
+            memo.getCreatedAt());
     }
 }

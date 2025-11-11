@@ -31,6 +31,12 @@ public class GetRetrospectionResponse {
     @Schema(description = "시장 정보", example = "NASDAQ")
     private String market;
 
+    @Schema(description = "기업명", example = "삼성전자")
+    private String companyName;
+
+    @Schema(description = "기업 로고 URL", example = "https://example.com/logo.png")
+    private String companyLogo;
+
     @Schema(description = "주문 타입", example = "SELL")
     private OrderType orderType;
 
@@ -49,8 +55,11 @@ public class GetRetrospectionResponse {
     @Schema(description = "수익률", example = "-15.67")
     private Double returnRate;
 
-    @Schema(description = "투자 원칙 그룹 목록")
-    private List<PrincipleGroupWithChecksResponse> principleCheckGroups;
+    @Schema(description = "피드백 뱃지", example = "훌륭해요!")
+    private String badge;
+
+    @Schema(description = "투자 원칙 그룹")
+    private PrincipleGroupWithChecksResponse principleCheckGroup;
 
     @Schema(description = "메모 목록")
     private List<MemoResponse> memos;
