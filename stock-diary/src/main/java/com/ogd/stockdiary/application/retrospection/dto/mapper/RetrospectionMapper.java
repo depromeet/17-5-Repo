@@ -14,11 +14,13 @@ import com.ogd.stockdiary.application.retrospection.dto.response.MemoResponse;
 import com.ogd.stockdiary.domain.principlecheck.dto.PrincipleCheckCommand;
 import com.ogd.stockdiary.domain.principlecheck.entity.PrincipleCheck;
 import com.ogd.stockdiary.domain.principlegroup.entity.PrincipleGroup;
+import com.ogd.stockdiary.domain.report.entity.Feedback;
 import com.ogd.stockdiary.domain.retrospection.entity.Memo;
 import com.ogd.stockdiary.domain.retrospection.entity.Order;
 import com.ogd.stockdiary.domain.retrospection.entity.Retrospection;
 import com.ogd.stockdiary.domain.retrospection.port.in.CreateRetrospectionCommand;
 import com.ogd.stockdiary.domain.retrospection.port.in.GetRetrospectionCommand;
+import com.ogd.stockdiary.domain.stock.entity.Stock;
 import com.ogd.stockdiary.domain.user.entity.User;
 
 public class RetrospectionMapper {
@@ -90,13 +92,16 @@ public class RetrospectionMapper {
         List<PrincipleCheck> principleChecks,
         Map<Long, List<String>> imageUrlsMap,
         Map<Long, List<String>> linksMap,
-        List<Memo> memos) {
+        List<Memo> memos,
+        Stock stock,
+        String companyLogoUrl,
+        Feedback feedback) {
         // PrincipleCheck를 PrincipleGroup으로 그룹핑
         Map<PrincipleGroup, List<PrincipleCheck>> groupedChecks = principleChecks.stream()
             .collect(Collectors.groupingBy(pc -> pc.getPrinciple().getPrincipleGroup()));
 
-        // PrincipleGroupWithChecksResponse 리스트 생성 (groupId 순서로 정렬)
-        List<GetRetrospectionResponse.PrincipleGroupWithChecksResponse> principleCheckGroups = groupedChecks.entrySet()
+        // PrincipleGroupWithChecksResponse 생성 (첫 번째 그룹만 반환)
+        GetRetrospectionResponse.PrincipleGroupWithChecksResponse principleCheckGroup = groupedChecks.entrySet()
             .stream()
             .map(entry -> {
                 PrincipleGroup group = entry.getKey();
@@ -122,7 +127,8 @@ public class RetrospectionMapper {
                     checkResponses);
             })
             .sorted(Comparator.comparing(GetRetrospectionResponse.PrincipleGroupWithChecksResponse::getGroupId))
-            .toList();
+            .findFirst()
+            .orElse(null);
 
         List<MemoResponse> memoResponses = memos.stream()
             .map(MemoMapper::toResponse)
@@ -133,13 +139,16 @@ public class RetrospectionMapper {
             retrospection.getUser().getId(),
             retrospection.getSymbol(),
             retrospection.getMarket(),
+            stock != null ? stock.getCompanyName() : null,
+            companyLogoUrl,
             retrospection.getOrder().getOrderType(),
             retrospection.getOrder().getPrice(),
             retrospection.getOrder().getCurrency(),
             retrospection.getOrder().getVolume(),
             retrospection.getOrder().getOrderDate(),
             retrospection.getReturnRate(),
-            principleCheckGroups,
+            feedback != null ? feedback.getTitle() : null,
+            principleCheckGroup,
             memoResponses,
             retrospection.getCreatedAt(),
             retrospection.getUpdatedAt());
