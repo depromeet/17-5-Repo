@@ -31,7 +31,7 @@ public class CreatePrincipleGroupRequest {
     @NotNull(message = "투자원칙 타입은 필수입니다.")
     private PrincipleType principleType;
 
-    @Schema(description = "썸네일 (이모지 또는 이미지 URL)", example = "📈", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "썸네일 (이모지 또는 이미지 id)", example = "📈", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "썸네일은 필수입니다")
     private String thumbnail;
 

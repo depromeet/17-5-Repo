@@ -41,8 +41,31 @@ public class PrincipleGroupService implements PrincipleGroupUseCase {
     @Override
     @Transactional(readOnly = true)
     public List<PrincipleGroup> getUserPrincipleGroups(Long userId, PrincipleType type) {
-        return principleGroupRepository.findByUserIdAndGroupType(userId, PrincipleGroupType.USER).stream()
+        List<PrincipleGroup> groups = principleGroupRepository.findByUserIdAndGroupType(userId,
+            PrincipleGroupType.USER).stream()
             .filter(pg -> type == null || pg.getPrincipleType().equals(type)).toList();
+
+        groups.forEach(group -> {
+            String thumbnail = group.getThumbnail();
+            if (isNumeric(thumbnail)) {
+                try {
+                    Long metaId = Long.parseLong(thumbnail);
+                    ImageMetadata imageMetadata = imageRepository.findById(metaId)
+                        .orElseThrow(() -> new ApplicationException(
+                            CodeEnum.FRS_003, "이미지 메타데이터를 찾을 수 없습니다: " + metaId));
+
+                    String downloadUrl = imageUseCase.getDownloadUrl(imageMetadata.getObjectKey());
+                    group.updateThumbnail(downloadUrl);
+                    group.updateImageId(metaId);
+                } catch (NumberFormatException e) {
+                    // 숫자가 아닌 경우 무시
+                    group.updateImageId(null);
+                }
+            } else {
+                group.updateImageId(null);
+            }
+        });
+        return groups;
     }
 
     @Override
@@ -62,9 +85,13 @@ public class PrincipleGroupService implements PrincipleGroupUseCase {
 
                     String downloadUrl = imageUseCase.getDownloadUrl(imageMetadata.getObjectKey());
                     group.updateThumbnail(downloadUrl);
+                    group.updateImageId(metaId);
                 } catch (NumberFormatException e) {
                     // 숫자가 아닌 경우 무시
+                    group.updateImageId(null);
                 }
+            } else {
+                group.updateImageId(null);
             }
         });
 
@@ -115,9 +142,13 @@ public class PrincipleGroupService implements PrincipleGroupUseCase {
 
                 String downloadUrl = imageUseCase.getDownloadUrl(imageMetadata.getObjectKey());
                 principleGroup.updateThumbnail(downloadUrl);
+                principleGroup.updateImageId(metaId);
             } catch (NumberFormatException e) {
                 // 숫자가 아닌 경우 무시
+                principleGroup.updateImageId(null);
             }
+        } else {
+            principleGroup.updateImageId(null);
         }
 
         return principleGroup;

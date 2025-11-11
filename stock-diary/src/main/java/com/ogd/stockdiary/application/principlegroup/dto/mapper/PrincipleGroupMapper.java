@@ -63,6 +63,7 @@ public class PrincipleGroupMapper {
             principleGroup.getGroupName(),
             principleGroup.getPrincipleType(),
             principleGroup.getThumbnail(),
+            principleGroup.getImageId(),
             principleGroup.getDisplayOrder(),
             principleResponses);
     }
@@ -73,6 +74,7 @@ public class PrincipleGroupMapper {
             principleGroup.getId(),
             principleGroup.getGroupName(),
             principleGroup.getThumbnail(),
+            principleGroup.getImageId(),
             principleCount,
             principleGroup.getUser().getNickname());
     }

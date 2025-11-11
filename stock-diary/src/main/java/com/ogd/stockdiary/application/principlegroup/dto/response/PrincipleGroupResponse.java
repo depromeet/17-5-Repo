@@ -26,6 +26,9 @@ public class PrincipleGroupResponse {
     @Schema(description = "썸네일 (이모지 또는 이미지 URL)", example = "📈")
     private final String thumbnail;
 
+    @Schema(description = "이미지 메타데이터 ID (썸네일이 이미지인 경우)", example = "123")
+    private final Long imageId;
+
     @Schema(description = "그룹 표시 순서", example = "1")
     private final Integer displayOrder;
 
