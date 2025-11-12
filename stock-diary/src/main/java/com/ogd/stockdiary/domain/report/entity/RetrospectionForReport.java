@@ -1,13 +1,13 @@
 package com.ogd.stockdiary.domain.report.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
 
 import com.ogd.stockdiary.domain.retrospection.entity.Order;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "retrospections")

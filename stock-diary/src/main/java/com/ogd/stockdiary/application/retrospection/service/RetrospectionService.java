@@ -18,6 +18,7 @@ import com.ogd.stockdiary.application.retrospection.dto.response.MarketGroupResp
 import com.ogd.stockdiary.application.retrospection.dto.response.RetrospectionDetailResponse;
 import com.ogd.stockdiary.application.user.repository.UserRepository;
 import com.ogd.stockdiary.common.httpresponse.CodeEnum;
+import com.ogd.stockdiary.domain.fileclient.port.out.FileClientPort;
 import com.ogd.stockdiary.domain.image.entity.ImageMetadata;
 import com.ogd.stockdiary.domain.image.entity.ImageStatus;
 import com.ogd.stockdiary.domain.image.entity.PrincipleCheckImage;
@@ -65,6 +66,7 @@ public class RetrospectionService
     private final ImageUseCase imageUseCase;
     private final MemoRepository memoRepository;
     private final StockRepository stockRepository;
+    private final FileClientPort fileClientPort;
 
     @Override
     @Transactional
@@ -205,27 +207,36 @@ public class RetrospectionService
         List<Stock> stocks = stockRepository.findAllByCodeIn(symbol);
 
         // stock 정보를 Map 으로 변환
-        Map<String, String> stockByCompanyName = stocks.stream()
+        Map<String, Stock> stockByCompanyName = stocks.stream()
             .collect(Collectors.toMap(
-                stock -> (stock.getCode()), // 키: stock의 code
-                Stock::getCompanyName));
+                Stock::getCode, // 키: stock의 code
+                stock -> stock));
 
         // companyName 기준 회고 그룹화
-        Map<String, List<Retrospection>> retrospectionsByCompanyName = retrospections.stream()
+        Map<Stock, List<Retrospection>> retrospectionsByCompanyName = retrospections.stream()
             .collect(Collectors.groupingBy(retrospection
-            // 키: retrospection 의 symbol
-            -> stockByCompanyName.getOrDefault(retrospection.getSymbol(), retrospection.getSymbol())));
+            // 키: retrospection 의 symbol 에 해당하는 Stock 객체
+            -> stockByCompanyName.getOrDefault(retrospection.getSymbol(), new Stock())));
 
         // 응답 DTO 로 변환
         return retrospectionsByCompanyName.entrySet().stream()
             .map(entry -> {
+                Stock stock = entry.getKey();
                 List<RetrospectionDetailResponse> detailResponses = entry.getValue().stream()
                     .map(RetrospectionDetailResponse::fromEntity)
                     .sorted(Comparator.comparingLong(RetrospectionDetailResponse::id).reversed())
                     .toList();
 
+                String logo = null;
+                if (stock.getLogo() != null && !stock.getLogo().isEmpty()) {
+                    logo = fileClientPort.getDownloadPreSignedUrl(stock.getLogo(), 86400); // 24시간
+                }
+
                 return new MarketGroupResponse(
-                    entry.getKey(),
+                    stock.getCompanyName(),
+                    logo,
+                    stock.getCode(),
+                    stock.getMarket(),
                     detailResponses);
 
             })
