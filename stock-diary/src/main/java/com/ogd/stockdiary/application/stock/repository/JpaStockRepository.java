@@ -1,12 +1,14 @@
 package com.ogd.stockdiary.application.stock.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.ogd.stockdiary.domain.stock.entity.Market;
 import com.ogd.stockdiary.domain.stock.entity.Stock;
 
 @RequestMapping
@@ -26,4 +28,7 @@ public interface JpaStockRepository extends CrudRepository<Stock, Long> {
 
     @Query("SELECT s FROM Stock s WHERE s.code = :code")
     Stock findByCode(String code);
+
+    @Query("SELECT s FROM Stock s WHERE s.code = :code AND s.market = :market")
+    Optional<Stock> findByCodeAndMarket(String code, Market market);
 }

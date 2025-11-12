@@ -3,6 +3,7 @@ package com.ogd.stockdiary.application.retrospection.service;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -29,6 +30,8 @@ import com.ogd.stockdiary.domain.principlecheck.dto.PrincipleCheckCommand;
 import com.ogd.stockdiary.domain.principlecheck.entity.PrincipleCheck;
 import com.ogd.stockdiary.domain.principlecheck.entity.PrincipleCheckLink;
 import com.ogd.stockdiary.domain.principlecheck.port.out.PrincipleCheckRepository;
+import com.ogd.stockdiary.domain.report.entity.Feedback;
+import com.ogd.stockdiary.domain.report.port.out.FeedbackRepository;
 import com.ogd.stockdiary.domain.retrospection.entity.Memo;
 import com.ogd.stockdiary.domain.retrospection.entity.Retrospection;
 import com.ogd.stockdiary.domain.retrospection.port.in.*;
@@ -38,6 +41,7 @@ import com.ogd.stockdiary.domain.retrospection.port.in.GetRetrospectionCommand;
 import com.ogd.stockdiary.domain.retrospection.port.in.GetRetrospectionUseCase;
 import com.ogd.stockdiary.domain.retrospection.port.out.MemoRepository;
 import com.ogd.stockdiary.domain.retrospection.port.out.RetrospectionRepository;
+import com.ogd.stockdiary.domain.stock.entity.Market;
 import com.ogd.stockdiary.domain.stock.entity.Stock;
 import com.ogd.stockdiary.domain.stock.repository.StockRepository;
 import com.ogd.stockdiary.domain.user.entity.User;
@@ -67,6 +71,7 @@ public class RetrospectionService
     private final MemoRepository memoRepository;
     private final StockRepository stockRepository;
     private final FileClientPort fileClientPort;
+    private final FeedbackRepository feedbackRepository;
 
     @Override
     @Transactional
@@ -175,7 +180,28 @@ public class RetrospectionService
         // 메모 목록 조회 (최신순 정렬)
         List<Memo> memos = memoRepository.findByRetrospectionIdOrderByIdDesc(retrospectionId);
 
-        return RetrospectionMapper.toGetResponse(retrospection, principleChecks, imageUrlsMap, linksMap, memos);
+        // Stock 조회 (symbol과 market으로)
+        Stock stock = null;
+        String companyLogoUrl = null;
+        try {
+            Market market = Market.valueOf(retrospection.getMarket());
+            Optional<Stock> stockOptional = stockRepository.findByCodeAndMarket(retrospection.getSymbol(), market);
+            stock = stockOptional.orElse(null);
+
+            // Stock의 logo가 있으면 URL 생성
+            if (stock != null && stock.getLogo() != null) {
+                companyLogoUrl = imageUseCase.getDownloadUrl(stock.getLogo());
+            }
+        } catch (IllegalArgumentException e) {
+            // Market enum 변환 실패 시 stock은 null로 유지
+        }
+
+        // Feedback 조회
+        Optional<Feedback> feedbackOptional = feedbackRepository.findByRetrospectionId(retrospectionId);
+        Feedback feedback = feedbackOptional.orElse(null);
+
+        return RetrospectionMapper.toGetResponse(retrospection, principleChecks, imageUrlsMap, linksMap, memos, stock,
+            companyLogoUrl, feedback);
     }
 
     private List<String> getImageUrls(Long principleCheckId) {

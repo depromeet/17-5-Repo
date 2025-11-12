@@ -40,6 +40,9 @@ public class PrincipleGroup {
 
     private Integer displayOrder;
 
+    @Transient
+    private Long imageId;
+
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
@@ -85,5 +88,9 @@ public class PrincipleGroup {
 
     public void updateDisplayOrder(Integer displayOrder) {
         this.displayOrder = displayOrder;
+    }
+
+    public void updateImageId(Long imageId) {
+        this.imageId = imageId;
     }
 }

@@ -1,6 +1,7 @@
 package com.ogd.stockdiary.application.report.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
@@ -25,5 +26,10 @@ public class FeedbackRepositoryImpl implements FeedbackRepository {
 
     public List<Feedback> findAllByUserId(Long userId) {
         return jpaFeedbackRepository.findAllByUserId(userId);
+    }
+
+    @Override
+    public Optional<Feedback> findByRetrospectionId(Long retrospectionId) {
+        return jpaFeedbackRepository.findByRetrospectionId(retrospectionId);
     }
 }

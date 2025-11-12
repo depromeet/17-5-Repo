@@ -1,11 +1,13 @@
 package com.ogd.stockdiary.application.stock.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import com.ogd.stockdiary.common.httpresponse.SliceContent;
+import com.ogd.stockdiary.domain.stock.entity.Market;
 import com.ogd.stockdiary.domain.stock.entity.Stock;
 import com.ogd.stockdiary.domain.stock.repository.StockRepository;
 
@@ -48,6 +50,11 @@ public class StockRepositoryImpl implements StockRepository {
     @Override
     public Stock findByCode(String code) {
         return jpaStockRepository.findByCode(code);
+    }
+
+    @Override
+    public Optional<Stock> findByCodeAndMarket(String code, Market market) {
+        return jpaStockRepository.findByCodeAndMarket(code, market);
     }
 
     @Override
