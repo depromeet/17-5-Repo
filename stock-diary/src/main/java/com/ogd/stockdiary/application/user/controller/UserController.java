@@ -39,11 +39,8 @@ public class UserController {
         - Authorization 헤더에 Bearer 토큰 필요
         - 예: `Authorization: Bearer eyJhbGc...`
 
-        ### 파라미터
-        - authCode: Apple 사용자의 경우 필수, 기타 Provider는 선택
-
         ### 주의사항
-        - Apple: authCode를 사용하여 Apple 토큰 취소 (필수)
+        - Apple: 로그인 시 저장한 refresh_token으로 Apple 계정 연결 해제
         - Kakao: 카카오 연결 해제 API 호출
         - Google: DB만 처리 (소셜 API 호출 없음)
         """)
@@ -53,11 +50,9 @@ public class UserController {
     })
     @DeleteMapping
     public HttpApiResponse<Void> withdraw(
-        @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
-        @RequestParam(required = false) String authCode) {
-        log.info("User withdrawal requested - userId: {}, authCode provided: {}",
-            authenticatedUser.getUserId(), authCode != null);
-        authService.withdrawUser(authenticatedUser.getUserId(), authCode);
+        @AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
+        log.info("User withdrawal requested - userId: {}", authenticatedUser.getUserId());
+        authService.withdrawUser(authenticatedUser.getUserId());
         return HttpApiResponse.ok();
     }
 }
