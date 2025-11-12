@@ -5,7 +5,6 @@ import java.util.List;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ogd.stockdiary.application.report.dto.Request.CreateFeedbackRequest;
 import com.ogd.stockdiary.application.report.dto.Response.CreateFeedbackResponse;
 import com.ogd.stockdiary.domain.report.entity.Feedback;
 import com.ogd.stockdiary.domain.report.port.in.CreateFeedbackCommand;
@@ -13,8 +12,7 @@ import com.ogd.stockdiary.domain.report.port.in.GetFeedbackCommand;
 
 public class ReportMapper {
 
-    public static CreateFeedbackCommand toCommand(
-        CreateFeedbackRequest request, Long retrospectionId) {
+    public static CreateFeedbackCommand toCommand(Long retrospectionId) {
         return new CreateFeedbackCommand(retrospectionId);
     }
 
@@ -48,7 +46,7 @@ public class ReportMapper {
             feedback.getTitle(), keepList, improveList, nextTiimeList);
     }
 
-    public static GetFeedbackCommand toCommand(Long userId) {
+    public static GetFeedbackCommand toFeedbackCommand(Long userId) {
         return new GetFeedbackCommand(userId);
     }
 }

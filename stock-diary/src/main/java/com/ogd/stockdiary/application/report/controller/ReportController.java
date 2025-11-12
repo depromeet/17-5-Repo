@@ -2,11 +2,12 @@ package com.ogd.stockdiary.application.report.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.ogd.stockdiary.application.config.security.AuthenticatedUser;
 import com.ogd.stockdiary.application.report.dto.Mapper.ReportMapper;
-import com.ogd.stockdiary.application.report.dto.Request.CreateFeedbackRequest;
 import com.ogd.stockdiary.application.report.dto.Response.BadgeResponse;
 import com.ogd.stockdiary.application.report.dto.Response.CreateFeedbackResponse;
 import com.ogd.stockdiary.common.httpresponse.HttpApiResponse;
@@ -17,6 +18,7 @@ import com.ogd.stockdiary.domain.report.port.out.FeedbackRepository;
 import com.ogd.stockdiary.domain.report.usecase.CreateFeedbackUseCase;
 import com.ogd.stockdiary.domain.report.usecase.GetFeedbackUsecase;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -28,16 +30,13 @@ public class ReportController {
     private final GetFeedbackUsecase getFeedbackUsecase;
 
     @PostMapping("/{retrospectionId}/feedback")
+    @Operation(summary = "피드백 생성", description = "회고에 대한 피드백을 생성합니다.")
     public ResponseEntity<HttpApiResponse<CreateFeedbackResponse>> CreateFeedback(
-        @RequestBody(required = false) CreateFeedbackRequest request,
         @PathVariable Long retrospectionId)
         throws JsonProcessingException {
 
-        // TODO: Spring Security에서 User 정보 가져오기
-        Long userId = 1L; // 임시로 하드코딩
-
         // 요청을 command 객체로 변환
-        CreateFeedbackCommand command = ReportMapper.toCommand(request, retrospectionId);
+        CreateFeedbackCommand command = ReportMapper.toCommand(retrospectionId);
         // 서비스에 전달 후 피드백 엔티티 반환
         Feedback feedback = createFeedbackUseCase.createFeedbackUseCase(command);
         // 응답용 DTO
@@ -54,12 +53,12 @@ public class ReportController {
     }
 
     @GetMapping()
-    public ResponseEntity<HttpApiResponse<BadgeResponse>> GetAllFeedback() {
+    @Operation(summary = "홈화면 피드백 뱃지 조회", description = "홈화면에서 뱃지 개수를 조회합니다.")
+    public ResponseEntity<HttpApiResponse<BadgeResponse>> GetAllFeedback(
+        @AuthenticationPrincipal AuthenticatedUser user) {
+        Long userId = user.getUserId();
 
-        // TODO: Spring Security에서 User 정보 가져오기
-        Long userId = 1L; // 임시로 하드코딩
-
-        GetFeedbackCommand command = ReportMapper.toCommand(userId);
+        GetFeedbackCommand command = ReportMapper.toFeedbackCommand(userId);
 
         BadgeResponse badgeResponse = getFeedbackUsecase.getAllFeedbackUsecase(command);
 

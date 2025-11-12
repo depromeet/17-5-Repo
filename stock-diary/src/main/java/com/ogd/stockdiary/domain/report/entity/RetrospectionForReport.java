@@ -1,5 +1,7 @@
 package com.ogd.stockdiary.domain.report.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
 
 import com.ogd.stockdiary.domain.retrospection.entity.Order;
@@ -28,10 +30,14 @@ public class RetrospectionForReport {
     @Embedded
     private Order order;
 
-    public RetrospectionForReport(String symbol, String market, Order order, String content) {
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
+    public RetrospectionForReport(String symbol, String market, Order order, String content, LocalDateTime createdAt) {
         this.symbol = symbol;
         this.market = market;
         this.order = order;
         this.content = content;
+        this.createdAt = createdAt;
     }
 }
