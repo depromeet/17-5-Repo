@@ -1,6 +1,7 @@
 package com.ogd.stockdiary.application.report.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +66,7 @@ public class ReportService implements CreateFeedbackUseCase, GetFeedbackUsecase 
         BigDecimal price = retrospectionForReport.getOrder().getPrice();
         Integer volume = retrospectionForReport.getOrder().getVolume();
         OrderType orderType = retrospectionForReport.getOrder().getOrderType();
+        LocalDateTime createdAt = retrospectionForReport.getCreatedAt();
 
         List<ReportSourceData> reportSourceData = reportDataPort.findByRetrospectionId(command.retrospectionId());
 
@@ -81,6 +83,7 @@ public class ReportService implements CreateFeedbackUseCase, GetFeedbackUsecase 
             })
             .toList();
 
+        // 프롬프트에 JSON 포맷으로 전달
         String principleCheckAndImage = objectMapper.writeValueAsString(checks);
 
         // 원칙 상태 카운트 집계
@@ -100,6 +103,7 @@ public class ReportService implements CreateFeedbackUseCase, GetFeedbackUsecase 
                 Order Price: {price}
                 Order Volume: {volume}
                 Order Type: {orderType}
+                Created At: {createdAt}
 
                 --- User Reflection ---
                 Principle Check and Image Data: {principleCheckAndImage}
@@ -118,6 +122,7 @@ public class ReportService implements CreateFeedbackUseCase, GetFeedbackUsecase 
         variables.put("price", price);
         variables.put("volume", volume);
         variables.put("orderType", orderType);
+        variables.put("createdAt", createdAt);
 
         // 플레이스 홀더 넣은 유저 메시지 구성
         Message userMessage = promptTemplate.createMessage(variables);

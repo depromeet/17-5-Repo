@@ -7,6 +7,8 @@ import com.ogd.stockdiary.domain.retrospection.entity.Order;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "retrospections")
 @NoArgsConstructor
@@ -28,10 +30,14 @@ public class RetrospectionForReport {
     @Embedded
     private Order order;
 
-    public RetrospectionForReport(String symbol, String market, Order order, String content) {
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
+    public RetrospectionForReport(String symbol, String market, Order order, String content, LocalDateTime createdAt) {
         this.symbol = symbol;
         this.market = market;
         this.order = order;
         this.content = content;
+        this.createdAt = createdAt;
     }
 }
