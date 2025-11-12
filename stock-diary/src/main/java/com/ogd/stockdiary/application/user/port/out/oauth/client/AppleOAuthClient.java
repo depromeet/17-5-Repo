@@ -144,13 +144,22 @@ public class AppleOAuthClient implements OAuthClient {
         params.add("token", identifier);
         params.add("token_type_hint", "refresh_token");
 
-        restClient
-            .post()
-            .uri(APPLE_AUTH_URL + REVOKE_ENDPOINT)
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-            .body(params)
-            .retrieve()
-            .toBodilessEntity();
+        try {
+            restClient
+                .post()
+                .uri(APPLE_AUTH_URL + REVOKE_ENDPOINT)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(params)
+                .retrieve()
+                .toBodilessEntity();
+            log.info("Apple token revoked successfully");
+        } catch (HttpClientErrorException e) {
+            log.error("Apple token revoke failed: {}", e.getResponseBodyAsString());
+            throw new ApplicationException(
+                CodeEnum.AUTH_001,
+                "Apple 토큰 취소 실패",
+                parseOAuthError(e, "APPLE"));
+        }
     }
 
     private String generateClientSecret(String clientId) {
