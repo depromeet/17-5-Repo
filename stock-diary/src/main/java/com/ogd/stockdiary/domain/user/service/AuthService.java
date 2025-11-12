@@ -37,6 +37,7 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtProperties jwtProperties;
+    private final com.ogd.stockdiary.application.user.port.out.oauth.client.AppleOAuthClient appleOAuthClient;
 
     @Transactional
     public AuthResult socialLogin(
@@ -202,7 +203,7 @@ public class AuthService {
     }
 
     @Transactional
-    public void withdrawUser(Long userId, String authCode) {
+    public void withdrawUser(Long userId) {
         User user = userRepository
             .findById(userId)
             .orElseThrow(() -> new ApplicationException(CodeEnum.FRS_003, "User not found"));
@@ -211,20 +212,18 @@ public class AuthService {
 
         // Provider별 소셜 연결 해제
         if (provider == OAuthProvider.APPLE) {
-            // Apple: authCode 필수
-            if (authCode == null || authCode.isEmpty()) {
-                throw new ApplicationException(
-                    CodeEnum.FRS_005,
-                    "Apple 회원탈퇴 시 authCode는 필수입니다",
-                    null);
-            }
+            // Apple: 저장된 refresh token으로 연결 해제
+            AppleAuthToken appleAuthToken = appleAuthTokenRepository
+                .findById(userId)
+                .orElseThrow(
+                    () -> new ApplicationException(
+                        CodeEnum.FRS_005,
+                        "Apple auth token not found",
+                        null));
 
             OAuthClient client = oAuthClientFactory.getClient(OAuthProvider.APPLE);
-            client.unlink(authCode);
-
-            // AppleAuthToken이 있으면 삭제
-            appleAuthTokenRepository.findById(userId)
-                .ifPresent(appleAuthTokenRepository::delete);
+            client.unlink(appleAuthToken.getRefreshToken());
+            appleAuthTokenRepository.delete(appleAuthToken);
 
         } else if (provider == OAuthProvider.KAKAO) {
             // Kakao: subject로 연결 해제
