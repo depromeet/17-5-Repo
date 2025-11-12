@@ -51,9 +51,9 @@ public class UserController {
     @DeleteMapping
     public HttpApiResponse<Void> withdraw(
         @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
-        @RequestParam String authCode
-    ) {
-        log.info("User withdrawal requested - userId: {}", authenticatedUser.getUserId());
+        @RequestParam(required = false) String authCode) {
+        log.info("User withdrawal requested - userId: {}, authCode provided: {}",
+            authenticatedUser.getUserId(), authCode != null);
         authService.withdrawUser(authenticatedUser.getUserId());
         return HttpApiResponse.ok();
     }
