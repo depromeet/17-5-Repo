@@ -30,7 +30,7 @@ public class User {
     @Column(nullable = false, length = 100)
     private String nickname;
 
-    @Column(nullable = false, unique = true, length = 255)
+    @Column(nullable = false, length = 255)
     private String email;
 
     @Column(name = "profile_image_url", length = 500)

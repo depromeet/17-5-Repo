@@ -54,7 +54,7 @@ public class OIDCTokenVerification {
                 claims.getSubject(),
                 claims.get("email", String.class),
                 claims.get("picture", String.class),
-                claims.get("name", String.class));
+                claims.get("nickname", String.class));
 
         } catch (ExpiredJwtException e) {
             log.error("ID token has expired", e);
