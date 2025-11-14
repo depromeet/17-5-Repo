@@ -6,8 +6,10 @@ import java.util.stream.Collectors;
 
 import jakarta.validation.Valid;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import com.ogd.stockdiary.application.config.security.AuthenticatedUser;
 import com.ogd.stockdiary.application.principlegroup.dto.mapper.PrincipleGroupMapper;
 import com.ogd.stockdiary.application.principlegroup.dto.request.CreatePrincipleGroupRequest;
 import com.ogd.stockdiary.application.principlegroup.dto.request.ReorderPrincipleGroupsRequest;
@@ -43,10 +45,10 @@ public class PrincipleGroupController {
     @GetMapping
     @Operation(summary = "투자원칙 그룹 목록 조회", description = "사용자의 모든 투자원칙 그룹과 속한 원칙들을 조회합니다.")
     public HttpApiResponse<List<PrincipleGroupResponse>> getUserPrincipleGroups(
+        @AuthenticationPrincipal AuthenticatedUser user,
         @RequestParam(required = false) PrincipleType type) {
 
-        // TODO: Spring Security에서 User 정보 가져오기
-        Long userId = 1L; // 임시로 하드코딩
+        Long userId = user.getUserId();
 
         List<PrincipleGroup> principleGroups = principleGroupUseCase.getUserPrincipleGroups(userId, type);
 
@@ -92,10 +94,10 @@ public class PrincipleGroupController {
     @GetMapping("/{groupId}")
     @Operation(summary = "투자원칙 그룹 조회", description = "특정 투자원칙 그룹과 속한 원칙들을 조회합니다.")
     public HttpApiResponse<PrincipleGroupResponse> getPrincipleGroupById(
+        @AuthenticationPrincipal AuthenticatedUser user,
         @PathVariable Long groupId) {
 
-        // TODO: Spring Security에서 User 정보 가져오기
-        Long userId = 1L; // 임시로 하드코딩
+        Long userId = user.getUserId();
 
         PrincipleGroup principleGroup = principleGroupUseCase.getPrincipleGroupById(groupId, userId);
 
@@ -109,10 +111,10 @@ public class PrincipleGroupController {
     @PostMapping
     @Operation(summary = "투자원칙 그룹 생성", description = "새로운 투자원칙 그룹을 생성합니다. principles가 있으면 함께 생성됩니다. (최대 5개)")
     public HttpApiResponse<PrincipleGroupResponse> createPrincipleGroup(
+        @AuthenticationPrincipal AuthenticatedUser user,
         @Valid @RequestBody CreatePrincipleGroupRequest request) {
 
-        // TODO: Spring Security에서 User 정보 가져오기
-        Long userId = 1L; // 임시로 하드코딩
+        Long userId = user.getUserId();
 
         CreatePrincipleGroupCommand command = principleGroupMapper.toCommand(request, userId);
         PrincipleGroup principleGroup = principleGroupUseCase.createPrincipleGroup(command);
@@ -127,10 +129,11 @@ public class PrincipleGroupController {
     @PatchMapping("/{groupId}")
     @Operation(summary = "투자원칙 그룹 수정", description = "투자원칙 그룹의 이름을 수정합니다.")
     public HttpApiResponse<PrincipleGroupResponse> updatePrincipleGroup(
-        @PathVariable Long groupId, @Valid @RequestBody UpdatePrincipleGroupRequest request) {
+        @AuthenticationPrincipal AuthenticatedUser user,
+        @PathVariable Long groupId,
+        @Valid @RequestBody UpdatePrincipleGroupRequest request) {
 
-        // TODO: Spring Security에서 User 정보 가져오기
-        Long userId = 1L; // 임시로 하드코딩
+        Long userId = user.getUserId();
 
         UpdatePrincipleGroupCommand command = principleGroupMapper.toCommand(request, groupId, userId);
         PrincipleGroup principleGroup = principleGroupUseCase.updatePrincipleGroup(command);
@@ -144,10 +147,11 @@ public class PrincipleGroupController {
 
     @DeleteMapping("/{groupId}")
     @Operation(summary = "투자원칙 그룹 삭제", description = "투자원칙 그룹과 해당 그룹에 속한 모든 원칙들을 삭제합니다.")
-    public HttpApiResponse<Void> deletePrincipleGroup(@PathVariable Long groupId) {
+    public HttpApiResponse<Void> deletePrincipleGroup(
+        @AuthenticationPrincipal AuthenticatedUser user,
+        @PathVariable Long groupId) {
 
-        // TODO: Spring Security에서 User 정보 가져오기
-        Long userId = 1L; // 임시로 하드코딩
+        Long userId = user.getUserId();
 
         principleGroupUseCase.deletePrincipleGroup(groupId, userId);
 
@@ -157,10 +161,10 @@ public class PrincipleGroupController {
     @PatchMapping("/reorder")
     @Operation(summary = "투자원칙 그룹 순서 변경", description = "여러 투자원칙 그룹의 표시 순서를 한번에 변경합니다.")
     public HttpApiResponse<Void> reorderPrincipleGroups(
+        @AuthenticationPrincipal AuthenticatedUser user,
         @Valid @RequestBody ReorderPrincipleGroupsRequest request) {
 
-        // TODO: Spring Security에서 User 정보 가져오기
-        Long userId = 1L; // 임시로 하드코딩
+        Long userId = user.getUserId();
 
         ReorderPrincipleGroupsCommand command = principleGroupMapper.toReorderCommand(request, userId);
         principleGroupUseCase.reorderPrincipleGroups(command);
