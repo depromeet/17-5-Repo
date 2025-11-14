@@ -38,6 +38,11 @@ public class InvestmentPrincipleRepositoryImpl implements InvestmentPrincipleRep
     }
 
     @Override
+    public Optional<InvestmentPrinciple> findById(Long principleId) {
+        return jpaInvestmentPrincipleRepository.findById(principleId);
+    }
+
+    @Override
     public Optional<InvestmentPrinciple> findByIdAndUserId(Long principleId, Long userId) {
         return jpaInvestmentPrincipleRepository.findByIdAndUserId(principleId, userId);
     }
