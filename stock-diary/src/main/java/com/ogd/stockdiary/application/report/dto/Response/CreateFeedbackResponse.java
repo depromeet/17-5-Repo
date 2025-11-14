@@ -5,11 +5,16 @@ import java.util.List;
 
 import com.ogd.stockdiary.domain.retrospection.entity.OrderType;
 
+import lombok.Builder;
+
+@Builder
 public record CreateFeedbackResponse(
+    String companyName,
     String symbol,
     BigDecimal price,
     Integer volume,
     OrderType orderType,
+    String companyLogo,
 
     long keptCount,
     long neutralCount,

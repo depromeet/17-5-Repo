@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -24,12 +25,13 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ogd.stockdiary.application.report.dto.Response.*;
+import com.ogd.stockdiary.application.report.dto.Response.BadgeResponse;
+import com.ogd.stockdiary.application.report.dto.Response.LlmResponse;
 import com.ogd.stockdiary.domain.analysis.port.PromptLoader;
+import com.ogd.stockdiary.domain.fileclient.port.out.FileClientPort;
 import com.ogd.stockdiary.domain.principlecheck.entity.PrincipleCheckStatus;
 import com.ogd.stockdiary.domain.report.entity.Feedback;
 import com.ogd.stockdiary.domain.report.entity.RetrospectionForReport;
-import com.ogd.stockdiary.domain.report.port.in.CreateFeedbackCommand;
-import com.ogd.stockdiary.domain.report.port.in.GetFeedbackCommand;
 import com.ogd.stockdiary.domain.report.port.out.FeedbackRepository;
 import com.ogd.stockdiary.domain.report.port.out.ReportDataPort;
 import com.ogd.stockdiary.domain.report.port.out.ReportPromptLoader;
@@ -40,6 +42,9 @@ import com.ogd.stockdiary.domain.report.vo.ReportSourceData;
 import com.ogd.stockdiary.domain.retrospection.entity.OrderType;
 import com.ogd.stockdiary.domain.retrospection.entity.Retrospection;
 import com.ogd.stockdiary.domain.retrospection.port.out.RetrospectionRepository;
+import com.ogd.stockdiary.domain.stock.entity.Market;
+import com.ogd.stockdiary.domain.stock.entity.Stock;
+import com.ogd.stockdiary.domain.stock.repository.StockRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -55,24 +60,27 @@ public class ReportService implements CreateFeedbackUseCase, GetFeedbackUsecase 
     private final ObjectMapper objectMapper;
     private final ReportDataPort reportDataPort;
     private final PromptLoader promptLoader;
+    private final StockRepository stockRepository;
+    private final FileClientPort fileClientPort;
 
     @Override
     @Transactional
-    public Feedback createFeedbackUseCase(CreateFeedbackCommand command)
+    public CreateFeedbackResponse createFeedback(Long retrospectionId)
         throws JsonProcessingException {
 
-        Retrospection retrospection = retrospectionRepository.getById(command.retrospectionId());
+        Retrospection retrospection = retrospectionRepository.getById(retrospectionId);
 
         RetrospectionForReport retrospectionForReport = retrospectionForReportRepository
-            .getById(command.retrospectionId());
+            .getById(retrospectionId);
 
         String symbol = retrospectionForReport.getSymbol();
+        Market market = Market.valueOf(retrospectionForReport.getMarket());
         BigDecimal price = retrospectionForReport.getOrder().getPrice();
         Integer volume = retrospectionForReport.getOrder().getVolume();
         OrderType orderType = retrospectionForReport.getOrder().getOrderType();
         LocalDate date = retrospectionForReport.getCreatedAt().toLocalDate();
 
-        List<ReportSourceData> reportSourceData = reportDataPort.findByRetrospectionId(command.retrospectionId());
+        List<ReportSourceData> reportSourceData = reportDataPort.findByRetrospectionId(retrospectionId);
 
         // null 허용 위해서 해시맵 사용
         List<Map<String, Object>> checks = reportSourceData.stream()
@@ -118,6 +126,7 @@ public class ReportService implements CreateFeedbackUseCase, GetFeedbackUsecase 
             .neutralCount(neutralCount)
             .notKeptCount(notKeptCount)
             .symbol(symbol)
+            .market(market)
             .price(price)
             .orderType(orderType)
             .volume(volume)
@@ -126,8 +135,31 @@ public class ReportService implements CreateFeedbackUseCase, GetFeedbackUsecase 
         // 저장
         feedbackRepository.save(feedback);
 
-        // 반환
-        return feedback;
+        // 응답 생성 (symbol + market으로 stock 조회)
+        Optional<Stock> stockOptional = stockRepository.findByCodeAndMarket(symbol, market);
+        Stock stock = stockOptional.orElse(null);
+
+        String logoUrl = (stock != null && stock.getLogo() != null)
+            ? fileClientPort.getDownloadPreSignedUrl(stock.getLogo(), 86400)
+            : null;
+
+        String companyName = stock != null ? stock.getCompanyName() : null;
+
+        return CreateFeedbackResponse.builder()
+            .symbol(symbol)
+            .companyName(companyName)
+            .price(price)
+            .volume(volume)
+            .orderType(orderType)
+            .companyLogo(logoUrl)
+            .keptCount(keptCount)
+            .neutralCount(neutralCount)
+            .notKeptCount(notKeptCount)
+            .badge(llmResponse.badge())
+            .keep(llmResponse.keep())
+            .fix(llmResponse.fix())
+            .next(llmResponse.next())
+            .build();
 
     }
 
@@ -491,8 +523,64 @@ public class ReportService implements CreateFeedbackUseCase, GetFeedbackUsecase 
     }
 
     @Override
-    public BadgeResponse getAllFeedbackUsecase(GetFeedbackCommand command) {
-        List<Feedback> allFeedback = feedbackRepository.findAllByUserId(command.userId());
+    public CreateFeedbackResponse getFeedbackByRetrospectionId(Long retrospectionId) throws JsonProcessingException {
+        Feedback feedback = feedbackRepository.findByRetrospectionId(retrospectionId)
+            .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("해당 회고에 대한 피드백을 찾을 수 없습니다."));
+
+        return convertToResponse(feedback);
+    }
+
+    private CreateFeedbackResponse convertToResponse(Feedback feedback) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+
+        // JSON 파싱
+        List<String> keepList = mapper.readValue(feedback.getKeep(),
+            new com.fasterxml.jackson.core.type.TypeReference<List<String>>() {
+            });
+        List<String> improveList = mapper.readValue(feedback.getImprove(),
+            new com.fasterxml.jackson.core.type.TypeReference<List<String>>() {
+            });
+        List<String> nextTimeList = mapper.readValue(feedback.getNextTime(),
+            new com.fasterxml.jackson.core.type.TypeReference<List<String>>() {
+            });
+
+        // symbol + market으로 stock 조회해서 logo 가져오기
+        String logoUrl = null;
+        String companyName = feedback.getSymbol();
+
+        if (feedback.getSymbol() != null && feedback.getMarket() != null) {
+            Optional<Stock> stockOptional = stockRepository.findByCodeAndMarket(feedback.getSymbol(),
+                feedback.getMarket());
+
+            if (stockOptional.isPresent()) {
+                Stock stock = stockOptional.get();
+                companyName = stock.getCompanyName();
+                if (stock.getLogo() != null) {
+                    logoUrl = fileClientPort.getDownloadPreSignedUrl(stock.getLogo(), 86400);
+                }
+            }
+        }
+
+        return CreateFeedbackResponse.builder()
+            .symbol(feedback.getSymbol())
+            .companyName(companyName)
+            .price(feedback.getPrice())
+            .volume(feedback.getVolume())
+            .orderType(feedback.getOrderType())
+            .companyLogo(logoUrl)
+            .keptCount(feedback.getKeptCount())
+            .neutralCount(feedback.getNeutralCount())
+            .notKeptCount(feedback.getNotKeptCount())
+            .badge(feedback.getTitle())
+            .keep(keepList)
+            .fix(improveList)
+            .next(nextTimeList)
+            .build();
+    }
+
+    @Override
+    public BadgeResponse getAllFeedbackUsecase(Long userId) {
+        List<Feedback> allFeedback = feedbackRepository.findAllByUserId(userId);
 
         Map<String, Long> badgeCounts = allFeedback.stream()
             .collect(Collectors.groupingBy(Feedback::getTitle, Collectors.counting()));
@@ -513,9 +601,7 @@ public class ReportService implements CreateFeedbackUseCase, GetFeedbackUsecase 
             percentage = (int) Math.round(tempPercentage);
         }
 
-        BadgeResponse badgeResponse = new BadgeResponse(hedge, bronze, silver, gold, percentage);
-
-        return badgeResponse;
+        return new BadgeResponse(hedge, bronze, silver, gold, percentage);
 
     }
 }
