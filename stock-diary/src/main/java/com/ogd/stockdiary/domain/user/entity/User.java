@@ -1,6 +1,7 @@
 package com.ogd.stockdiary.domain.user.entity;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -17,7 +18,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", uniqueConstraints = {
+    @jakarta.persistence.UniqueConstraint(columnNames = {"email", "subject"})
+})
 @Getter
 @NoArgsConstructor
 public class User {
@@ -69,5 +72,14 @@ public class User {
         this.email = email;
         this.profileImageUrl = profileImageUrl;
         this.oAuthProviderInfo = oAuthProviderInfo;
+    }
+
+    public void delete() {
+        // Subject 변경 (재가입 가능하도록)
+        String deletedSubject = "deleted_" + UUID.randomUUID() + "_" + this.oAuthProviderInfo.getSubject();
+        this.oAuthProviderInfo.setSubject(deletedSubject);
+
+        // Soft Delete
+        this.isDeleted = true;
     }
 }

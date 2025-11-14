@@ -197,8 +197,8 @@ public class AuthService {
             client.unlink(user.getOAuthProviderInfo().getSubject());
         }
 
-        // 사용자 삭제 또는 비활성화
-        user.setIsDeleted(true);
+        // 사용자 삭제
+        user.delete();
         userRepository.save(user);
     }
 
@@ -235,8 +235,8 @@ public class AuthService {
         // JWT Refresh Token 삭제
         refreshTokenRepository.deleteById(userId);
 
-        // Soft Delete
-        user.setIsDeleted(true);
+        // 사용자 삭제
+        user.delete();
         userRepository.save(user);
 
         log.info("User withdrawn successfully - userId: {}, provider: {}", userId, provider);
