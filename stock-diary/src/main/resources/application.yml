@@ -14,7 +14,7 @@ kakao:
   admin-key: ${KAKAO_ADMIN_KEY}
 
 jwt:
-  secret-key: ${JWT_SECRET_KEY:wq8B+vdeTI+E7e2LE3Y2Cuo8taVY9Gf9hGs74lBz4RxKqHsqcyqt4kFRI/rHiWhaxPWfZgmPAkR6Pxy7ptNkWQ==}
+  secret-key: ${JWT_SECRET_KEY}
   access-token-expiration: 120000       # 2분초 (밀리초)
   refresh-token-expiration: 12000000      # 200분 (밀리초)
 
