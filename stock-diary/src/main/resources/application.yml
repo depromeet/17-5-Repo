@@ -55,6 +55,15 @@ spring:
     console:
       enabled: true
 
+  cache:
+    cache-names:
+      - marketData
+      - technicalAnalysis
+      - fundamentalAnalysis
+    caffeine:
+      spec: expiredAfterWrite=1h
+
+
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
