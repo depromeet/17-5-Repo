@@ -1,5 +1,7 @@
 package com.ogd.stockdiary.application.report.controller;
 
+import jakarta.persistence.EntityNotFoundException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,6 +17,7 @@ import com.ogd.stockdiary.domain.report.entity.Feedback;
 import com.ogd.stockdiary.domain.report.port.in.CreateFeedbackCommand;
 import com.ogd.stockdiary.domain.report.port.in.GetFeedbackCommand;
 import com.ogd.stockdiary.domain.report.port.out.FeedbackRepository;
+import com.ogd.stockdiary.domain.report.port.out.RetrospectionForReportRepository;
 import com.ogd.stockdiary.domain.report.usecase.CreateFeedbackUseCase;
 import com.ogd.stockdiary.domain.report.usecase.GetFeedbackUsecase;
 
@@ -28,6 +31,7 @@ public class ReportController {
     private final CreateFeedbackUseCase createFeedbackUseCase;
     private final FeedbackRepository feedbackRepository;
     private final GetFeedbackUsecase getFeedbackUsecase;
+    private final RetrospectionForReportRepository retrospectionForReportRepository;
 
     @PostMapping("/{retrospectionId}/feedback")
     @Operation(summary = "피드백 생성", description = "회고에 대한 피드백을 생성합니다.")
@@ -43,6 +47,19 @@ public class ReportController {
         CreateFeedbackResponse text = ReportMapper.toResponse(feedback);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(HttpApiResponse.of(text));
+    }
+
+    @GetMapping("/{retrospectionId}/feedback")
+    @Operation(summary = "피드백 조회", description = "회고에 대한 피드백을 조회합니다.")
+    public ResponseEntity<HttpApiResponse<CreateFeedbackResponse>> GetFeedback(@PathVariable Long retrospectionId)
+        throws JsonProcessingException {
+
+        Feedback feedback = feedbackRepository.findByRetrospectionId(retrospectionId)
+            .orElseThrow(() -> new EntityNotFoundException("해당 회고에 대한 피드백을 찾을 수 없습니다."));
+
+        CreateFeedbackResponse text = ReportMapper.toResponse(feedback);
+        return ResponseEntity.ok().body(HttpApiResponse.of(text));
+
     }
 
     @DeleteMapping("/{feedbackId}")
@@ -65,4 +82,5 @@ public class ReportController {
         return ResponseEntity.ok().body(HttpApiResponse.of(badgeResponse));
 
     }
+
 }
