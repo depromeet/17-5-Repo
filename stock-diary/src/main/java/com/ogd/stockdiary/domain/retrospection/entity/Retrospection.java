@@ -2,21 +2,9 @@ package com.ogd.stockdiary.domain.retrospection.entity;
 
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.ConstraintMode;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.ForeignKey;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
+import com.ogd.stockdiary.domain.report.entity.Feedback;
 import com.ogd.stockdiary.domain.user.entity.User;
 
 import lombok.Getter;
@@ -35,6 +23,9 @@ public class Retrospection {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private User user;
+
+    @OneToOne(mappedBy = "retrospection", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Feedback feedback;
 
     @Column(nullable = false, length = 20)
     private String symbol;
