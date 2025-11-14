@@ -4,6 +4,7 @@ import java.util.List;
 
 import jakarta.validation.Valid;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ogd.stockdiary.application.config.security.AuthenticatedUser;
 import com.ogd.stockdiary.application.retrospection.dto.mapper.MemoMapper;
 import com.ogd.stockdiary.application.retrospection.dto.mapper.RetrospectionMapper;
 import com.ogd.stockdiary.application.retrospection.dto.request.CreateMemoRequest;
@@ -51,10 +53,10 @@ public class RetrospectionController {
     @PostMapping
     @Operation(summary = "회고 생성", description = "주식 거래 회고를 생성합니다.")
     public HttpApiResponse<CreateRetrospectionResponse> createRetrospection(
+        @AuthenticationPrincipal AuthenticatedUser user,
         @Valid @RequestBody CreateRetrospectionRequest request) {
 
-        // TODO: Spring Security에서 User 정보 가져오기
-        Long userId = 1L; // 임시로 하드코딩
+        Long userId = user.getUserId();
 
         CreateRetrospectionCommand command = RetrospectionMapper.toCommand(request, userId);
         Retrospection retrospection = createRetrospectionUseCase.createRetrospection(command);
@@ -66,10 +68,10 @@ public class RetrospectionController {
     @GetMapping("/{retrospectionId}")
     @Operation(summary = "회고 조회", description = "특정 회고를 조회합니다.")
     public HttpApiResponse<GetRetrospectionResponse> getRetrospection(
+        @AuthenticationPrincipal AuthenticatedUser user,
         @PathVariable Long retrospectionId) {
 
-        // TODO: Spring Security에서 User 정보 가져오기
-        Long userId = 1L; // 임시로 하드코딩
+        Long userId = user.getUserId();
 
         GetRetrospectionResponse response = getRetrospectionUseCase.getRetrospection(retrospectionId, userId);
 
@@ -78,9 +80,10 @@ public class RetrospectionController {
 
     @GetMapping()
     @Operation(summary = "종목별 회고목록 조회", description = "유저의 종목별 회고 목록을 최신순으로 조회한다.")
-    public HttpApiResponse<List<MarketGroupResponse>> getAllRetrospcetions() {
-        // TODO: Spring Security에서 User 정보 가져오기
-        Long userId = 1L;
+    public HttpApiResponse<List<MarketGroupResponse>> getAllRetrospcetions(
+        @AuthenticationPrincipal AuthenticatedUser user) {
+
+        Long userId = user.getUserId();
 
         GetRetrospectionCommand command = RetrospectionMapper.toCommand(userId);
 
@@ -92,9 +95,11 @@ public class RetrospectionController {
 
     @DeleteMapping("/{retrospectionId}")
     @Operation(summary = "회고 삭제", description = "회고 id로 회고를 삭제합니다.")
-    public HttpApiResponse<String> delete(@PathVariable Long retrospectionId) {
-        // TODO: Spring Security에서 User 정보 가져오기
-        Long userId = 1L;
+    public HttpApiResponse<String> delete(
+        @AuthenticationPrincipal AuthenticatedUser user,
+        @PathVariable Long retrospectionId) {
+
+        Long userId = user.getUserId();
 
         deleteRetrospectionUseCase.deleteRetrospection(retrospectionId);
 
@@ -106,11 +111,11 @@ public class RetrospectionController {
     @PostMapping("/{retrospectionId}/memos")
     @Operation(summary = "메모 생성", description = "회고에 메모를 추가합니다.")
     public HttpApiResponse<MemoResponse> createMemo(
+        @AuthenticationPrincipal AuthenticatedUser user,
         @PathVariable Long retrospectionId,
         @Valid @RequestBody CreateMemoRequest request) {
 
-        // TODO: Spring Security에서 User 정보 가져오기
-        Long userId = 1L; // 임시로 하드코딩
+        Long userId = user.getUserId();
 
         Memo memo = createMemoUseCase.createMemo(retrospectionId, request.getContent(), userId);
         MemoResponse response = MemoMapper.toResponse(memo);
@@ -121,12 +126,12 @@ public class RetrospectionController {
     @PutMapping("/{retrospectionId}/memos/{memoId}")
     @Operation(summary = "메모 수정", description = "메모 내용을 수정합니다.")
     public HttpApiResponse<MemoResponse> updateMemo(
+        @AuthenticationPrincipal AuthenticatedUser user,
         @PathVariable Long retrospectionId,
         @PathVariable Long memoId,
         @Valid @RequestBody UpdateMemoRequest request) {
 
-        // TODO: Spring Security에서 User 정보 가져오기
-        Long userId = 1L; // 임시로 하드코딩
+        Long userId = user.getUserId();
 
         Memo memo = updateMemoUseCase.updateMemo(retrospectionId, memoId, request.getContent(), userId);
         MemoResponse response = MemoMapper.toResponse(memo);
@@ -137,11 +142,11 @@ public class RetrospectionController {
     @DeleteMapping("/{retrospectionId}/memos/{memoId}")
     @Operation(summary = "메모 삭제", description = "메모를 삭제합니다.")
     public HttpApiResponse<String> deleteMemo(
+        @AuthenticationPrincipal AuthenticatedUser user,
         @PathVariable Long retrospectionId,
         @PathVariable Long memoId) {
 
-        // TODO: Spring Security에서 User 정보 가져오기
-        Long userId = 1L; // 임시로 하드코딩
+        Long userId = user.getUserId();
 
         deleteMemoUseCase.deleteMemo(retrospectionId, memoId, userId);
 
