@@ -42,7 +42,8 @@ public class ReportMapper {
         return new CreateFeedbackResponse(
             // 나머지 필드는 디비에 String 으로 저장되었었음
             feedback.getSymbol(), feedback.getPrice(), feedback.getVolume(),
-            feedback.getOrderType(), feedback.getKeptCount(), feedback.getNeutralCount(), feedback.getNotKeptCount(),
+            feedback.getOrderType(), feedback.getCompanylogo(), feedback.getKeptCount(), feedback.getNeutralCount(),
+            feedback.getNotKeptCount(),
             feedback.getTitle(), keepList, improveList, nextTiimeList);
     }
 
