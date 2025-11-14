@@ -16,6 +16,8 @@ public interface InvestmentPrincipleRepository {
 
     List<InvestmentPrinciple> saveAll(List<InvestmentPrinciple> investmentPrinciples);
 
+    Optional<InvestmentPrinciple> findById(Long principleId);
+
     Optional<InvestmentPrinciple> findByIdAndUserId(Long principleId, Long userId);
 
     void deleteByIdAndUserId(Long principleId, Long userId);

@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.ogd.stockdiary.domain.principlegroup.entity.PrincipleGroupType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -105,9 +106,17 @@ public class RetrospectionService
         principleCheckCommands.forEach(command -> {
             // 투자원칙 조회
             InvestmentPrinciple principle = investmentPrincipleRepository
-                .findByIdAndUserId(command.getPrincipleId(), userId)
+                .findById(command.getPrincipleId())
                 .orElseThrow(() -> new ApplicationException(CodeEnum.FRS_003,
                     "투자원칙을 찾을 수 없습니다: " + command.getPrincipleId()));
+
+            // USER 타입 원칙인 경우 userId 검증
+            if (principle.getPrincipleGroup().getGroupType() == PrincipleGroupType.USER) {
+                if (!principle.getUser().getId().equals(userId)) {
+                    throw new ApplicationException(CodeEnum.FRS_003,
+                        "해당 투자원칙에 접근할 권한이 없습니다: " + command.getPrincipleId());
+                }
+            }
 
             // PrincipleCheck 생성 및 저장
             PrincipleCheck principleCheck = PrincipleCheck.create(
