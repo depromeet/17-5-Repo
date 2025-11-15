@@ -35,13 +35,18 @@ spring:
       max-request-size: 30MB
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:
 #        dialect: org.hibernate.dialect.H2Dialect
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
+        # Batch Insert 최적화 설정
+        jdbc:
+          batch_size: 50  # 배치 크기
+        order_inserts: true  # INSERT 순서 최적화
+        order_updates: true  # UPDATE 순서 최적화
   ai:
     openai:
       api-key: ${OPENAI_API_KEY}

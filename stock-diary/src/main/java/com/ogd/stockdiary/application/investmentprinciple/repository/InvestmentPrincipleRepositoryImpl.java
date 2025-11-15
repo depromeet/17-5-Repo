@@ -43,6 +43,11 @@ public class InvestmentPrincipleRepositoryImpl implements InvestmentPrincipleRep
     }
 
     @Override
+    public List<InvestmentPrinciple> findAllByIds(List<Long> principleIds) {
+        return jpaInvestmentPrincipleRepository.findAllById(principleIds);
+    }
+
+    @Override
     public Optional<InvestmentPrinciple> findByIdAndUserId(Long principleId, Long userId) {
         return jpaInvestmentPrincipleRepository.findByIdAndUserId(principleId, userId);
     }

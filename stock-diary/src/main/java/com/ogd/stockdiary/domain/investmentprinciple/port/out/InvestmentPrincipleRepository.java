@@ -18,6 +18,8 @@ public interface InvestmentPrincipleRepository {
 
     Optional<InvestmentPrinciple> findById(Long principleId);
 
+    List<InvestmentPrinciple> findAllByIds(List<Long> principleIds);
+
     Optional<InvestmentPrinciple> findByIdAndUserId(Long principleId, Long userId);
 
     void deleteByIdAndUserId(Long principleId, Long userId);
