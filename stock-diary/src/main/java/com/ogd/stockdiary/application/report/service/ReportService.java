@@ -18,8 +18,6 @@ import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -178,27 +176,21 @@ public class ReportService implements CreateFeedbackUseCase, GetFeedbackUsecase 
         // 모든 분석 완료 대기(비동기 메서드 여러 개이므로)
         CompletableFuture.allOf(marketDataFuture, technicalAnalysisFuture, fundamentalAnalysisFuture).join();
 
-        // 리서치 객체 생성
-        Research research = synthesizeResearch(
+        // 최종 판단 (synthesizeResearch 제거하여 LLM 호출 1회 감소)
+        return generateExpertJudgement(
             marketDataFuture.join(),
             technicalAnalysisFuture.join(),
-            fundamentalAnalysisFuture.join());
-
-        // 최종 판단
-        LlmResponse llmResponse = generateExpertJudgement(research, symbol, price, volume, orderType, date,
+            fundamentalAnalysisFuture.join(),
+            symbol, price, volume, orderType, date,
             principleCheckAndImage);
 
-        return llmResponse;
-
     }
 
-    @Async("threadPoolTaskExecutor")
     public CompletableFuture<MarketData> collectMarketDataAsync(String symbol, LocalDate date) {
-        return CompletableFuture.supplyAsync(() -> getAndCacheMarketData(symbol, date));
+        return CompletableFuture.supplyAsync(() -> getMarketData(symbol, date));
     }
 
-    @Cacheable(value = "marketData", key = "{#symbol,#date}")
-    public MarketData getAndCacheMarketData(String symbol, LocalDate date) {
+    public MarketData getMarketData(String symbol, LocalDate date) {
 
         try {
             // instruction
@@ -258,13 +250,11 @@ public class ReportService implements CreateFeedbackUseCase, GetFeedbackUsecase 
         }
     }
 
-    @Async("threadPoolTaskExecutor")
     public CompletableFuture<TechnicalAnalysis> analyzeTechnicalAsync(String symbol) {
-        return CompletableFuture.supplyAsync(() -> getAndCacheTechnicalAnalysis(symbol));
+        return CompletableFuture.supplyAsync(() -> getTechnicalAnalysis(symbol));
     }
 
-    @Cacheable(value = "technicalAnalysis", key = "{#symbol}")
-    public TechnicalAnalysis getAndCacheTechnicalAnalysis(String symbol) {
+    public TechnicalAnalysis getTechnicalAnalysis(String symbol) {
 
         try {
             String systemPrompt = """
@@ -332,13 +322,11 @@ public class ReportService implements CreateFeedbackUseCase, GetFeedbackUsecase 
 
     }
 
-    @Async("threadPoolTaskExecutor")
     public CompletableFuture<FundamentalAnalysis> analyzeFundamentalAsync(String symbol) {
-        return CompletableFuture.supplyAsync(() -> getAndCacheFundamentalAnalysis(symbol));
+        return CompletableFuture.supplyAsync(() -> getFundamentalAnalysis(symbol));
     }
 
-    @Cacheable(value = "fundamentalAnalysis", key = "{#symbol}")
-    public FundamentalAnalysis getAndCacheFundamentalAnalysis(String symbol) {
+    public FundamentalAnalysis getFundamentalAnalysis(String symbol) {
 
         try {
             String systemPrompt = """
@@ -397,81 +385,21 @@ public class ReportService implements CreateFeedbackUseCase, GetFeedbackUsecase 
         }
     }
 
-    public Research synthesizeResearch(MarketData marketData, TechnicalAnalysis technicalAnalysis,
-        FundamentalAnalysis fundamentalAnalysis) throws JsonProcessingException {
-
-        String systemPrompt = """
-
-            Return data by adhering strictly to the JSON format provided below.
-            Provide the analysis concisely and briefly.
-
-            Example:
-            {
-                "marketContext": "AAPL은 현재 기술적 돌파 구간에서 거래 중. 20일선 상회 후 60일선 돌파 대기 상태.",
-                "investmentThesis": "Q3 실적 호조와 AI 관련 성장 모멘텀으로 상승 여력 존재",
-                "riskFactors": "Fed 정책 변화, 중국 시장 불확실성, 고평가 우려",
-                "priceTarget": "목표가 280, 손절가 255",
-                "technicalSummary": "매수신호",
-                "fundamentalSummary": "매수 유지"
-
-
-            }
-
-
-            """;
-
-        String userPrompt = """
-            Synthesize comprehensive research report:
-
-            Market Data: {marketData}
-            Technical Analysis: {techAnalysis}
-            Fundamental Analysis: {fundAnalysis}
-
-            Create unified research summary with:
-            - Overall market context
-            - Key investment thesis
-            - Risk factors
-            - Price targets
-            """;
-
-        PromptTemplate promptTemplate = new PromptTemplate(userPrompt);
-
-        Map<String, Object> variables = new HashMap<>();
-        // JSON 포맷으로 바꾸어서 프롬프트에 넣기
-        variables.put("marketData", objectMapper.writeValueAsString(marketData));
-        variables.put("techAnalysis", objectMapper.writeValueAsString(technicalAnalysis));
-        variables.put("fundAnalysis", objectMapper.writeValueAsString(fundamentalAnalysis));
-        Message userMessage = promptTemplate.createMessage(variables);
-
-        String modelName = "gpt-3.5-turbo-0125";
-        OpenAiChatOptions options = new OpenAiChatOptions.Builder().model(modelName).maxTokens(500).build();
-
-        SystemMessage systemMessage = new SystemMessage(systemPrompt);
-        Prompt prompt = new Prompt(List.of(systemMessage, userMessage), options);
-
-        // .call()은 동기 호출
-        ChatResponse response = chatModel.call(prompt);
-
-        String text = response.getResult().getOutput().getText();
-        Research researchLlmResponse = objectMapper.readValue(text, Research.class);
-
-        Research research = Research.onCreate(
-            researchLlmResponse.marketContext(),
-            researchLlmResponse.investmentThesis(),
-            researchLlmResponse.riskFactors(),
-            researchLlmResponse.priceTarget(),
-            technicalAnalysis.signal(),
-            fundamentalAnalysis.recommendation());
-
-        return research;
-
-    }
-
-    public LlmResponse generateExpertJudgement(Research research, String symbol, BigDecimal price, Integer volume,
+    public LlmResponse generateExpertJudgement(MarketData marketData, TechnicalAnalysis technicalAnalysis,
+        FundamentalAnalysis fundamentalAnalysis, String symbol, BigDecimal price, Integer volume,
         OrderType orderType, LocalDate date, String principleCheckAndImage) throws JsonProcessingException {
 
         String userPrompt = """
-            Based on {research}:
+            Based on comprehensive market analysis:
+
+            --- Market Data ---
+            {marketData}
+
+            --- Technical Analysis ---
+            {technicalAnalysis}
+
+            --- Fundamental Analysis ---
+            {fundamentalAnalysis}
 
             --- Trade Details ---
                 Symbol: {symbol}
@@ -494,7 +422,9 @@ public class ReportService implements CreateFeedbackUseCase, GetFeedbackUsecase 
         // 플레이스 홀더, null 허용하기 위해 Map.of 대신 HashMap 사용
         Map<String, Object> variables = new HashMap<>();
 
-        variables.put("research", research);
+        variables.put("marketData", objectMapper.writeValueAsString(marketData));
+        variables.put("technicalAnalysis", objectMapper.writeValueAsString(technicalAnalysis));
+        variables.put("fundamentalAnalysis", objectMapper.writeValueAsString(fundamentalAnalysis));
         variables.put("principleCheckAndImage", principleCheckAndImage);
         variables.put("symbol", symbol);
         variables.put("price", price);
