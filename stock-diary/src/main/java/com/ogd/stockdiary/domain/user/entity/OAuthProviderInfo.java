@@ -8,6 +8,7 @@ import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Embeddable
 @Getter
@@ -20,5 +21,6 @@ public class OAuthProviderInfo {
     private OAuthProvider oauthProvider;
 
     @Column(name = "subject", length = 255)
+    @Setter
     private String subject;
 }

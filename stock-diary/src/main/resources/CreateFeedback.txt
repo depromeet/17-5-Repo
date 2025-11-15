@@ -4,7 +4,7 @@ Return JSON format.
 
 2. Example of the required format:
 {
-   "badge": "bronze"
+   "badge": "bronze",
    "keep": [
               "실적 개선과 거래량 증가를 근거로 진입한 판단은 근거가 명확했습니다.",
               "매수 시점은 상승 초입 구간으로, 흐름 인식이 정확했어요."
@@ -48,4 +48,4 @@ Return JSON format.
 6. Constraints:
 - Always include all four keys: "badge", "keep", "fix", "next"
 - All content must be written in Korean.
-- "keep", "fix", "next" are 200 tokens or fewer.
+- "keep", "fix", "next" each are 300 tokens or fewer.

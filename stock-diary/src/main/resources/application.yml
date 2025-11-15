@@ -14,9 +14,9 @@ kakao:
   admin-key: ${KAKAO_ADMIN_KEY}
 
 jwt:
-  secret-key: ${JWT_SECRET_KEY:wq8B+vdeTI+E7e2LE3Y2Cuo8taVY9Gf9hGs74lBz4RxKqHsqcyqt4kFRI/rHiWhaxPWfZgmPAkR6Pxy7ptNkWQ==}
-  access-token-expiration: 120000       # 2분초 (밀리초)
-  refresh-token-expiration: 12000000      # 200분 (밀리초)
+  secret-key: ${JWT_SECRET_KEY}
+  access-token-expiration: 604800000       # 7일 (밀리초)
+  refresh-token-expiration: 6048000000      # 70일 (밀리초)
 
 # Cloud Storage 설정 (MinIO / AWS S3)
 cloud:
@@ -54,6 +54,15 @@ spring:
   h2:
     console:
       enabled: true
+
+  cache:
+    cache-names:
+      - marketData
+      - technicalAnalysis
+      - fundamentalAnalysis
+    caffeine:
+      spec: expiredAfterWrite=1h
+
 
 springdoc:
   swagger-ui:
