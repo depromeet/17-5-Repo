@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -103,12 +104,26 @@ public class RetrospectionService
         Retrospection retrospection,
         List<PrincipleCheckCommand> principleCheckCommands,
         Long userId) {
-        principleCheckCommands.forEach(command -> {
-            // 투자원칙 조회
-            InvestmentPrinciple principle = investmentPrincipleRepository
-                .findById(command.getPrincipleId())
-                .orElseThrow(() -> new ApplicationException(CodeEnum.FRS_003,
-                    "투자원칙을 찾을 수 없습니다: " + command.getPrincipleId()));
+
+        // 1. 모든 principleId를 한번에 조회 (N+1 문제 해결)
+        List<Long> principleIds = principleCheckCommands.stream()
+            .map(PrincipleCheckCommand::getPrincipleId)
+            .toList();
+
+        List<InvestmentPrinciple> principles = investmentPrincipleRepository
+            .findAllByIds(principleIds); // IN 쿼리로 한번에 조회
+
+        // 2. Map으로 변환하여 빠른 조회
+        Map<Long, InvestmentPrinciple> principleMap = principles.stream()
+            .collect(Collectors.toMap(InvestmentPrinciple::getId, p -> p));
+
+        // 3. 유효성 검증
+        for (PrincipleCheckCommand command : principleCheckCommands) {
+            InvestmentPrinciple principle = principleMap.get(command.getPrincipleId());
+            if (principle == null) {
+                throw new ApplicationException(CodeEnum.FRS_003,
+                    "투자원칙을 찾을 수 없습니다: " + command.getPrincipleId());
+            }
 
             // USER 타입 원칙인 경우 userId 검증
             if (principle.getPrincipleGroup().getGroupType() == PrincipleGroupType.USER) {
@@ -117,11 +132,25 @@ public class RetrospectionService
                         "해당 투자원칙에 접근할 권한이 없습니다: " + command.getPrincipleId());
                 }
             }
+        }
 
-            // PrincipleCheck 생성 및 저장
-            PrincipleCheck principleCheck = PrincipleCheck.create(
-                retrospection, principle, command.getStatus(), command.getReason());
-            PrincipleCheck savedPrincipleCheck = principleCheckRepository.save(principleCheck);
+        // 4. PrincipleCheck 엔티티 생성
+        List<PrincipleCheck> principleChecks = principleCheckCommands.stream()
+            .map(command -> {
+                InvestmentPrinciple principle = principleMap.get(command.getPrincipleId());
+                return PrincipleCheck.create(retrospection, principle,
+                    command.getStatus(), command.getReason());
+            })
+            .toList();
+
+        // 5. 배치 저장 (N번 INSERT -> 1번 Batch INSERT)
+        List<PrincipleCheck> savedPrincipleChecks = principleCheckRepository
+            .saveAll(principleChecks);
+
+        // 6. 이미지/링크 처리 - 각 PrincipleCheck별로
+        for (int i = 0; i < principleCheckCommands.size(); i++) {
+            PrincipleCheckCommand command = principleCheckCommands.get(i);
+            PrincipleCheck savedPrincipleCheck = savedPrincipleChecks.get(i);
 
             // 이미지 처리
             if (!CollectionUtils.isEmpty(command.getImageIds())) {
@@ -132,7 +161,7 @@ public class RetrospectionService
             if (!CollectionUtils.isEmpty(command.getLinks())) {
                 saveLinks(savedPrincipleCheck, command.getLinks());
             }
-        });
+        }
     }
 
     private void saveImages(PrincipleCheck principleCheck, List<Long> imageIds, Long userId) {
@@ -253,6 +282,20 @@ public class RetrospectionService
             // 키: retrospection 의 symbol 에 해당하는 Stock 객체
             -> stockByCompanyName.getOrDefault(retrospection.getSymbol(), new Stock())));
 
+        // 성능 개선: 모든 logo URL을 병렬로 생성 (네트워크 I/O 병렬 처리)
+        Map<String, CompletableFuture<String>> logoUrlFutures = stocks.stream()
+            .filter(stock -> stock.getLogo() != null && !stock.getLogo().isEmpty())
+            .collect(Collectors.toMap(
+                Stock::getCode,
+                stock -> CompletableFuture.supplyAsync(
+                    () -> fileClientPort.getDownloadPreSignedUrl(stock.getLogo(), 86400))));
+
+        // 모든 Future 완료 대기 및 결과 수집
+        Map<String, String> logoUrlCache = logoUrlFutures.entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> entry.getValue().join()));
+
         // 응답 DTO 로 변환
         return retrospectionsByCompanyName.entrySet().stream()
             .map(entry -> {
@@ -262,10 +305,8 @@ public class RetrospectionService
                     .sorted(Comparator.comparingLong(RetrospectionDetailResponse::id).reversed())
                     .toList();
 
-                String logo = null;
-                if (stock.getLogo() != null && !stock.getLogo().isEmpty()) {
-                    logo = fileClientPort.getDownloadPreSignedUrl(stock.getLogo(), 86400); // 24시간
-                }
+                // 캐시에서 logo URL 조회 (외부 API 호출 제거)
+                String logo = logoUrlCache.get(stock.getCode());
 
                 return new MarketGroupResponse(
                     stock.getCompanyName(),

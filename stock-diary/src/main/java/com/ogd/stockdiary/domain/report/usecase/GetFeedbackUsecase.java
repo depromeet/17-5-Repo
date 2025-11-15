@@ -1,8 +1,11 @@
 package com.ogd.stockdiary.domain.report.usecase;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ogd.stockdiary.application.report.dto.Response.BadgeResponse;
-import com.ogd.stockdiary.domain.report.port.in.GetFeedbackCommand;
+import com.ogd.stockdiary.application.report.dto.Response.CreateFeedbackResponse;
 
 public interface GetFeedbackUsecase {
-    BadgeResponse getAllFeedbackUsecase(GetFeedbackCommand command);
+    CreateFeedbackResponse getFeedbackByRetrospectionId(Long retrospectionId) throws JsonProcessingException;
+
+    BadgeResponse getAllFeedbackUsecase(Long userId);
 }

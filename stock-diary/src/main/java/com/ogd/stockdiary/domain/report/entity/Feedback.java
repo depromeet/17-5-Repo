@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 
 import com.ogd.stockdiary.domain.retrospection.entity.OrderType;
 import com.ogd.stockdiary.domain.retrospection.entity.Retrospection;
+import com.ogd.stockdiary.domain.stock.entity.Market;
 import com.ogd.stockdiary.domain.user.entity.User;
 
 import lombok.Builder;
@@ -21,9 +22,6 @@ public class Feedback {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false)
-    private String companylogo;
 
     @Column(nullable = true)
     private String title;
@@ -49,8 +47,12 @@ public class Feedback {
     @Column(nullable = true)
     private long notKeptCount;
 
-    @Column(nullable = true)
+    @Column(nullable = false)
     private String symbol;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Market market;
 
     @Column(nullable = true)
     private BigDecimal price;
@@ -67,7 +69,6 @@ public class Feedback {
 
     @Builder
     public Feedback(
-        String companylogo,
         String title,
         String keep,
         String improve,
@@ -77,11 +78,11 @@ public class Feedback {
         long neutralCount,
         long notKeptCount,
         String symbol,
+        Market market,
         BigDecimal price,
         Integer volume,
         OrderType orderType,
         User user) {
-        this.companylogo = companylogo;
         this.title = title;
         this.keep = keep;
         this.improve = improve;
@@ -91,6 +92,7 @@ public class Feedback {
         this.neutralCount = neutralCount;
         this.notKeptCount = notKeptCount;
         this.symbol = symbol;
+        this.market = market;
         this.price = price;
         this.volume = volume;
         this.orderType = orderType;
