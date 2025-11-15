@@ -66,6 +66,12 @@ public class ReportService implements CreateFeedbackUseCase, GetFeedbackUsecase 
     public CreateFeedbackResponse createFeedback(Long retrospectionId)
         throws JsonProcessingException {
 
+        // 이미 피드백이 존재하면 기존 것을 반환 (멱등성 보장)
+        Optional<Feedback> existingFeedback = feedbackRepository.findByRetrospectionId(retrospectionId);
+        if (existingFeedback.isPresent()) {
+            return convertToResponse(existingFeedback.get());
+        }
+
         Retrospection retrospection = retrospectionRepository.getById(retrospectionId);
 
         RetrospectionForReport retrospectionForReport = retrospectionForReportRepository
