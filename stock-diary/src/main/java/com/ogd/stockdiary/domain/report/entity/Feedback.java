@@ -23,6 +23,9 @@ public class Feedback {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private String companylogo;
+
     @Column(nullable = true)
     private String title;
 
@@ -69,6 +72,7 @@ public class Feedback {
 
     @Builder
     public Feedback(
+        String companylogo,
         String title,
         String keep,
         String improve,
@@ -83,6 +87,7 @@ public class Feedback {
         Integer volume,
         OrderType orderType,
         User user) {
+        this.companylogo = companylogo;
         this.title = title;
         this.keep = keep;
         this.improve = improve;
