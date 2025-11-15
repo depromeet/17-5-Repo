@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -24,7 +25,10 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ogd.stockdiary.application.report.dto.Response.*;
+import com.ogd.stockdiary.application.report.dto.Response.BadgeResponse;
+import com.ogd.stockdiary.application.report.dto.Response.LlmResponse;
 import com.ogd.stockdiary.domain.analysis.port.PromptLoader;
+import com.ogd.stockdiary.domain.fileclient.port.out.FileClientPort;
 import com.ogd.stockdiary.domain.principlecheck.entity.PrincipleCheckStatus;
 import com.ogd.stockdiary.domain.report.entity.Feedback;
 import com.ogd.stockdiary.domain.report.entity.RetrospectionForReport;
@@ -40,6 +44,9 @@ import com.ogd.stockdiary.domain.report.vo.ReportSourceData;
 import com.ogd.stockdiary.domain.retrospection.entity.OrderType;
 import com.ogd.stockdiary.domain.retrospection.entity.Retrospection;
 import com.ogd.stockdiary.domain.retrospection.port.out.RetrospectionRepository;
+import com.ogd.stockdiary.domain.stock.entity.Market;
+import com.ogd.stockdiary.domain.stock.entity.Stock;
+import com.ogd.stockdiary.domain.stock.repository.StockRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -54,6 +61,8 @@ public class ReportService implements CreateFeedbackUseCase, GetFeedbackUsecase 
     private final ChatModel chatModel;
     private final ObjectMapper objectMapper;
     private final ReportDataPort reportDataPort;
+    private final StockRepository stockRepository;
+    private final FileClientPort fileClientPort;
     private final PromptLoader promptLoader;
 
     @Override
@@ -71,6 +80,18 @@ public class ReportService implements CreateFeedbackUseCase, GetFeedbackUsecase 
         Integer volume = retrospectionForReport.getOrder().getVolume();
         OrderType orderType = retrospectionForReport.getOrder().getOrderType();
         LocalDate date = retrospectionForReport.getCreatedAt().toLocalDate();
+
+        Market market = Market.valueOf(retrospectionForReport.getMarket());
+        Optional<Stock> stockOptional = stockRepository.findByCodeAndMarket(symbol, market);
+
+        Stock stock = stockOptional.orElse(null);
+
+        String logo = null;
+        if (stock.getLogo() != null && !stock.getLogo().isEmpty()) {
+            logo = fileClientPort.getDownloadPreSignedUrl(stock.getLogo(), 86400); // 24시간
+        }
+
+        String companyName = stock.getCompanyName();
 
         List<ReportSourceData> reportSourceData = reportDataPort.findByRetrospectionId(command.retrospectionId());
 
@@ -108,6 +129,7 @@ public class ReportService implements CreateFeedbackUseCase, GetFeedbackUsecase 
 
         // 피드백 객체 생성
         Feedback feedback = Feedback.builder()
+            .companylogo(logo)
             .title(llmResponse.badge())
             .keep(keepJson)
             .user(retrospection.getUser())
@@ -117,7 +139,7 @@ public class ReportService implements CreateFeedbackUseCase, GetFeedbackUsecase 
             .keptCount(keptCount)
             .neutralCount(neutralCount)
             .notKeptCount(notKeptCount)
-            .symbol(symbol)
+            .symbol(companyName)
             .price(price)
             .orderType(orderType)
             .volume(volume)

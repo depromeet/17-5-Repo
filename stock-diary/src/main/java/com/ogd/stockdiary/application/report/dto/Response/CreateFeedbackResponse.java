@@ -6,10 +6,11 @@ import java.util.List;
 import com.ogd.stockdiary.domain.retrospection.entity.OrderType;
 
 public record CreateFeedbackResponse(
-    String symbol,
+    String companyName,
     BigDecimal price,
     Integer volume,
     OrderType orderType,
+    String companyLogo,
 
     long keptCount,
     long neutralCount,

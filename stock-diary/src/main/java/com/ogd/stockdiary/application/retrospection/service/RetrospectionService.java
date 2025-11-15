@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.ogd.stockdiary.domain.principlegroup.entity.PrincipleGroupType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -31,6 +30,7 @@ import com.ogd.stockdiary.domain.principlecheck.dto.PrincipleCheckCommand;
 import com.ogd.stockdiary.domain.principlecheck.entity.PrincipleCheck;
 import com.ogd.stockdiary.domain.principlecheck.entity.PrincipleCheckLink;
 import com.ogd.stockdiary.domain.principlecheck.port.out.PrincipleCheckRepository;
+import com.ogd.stockdiary.domain.principlegroup.entity.PrincipleGroupType;
 import com.ogd.stockdiary.domain.report.entity.Feedback;
 import com.ogd.stockdiary.domain.report.port.out.FeedbackRepository;
 import com.ogd.stockdiary.domain.retrospection.entity.Memo;
