@@ -3,10 +3,8 @@ package com.ogd.stockdiary.domain.retrospection.entity;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -15,6 +13,9 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,7 +31,8 @@ public class Memo {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "retrospection_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
+    @JoinColumn(name = "retrospection_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Retrospection retrospection;
 
     @Column(nullable = false, columnDefinition = "TEXT")
