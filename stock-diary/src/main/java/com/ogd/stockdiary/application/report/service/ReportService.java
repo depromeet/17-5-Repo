@@ -25,9 +25,9 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ogd.stockdiary.application.report.dto.Response.*;
-import com.ogd.stockdiary.domain.analysis.port.PromptLoader;
 import com.ogd.stockdiary.application.report.dto.Response.BadgeResponse;
 import com.ogd.stockdiary.application.report.dto.Response.LlmResponse;
+import com.ogd.stockdiary.domain.analysis.port.PromptLoader;
 import com.ogd.stockdiary.domain.fileclient.port.out.FileClientPort;
 import com.ogd.stockdiary.domain.principlecheck.entity.PrincipleCheckStatus;
 import com.ogd.stockdiary.domain.report.entity.Feedback;
@@ -129,7 +129,7 @@ public class ReportService implements CreateFeedbackUseCase, GetFeedbackUsecase 
 
         // 피드백 객체 생성
         Feedback feedback = Feedback.builder()
-                .companylogo(logo)
+            .companylogo(logo)
             .title(llmResponse.badge())
             .keep(keepJson)
             .user(retrospection.getUser())
