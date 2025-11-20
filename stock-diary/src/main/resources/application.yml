@@ -50,6 +50,18 @@ spring:
   ai:
     openai:
       api-key: ${OPENAI_API_KEY}
+    vector-store:
+      chroma:
+        client:
+          host: localhost
+          port: 8000
+          tenant: default_tenant
+          database: default_database
+        collection-name: stock-market-data
+        database-name: ./chroma_data
+
+  profiles:
+    active: local
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -67,7 +79,6 @@ spring:
       - fundamentalAnalysis
     caffeine:
       spec: expiredAfterWrite=1h
-
 
 springdoc:
   swagger-ui:
@@ -89,3 +100,6 @@ logging:
     org.springframework.security: DEBUG
     org.springframework.web.reactive.function.client.ExchangeFunctions: DEBUG
     com.ogd.stockdiary.application.batch: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.ai.chroma: DEBUG
+    org.springframework.beans.factory: DEBUG
