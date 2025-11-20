@@ -31,4 +31,6 @@ public interface JpaStockRepository extends CrudRepository<Stock, Long> {
 
     @Query("SELECT s FROM Stock s WHERE s.code = :code AND s.market = :market")
     Optional<Stock> findByCodeAndMarket(String code, Market market);
+
+    List<Stock> findAll();
 }

@@ -31,6 +31,19 @@ configurations {
     }
 }
 
+// 1. Spring AI 버전을 변수로 설정 (선택적이지만 권장)
+ext {
+    set('springAiVersion', "1.0.0")
+}
+
+// 2. dependencyManagement 블록 추가 및 BOM 임포트
+dependencyManagement {
+    imports {
+        // Spring AI의 모든 의존성 관리를 이 BOM이 담당하도록 선언
+        mavenBom "org.springframework.ai:spring-ai-bom:${springAiVersion}"
+    }
+}
+
 repositories {
     mavenCentral()
     maven { url 'https://repo.spring.io/milestone' }
@@ -67,7 +80,19 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
     // openai
-    implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter:1.0.0-M6'
+    implementation 'org.springframework.ai:spring-ai-starter-model-openai'
+
+    // chromadb
+    implementation 'org.springframework.ai:spring-ai-starter-vector-store-chroma'
+
+    // ratelimiter
+    implementation 'io.github.resilience4j:resilience4j-ratelimiter:1.7.1'
+    implementation 'io.github.resilience4j:resilience4j-timelimiter:1.7.1'
+
+    // batch
+    implementation 'org.springframework.batch:spring-batch-core'
+    // Spring Boot Starter Batch
+    implementation 'org.springframework.boot:spring-boot-starter-batch'
 
     // AWS SDK S3 (MinIO compatible)
     implementation 'software.amazon.awssdk:s3:2.20.0'
@@ -79,6 +104,7 @@ dependencies {
 
     // 캐시
     implementation 'org.springframework.boot:spring-boot-starter-cache'
+
 
     compileOnly 'org.projectlombok:lombok'
 

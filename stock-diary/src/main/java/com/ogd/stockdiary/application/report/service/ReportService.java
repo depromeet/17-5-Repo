@@ -17,7 +17,10 @@ import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.ai.document.Document;
 import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -60,6 +63,7 @@ public class ReportService implements CreateFeedbackUseCase, GetFeedbackUsecase 
     private final PromptLoader promptLoader;
     private final StockRepository stockRepository;
     private final FileClientPort fileClientPort;
+    private final VectorStore vectorStore;
 
     @Override
     @Transactional
@@ -111,7 +115,27 @@ public class ReportService implements CreateFeedbackUseCase, GetFeedbackUsecase 
         long notKeptCount = reportSourceData.stream()
             .filter(d -> d.status() == PrincipleCheckStatus.NOT_KEPT).count();
 
-        LlmResponse llmResponse = analyzeWithMultiAgent(symbol, price, volume, orderType, date, principleCheckAndImage);
+        // 1. Retrieval (검색): 검색 쿼리 문자열로, 현재 매매와 관련된 유사 정보를 ChromaDB에서 검색
+        String queryText = String.format(
+            "%s 종목의 %s 날짜 근처의 시장 상황 및 주가 흐름",
+            symbol,
+            date.toString());
+
+        SearchRequest searchRequest = SearchRequest.builder()
+            .query(queryText)
+            .topK(5)
+            .build();
+
+        List<Document> documents = vectorStore.similaritySearch(searchRequest);
+
+        // 2. Augmented Prompt (프롬프트 강화)
+        String retrievedContext = documents.stream()
+            .map(Document::getText)
+            .collect(Collectors.joining("\n"));
+
+        // 3. Generation (생성): LLM 호출
+        LlmResponse llmResponse = analyzeWithMultiAgent(symbol, price, volume, orderType, date, principleCheckAndImage,
+            retrievedContext);
 
         // 디비에서 JSON으로 저장되는 건 다시 JSON 문자열로 변환
         String keepJson = objectMapper.writeValueAsString(llmResponse.keep());
@@ -172,10 +196,10 @@ public class ReportService implements CreateFeedbackUseCase, GetFeedbackUsecase 
         Integer volume,
         OrderType orderType,
         LocalDate date,
-        String principleCheckAndImage) throws JsonProcessingException {
+        String principleCheckAndImage, String retrievedContext) throws JsonProcessingException {
 
         // 병렬로 리서치 진행
-        CompletableFuture<MarketData> marketDataFuture = collectMarketDataAsync(symbol, date);
+        CompletableFuture<MarketData> marketDataFuture = collectMarketDataAsync(symbol, date, retrievedContext);
         CompletableFuture<TechnicalAnalysis> technicalAnalysisFuture = analyzeTechnicalAsync(symbol);
         CompletableFuture<FundamentalAnalysis> fundamentalAnalysisFuture = analyzeFundamentalAsync(symbol);
 
@@ -192,11 +216,12 @@ public class ReportService implements CreateFeedbackUseCase, GetFeedbackUsecase 
 
     }
 
-    public CompletableFuture<MarketData> collectMarketDataAsync(String symbol, LocalDate date) {
-        return CompletableFuture.supplyAsync(() -> getMarketData(symbol, date));
+    public CompletableFuture<MarketData> collectMarketDataAsync(String symbol, LocalDate date,
+        String retrievedContext) {
+        return CompletableFuture.supplyAsync(() -> getMarketData(symbol, date, retrievedContext));
     }
 
-    public MarketData getMarketData(String symbol, LocalDate date) {
+    public MarketData getMarketData(String symbol, LocalDate date, String retrievedContext) {
 
         try {
             // instruction
@@ -219,6 +244,7 @@ public class ReportService implements CreateFeedbackUseCase, GetFeedbackUsecase 
 
             String userPrompt = """
                 Collect market data for {symbol} on {date}:
+                The stock's current price records (open, high, low, close) and trading volume as of today: {retrievedContext}
                 - Current price and volume
                 - 1 week, 1 month, 6 month price history
                 - Trading volume patterns
@@ -229,6 +255,7 @@ public class ReportService implements CreateFeedbackUseCase, GetFeedbackUsecase 
             Map<String, Object> variables = new HashMap<>();
             variables.put("symbol", symbol);
             variables.put("date", date);
+            variables.put("retrievedContext", retrievedContext);
             Message userMessage = promptTemplate.createMessage(variables);
 
             String modelName = "gpt-3.5-turbo-0125";
